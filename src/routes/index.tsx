@@ -11,7 +11,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-import aiWorkersImage from "@/assets/ai-workers-robots-conveyor.jpg";
+import aiWorkersImage from "@/assets/ai-workers-paper-processes.jpg";
 import heroImage from "@/assets/hero-robotic-document-workflow.jpg";
 import { BackToTop } from "@/components/back-to-top";
 import { ContactForm } from "@/components/contact-form";
@@ -282,9 +282,9 @@ function Index() {
             </p>
             <img
               src={aiWorkersImage}
-              alt="Three robot AI workers at a conveyor: one reads a stack of orders, one processes them on a laptop, one packs boxes for fulfilment."
-              width={1254}
-              height={395}
+              alt="AI workers read, understand and act on paper business documents, taking a B2B order from processing to fulfilment without manual work."
+              width={900}
+              height={900}
               loading="lazy"
               className="mt-6 w-full max-w-md rounded-lg border"
             />
