@@ -1,0 +1,164 @@
+[
+ {
+  "id": "INV-L1",
+  "channel": "email",
+  "from": "billing@officesupplies.example.com",
+  "supplier": "Office Supplies Demo SRL (demo)",
+  "subject": "Invoice OS-2026-1251",
+  "text": "Hello,\n\nPlease find our invoice below.\n\nInvoice OS-2026-1251\nOffice Supplies Demo SRL · VAT RO10000001\nDate 26.10.2026 · Due 25.11.2026 · Your PO: PO-2026-0444\nPEN-BOX Ballpoint pens, box of 50  100 x 12.40 = 1,240.00\nNOTE-PAD Sticky notes, pack of 12  200 x 3.10 = 620.00\nNet 1,860.00 EUR · VAT 21% 390.60 · Total 2,250.60 EUR\nPay to IBAN RO12DEMO0000000000001001\n\nKind regards,\nIoana, Office Supplies Demo",
+  "expected": {
+   "stage": "Ready to approve",
+   "document_type": "invoice",
+   "match_result": "full_match",
+   "anomaly_flags": [],
+   "exception": null
+  }
+ },
+ {
+  "id": "INV-L2",
+  "channel": "email",
+  "from": "billing@officesupplies.example.com",
+  "supplier": "Office Supplies Demo SRL (demo)",
+  "subject": "Invoice OS-2026-1187",
+  "text": "Hello,\n\nResending our invoice in case it got lost.\n\nInvoice OS-2026-1187\nOffice Supplies Demo SRL · VAT RO10000001\nDate 02.10.2026 · Due 01.11.2026 · Your PO: PO-2026-0412\nPAP-A4-500 A4 copy paper, box of 5 reams  200 x 21.50 = 4,300.00\nTON-59A Toner cartridge HP 59A  40 x 89.00 = 3,560.00\nNet 7,860.00 EUR · VAT 21% 1,650.60 · Total 9,510.60 EUR\nPay to IBAN RO12DEMO0000000000001001\n\nIoana",
+  "expected": {
+   "stage": "Duplicate",
+   "document_type": "invoice",
+   "match_result": "full_match",
+   "anomaly_flags": [
+    "duplicate"
+   ],
+   "exception": "Invoice OS-2026-1187 from Office Supplies Demo SRL is already in the system and approved for payment. Not paid twice."
+  }
+ },
+ {
+  "id": "INV-L3",
+  "channel": "email",
+  "from": "accounts@cleanpro.example.com",
+  "supplier": "CleanPro Facility Services SRL (demo)",
+  "subject": "Invoice CP-1010",
+  "text": "Buna ziua,\n\nAtasat factura pentru curatenie octombrie. Va rugam sa folositi noul nostru cont bancar.\n\nFactura CP-1010\nCleanPro Facility Services SRL · CUI RO10000003\nData 27.10.2026 · Scadenta 26.11.2026 · Comanda PO-2026-0421\nCLN-OCT Curatenie sediu central, octombrie 2026  1 x 4,350.00\nTotal fara TVA 4,350.00 · TVA 21% 913.50 · Total 5,263.50 EUR\nIBAN RO56DEMO0000000000001903\n\nMaria, CleanPro",
+  "expected": {
+   "stage": "Needs review",
+   "document_type": "invoice",
+   "match_result": "full_match",
+   "anomaly_flags": [
+    "iban_recently_changed"
+   ],
+   "exception": "CleanPro changed its bank account (IBAN) on 23 Oct, 4 days before this invoice. Confirm the change by phone with a known contact before paying."
+  }
+ },
+ {
+  "id": "INV-L4",
+  "channel": "email",
+  "from": "finance@advisorypartners.example.com",
+  "supplier": "Advisory Partners Demo SRL (demo)",
+  "subject": "Invoice AP-2026-104",
+  "text": "Hello,\n\nInvoice for the October follow-up days attached. Note our payment details below.\n\nInvoice AP-2026-104\nAdvisory Partners Demo SRL · VAT RO10000005\nDate 27.10.2026 · Due 26.11.2026 · PO-2026-0447\nCONS-DAY Process consulting, senior consultant day  4 x 950.00 = 3,800.00\nNet 3,800.00 · VAT 21% 798.00 · Total 4,598.00 EUR\nIBAN RO21DEMO0000000000009999\n\nRadu",
+  "expected": {
+   "stage": "Needs review",
+   "document_type": "invoice",
+   "match_result": "full_match",
+   "anomaly_flags": [
+    "iban_mismatch"
+   ],
+   "exception": "The IBAN on the invoice (…9999) differs from the one on file (…1005). Possible payment fraud: verify by phone before paying."
+  }
+ },
+ {
+  "id": "INV-L5",
+  "channel": "email",
+  "from": "invoices@technova.example.com",
+  "supplier": "TechNova Hardware SRL (demo)",
+  "subject": "Invoice TN-55230",
+  "text": "Hi,\n\nInvoice for the docking stations.\n\nInvoice TN-55230\nTechNova Hardware SRL · VAT RO10000002\nDate 27.10.2026 · Due 26.11.2026 · PO-2026-0418\nDOCK-USBC USB-C docking station  20 x 199.00 = 3,980.00\nNet 3,980.00 · VAT 21% 835.80 · Total 4,815.80 EUR\nIBAN RO34DEMO0000000000001002\n\nAndrei, TechNova",
+  "expected": {
+   "stage": "Needs review",
+   "document_type": "invoice",
+   "match_result": "mismatch",
+   "anomaly_flags": [],
+   "exception": "Docking stations invoiced at €199.00, PO price €185.00 (+7.6%, over the 2% tolerance). 20 invoiced but only 12 delivered (DN-TN-7781)."
+  }
+ },
+ {
+  "id": "INV-L6",
+  "channel": "email",
+  "from": "invoices@technova.example.com",
+  "supplier": "TechNova Hardware SRL (demo)",
+  "subject": "Invoice TN-55231",
+  "text": "Hi,\n\nSecond invoice for the monitors.\n\nInvoice TN-55231\nTechNova Hardware SRL · VAT RO10000002\nDate 26.10.2026 · Due 25.11.2026 · PO-2026-0440 (delivery 2 of 2)\nMON-27 27\" monitor QHD  20 x 205.00 = 4,100.00\nNet 4,100.00 · VAT 21% 861.00 · Total 4,961.00 EUR\nIBAN RO34DEMO0000000000001002\n\nAndrei",
+  "expected": {
+   "stage": "Needs review",
+   "document_type": "invoice",
+   "match_result": "full_match",
+   "anomaly_flags": [
+    "split_purchase"
+   ],
+   "exception": "Second TechNova invoice in 6 days just under the €5,000 team-lead limit (€4,961.00 each, €9,922.00 together). Needs head-of-department sign-off."
+  }
+ },
+ {
+  "id": "INV-L7",
+  "channel": "email",
+  "from": "facturi@secureguard.example.com",
+  "supplier": "SecureGuard Services SRL (demo)",
+  "subject": "Invoice SG-3340",
+  "text": "Buna ziua,\n\nTransmitem factura pentru serviciile de paza din octombrie.\n\nFactura SG-3340\nSecureGuard Services SRL · CUI RO10000004\nData 27.10.2026 · Scadenta 26.11.2026 · Comanda PO-2026-0425\nSEC-HOUR Ore paza, retea sucursale, octombrie  720 x 14.50 = 10,440.00\nTotal fara TVA 10,440.00 · TVA 21% 2,192.40 · Total 12,632.40 EUR\nIBAN RO78DEMO0000000000001004\n\nVictor",
+  "expected": {
+   "stage": "Waiting on supplier",
+   "document_type": "invoice",
+   "match_result": "full_match",
+   "anomaly_flags": [
+    "certificate_expired"
+   ],
+   "exception": "SecureGuard's tax-compliance certificate expired on 30 Sep. Asked the supplier for a current one."
+  }
+ },
+ {
+  "id": "INV-L8",
+  "channel": "email",
+  "from": "contabilitate@bistrocorner.example.com",
+  "supplier": "Bistro Corner Catering SRL (demo)",
+  "subject": "Invoice BC-2210",
+  "text": "Buna ziua,\n\nVa trimitem factura pentru evenimentul de deschidere a sucursalei din Timisoara.\n\nFactura BC-2210\nBistro Corner Catering SRL · CUI RO10000099\nData 24.10.2026 · Scadenta 08.11.2026\nCatering eveniment deschidere sucursala Timisoara  1 x 1,450.00\nTotal fara TVA 1,450.00 · TVA 21% 304.50 · Total 1,754.50 EUR\nIBAN RO65DEMO0000000000004410\n\nMultumim!",
+  "expected": {
+   "stage": "Needs review",
+   "document_type": "invoice",
+   "match_result": "no_po",
+   "anomaly_flags": [
+    "unknown_supplier"
+   ],
+   "exception": "Bistro Corner Catering SRL isn't an approved supplier, and the invoice has no PO number. Procurement to check who ordered it."
+  }
+ },
+ {
+  "id": "INV-L9",
+  "channel": "email",
+  "from": "finance@advisorypartners.example.com",
+  "supplier": "Advisory Partners Demo SRL (demo)",
+  "subject": "Reminder: invoice AP-2026-090",
+  "text": "Hello,\n\nA friendly reminder that our invoice AP-2026-090 of 08.10.2026 (17,242.50 EUR, PO-2026-0430) is due on 07.11.2026. Could you confirm it is scheduled for payment?\n\nThank you,\nRadu, Advisory Partners",
+  "expected": {
+   "stage": "Ready to approve",
+   "document_type": "reminder",
+   "match_result": null,
+   "anomaly_flags": [],
+   "exception": "Payment reminder for AP-2026-090: added as a note to the existing invoice, no new record."
+  }
+ },
+ {
+  "id": "INV-L10",
+  "channel": "email",
+  "from": "office@printhouse.example.com",
+  "supplier": "PrintHouse Demo SRL (demo)",
+  "subject": "Question about invoice PH-771",
+  "text": "Buna ziua,\n\nPutem afla cand se plateste factura PH-771? Am trimis documentele de inregistrare ca furnizor pe 20 octombrie.\n\nMultumim,\nElena, PrintHouse",
+  "expected": {
+   "stage": "Needs review",
+   "document_type": "question",
+   "match_result": null,
+   "anomaly_flags": [],
+   "exception": "Supplier asks when invoice PH-771 will be paid and says it sent its onboarding documents on 20 Oct. Procurement to confirm onboarding status."
+  }
+ }
+]
