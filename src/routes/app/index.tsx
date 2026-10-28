@@ -20,7 +20,8 @@ function AppIndex() {
     if (first) {
       navigate({ to: "/app/$companyId/orders", params: { companyId: first.id }, replace: true });
     } else if (toDesk) {
-      navigate({ to: "/app/invoices", replace: true });
+      // Invoice desk users start where the samples are (the demo reviewer lands here after sign-in).
+      navigate({ to: "/app/invoices/new", replace: true });
     }
   }, [first, toDesk, navigate]);
 

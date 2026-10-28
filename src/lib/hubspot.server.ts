@@ -31,7 +31,8 @@ export async function hubspot<T>(
 
 export async function n8n<T>(webhook: string, body: unknown, timeoutMs = 60_000): Promise<T> {
   const key = process.env["N8N_APP_KEY"];
-  if (!key) throw new Error("The order assistant isn't configured yet (missing N8N_APP_KEY).");
+  if (!key)
+    throw new Error(`The n8n workflow "${webhook}" isn't configured yet (missing N8N_APP_KEY).`);
   const res = await fetch(`${N8N_BASE}/${webhook}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-appbuilder-key": key },
@@ -40,7 +41,9 @@ export async function n8n<T>(webhook: string, body: unknown, timeoutMs = 60_000)
   });
   const text = await res.text();
   if (!res.ok) {
-    throw new Error(`The order assistant returned ${res.status}. ${text.slice(0, 200)}`.trim());
+    throw new Error(
+      `The n8n workflow "${webhook}" returned ${res.status}. ${text.slice(0, 200)}`.trim(),
+    );
   }
   return (text ? JSON.parse(text) : {}) as T;
 }
