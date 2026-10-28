@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import headerImage from "@/assets/app-header-fulfillment-robots.jpg";
@@ -30,7 +30,10 @@ function AppLayout() {
         <header className="flex h-12 items-center gap-2 border-b px-4 md:hidden">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-5" />
-          <span className="text-sm font-semibold">AppBuilder.ai</span>
+          {/* Like the sidebar logo: /app sends each user to their start page (the overview for the invoice desk). */}
+          <Link to="/app" className="text-sm font-semibold">
+            AppBuilder.ai
+          </Link>
         </header>
         <img
           src={headerImage}
