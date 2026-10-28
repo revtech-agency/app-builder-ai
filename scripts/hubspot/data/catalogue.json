@@ -8,7 +8,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 2130.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.043,
+  "price": 91.59,
+  "stock_packs": 135
  },
  {
   "sku": "701099509",
@@ -19,7 +22,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 2130.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.045,
+  "price": 95.85,
+  "stock_packs": 63
  },
  {
   "sku": "701099513",
@@ -30,7 +36,10 @@
   "colour": "Red Orange",
   "pack_type": "box",
   "units_per_pack": 2130.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.0466,
+  "price": 99.26,
+  "stock_packs": 1
  },
  {
   "sku": "701300988",
@@ -41,7 +50,10 @@
   "colour": "Smoke 4 Dark",
   "pack_type": "caddy",
   "units_per_pack": 840.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.0338,
+  "price": 28.39,
+  "stock_packs": 140
  },
  {
   "sku": "701300989",
@@ -52,7 +64,10 @@
   "colour": "Smoke 4 Red",
   "pack_type": "caddy",
   "units_per_pack": 840.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.0338,
+  "price": 28.39,
+  "stock_packs": 150
  },
  {
   "sku": "701519086",
@@ -63,7 +78,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1280.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.0326,
+  "price": 41.73,
+  "stock_packs": 130
  },
  {
   "sku": "701301301",
@@ -74,7 +92,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.051,
+  "price": 61.2,
+  "stock_packs": 117
  },
  {
   "sku": "300002864",
@@ -85,7 +106,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.45,
+  "price": 225.0,
+  "stock_packs": 146
  },
  {
   "sku": "300004202",
@@ -96,7 +120,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 450.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.42,
+  "price": 189.0,
+  "stock_packs": 19
  },
  {
   "sku": "300003853",
@@ -107,7 +134,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 900.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.255,
+  "price": 229.5,
+  "stock_packs": 1
  },
  {
   "sku": "300003855",
@@ -118,7 +148,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.255,
+  "price": 127.5,
+  "stock_packs": 53
  },
  {
   "sku": "300003917",
@@ -129,7 +162,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 750.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.27,
+  "price": 202.5,
+  "stock_packs": 117
  },
  {
   "sku": "300003918",
@@ -140,7 +176,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.291,
+  "price": 174.6,
+  "stock_packs": 73
  },
  {
   "sku": "300003919",
@@ -151,7 +190,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1000.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.318,
+  "price": 318.0,
+  "stock_packs": 41
  },
  {
   "sku": "300003967",
@@ -162,7 +204,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.36,
+  "price": 216.0,
+  "stock_packs": 11
  },
  {
   "sku": "300004039",
@@ -173,7 +218,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 1000.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.27,
+  "price": 270.0,
+  "stock_packs": 50
  },
  {
   "sku": "300004040",
@@ -184,7 +232,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 1000.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.291,
+  "price": 291.0,
+  "stock_packs": 97
  },
  {
   "sku": "300004092",
@@ -195,7 +246,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.318,
+  "price": 159.0,
+  "stock_packs": 25
  },
  {
   "sku": "300004130",
@@ -206,7 +260,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.3,
+  "price": 150.0,
+  "stock_packs": 0
  },
  {
   "sku": "300004214",
@@ -217,7 +274,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.24,
+  "price": 288.0,
+  "stock_packs": 148
  },
  {
   "sku": "300004289",
@@ -228,7 +288,10 @@
   "colour": "NAT40",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.255,
+  "price": 127.5,
+  "stock_packs": 142
  },
  {
   "sku": "300004495",
@@ -239,7 +302,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.345,
+  "price": 172.5,
+  "stock_packs": 68
  },
  {
   "sku": "300005414",
@@ -250,7 +316,10 @@
   "colour": "NAT40",
   "pack_type": "box",
   "units_per_pack": 720.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.255,
+  "price": 183.6,
+  "stock_packs": 9
  },
  {
   "sku": "300005421",
@@ -261,7 +330,10 @@
   "colour": "NAT40",
   "pack_type": "box",
   "units_per_pack": 480.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.291,
+  "price": 139.68,
+  "stock_packs": 97
  },
  {
   "sku": "300005488",
@@ -272,7 +344,10 @@
   "colour": "NAT40",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.291,
+  "price": 145.5,
+  "stock_packs": 68
  },
  {
   "sku": "300005601",
@@ -283,7 +358,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.24,
+  "price": 120.0,
+  "stock_packs": 58
  },
  {
   "sku": "300006745",
@@ -294,7 +372,10 @@
   "colour": "",
   "pack_type": "box",
   "units_per_pack": 900.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.291,
+  "price": 261.9,
+  "stock_packs": 56
  },
  {
   "sku": "500063873",
@@ -305,7 +386,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.14,
+  "price": 106.68,
+  "stock_packs": 102
  },
  {
   "sku": "500068267",
@@ -316,7 +400,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 149.22,
+  "stock_packs": 91
  },
  {
   "sku": "500046194",
@@ -327,7 +414,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.128,
+  "price": 140.44,
+  "stock_packs": 27
  },
  {
   "sku": "500050808",
@@ -338,7 +428,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 109.73,
+  "stock_packs": 90
  },
  {
   "sku": "500051145",
@@ -349,7 +442,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1536.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 208.92,
+  "stock_packs": 78
  },
  {
   "sku": "500052051",
@@ -360,7 +456,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 109.73,
+  "stock_packs": 119
  },
  {
   "sku": "500052243",
@@ -371,7 +470,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 149.22,
+  "stock_packs": 54
  },
  {
   "sku": "500054481",
@@ -382,7 +484,10 @@
   "colour": "Caramel",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 149.22,
+  "stock_packs": 1
  },
  {
   "sku": "500059235",
@@ -393,7 +498,10 @@
   "colour": "Fresh Bloom",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 109.73,
+  "stock_packs": 48
  },
  {
   "sku": "500060105",
@@ -404,7 +512,10 @@
   "colour": "Fresh Bloom",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.14,
+  "price": 106.68,
+  "stock_packs": 90
  },
  {
   "sku": "500060916",
@@ -415,7 +526,10 @@
   "colour": "Brown",
   "pack_type": "caddy",
   "units_per_pack": 1031.3,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 140.26,
+  "stock_packs": 1
  },
  {
   "sku": "500061534",
@@ -426,7 +540,10 @@
   "colour": "Brown",
   "pack_type": "caddy",
   "units_per_pack": 716.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 103.13,
+  "stock_packs": 148
  },
  {
   "sku": "500061907",
@@ -437,7 +554,10 @@
   "colour": "Fresh Bloom",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 149.22,
+  "stock_packs": 120
  },
  {
   "sku": "500063406",
@@ -448,7 +568,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.14,
+  "price": 106.68,
+  "stock_packs": 92
  },
  {
   "sku": "500063434",
@@ -459,7 +582,10 @@
   "colour": "Non Smoker",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 109.73,
+  "stock_packs": 96
  },
  {
   "sku": "500063879",
@@ -470,7 +596,10 @@
   "colour": "Fresh Bloom",
   "pack_type": "caddy",
   "units_per_pack": 1219.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 175.56,
+  "stock_packs": 64
  },
  {
   "sku": "500065142",
@@ -481,7 +610,10 @@
   "colour": "Fresh Bloom",
   "pack_type": "caddy",
   "units_per_pack": 1031.3,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 140.26,
+  "stock_packs": 33
  },
  {
   "sku": "500066427",
@@ -492,7 +624,10 @@
   "colour": "Caramel",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 109.73,
+  "stock_packs": 109
  },
  {
   "sku": "500048115",
@@ -503,7 +638,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.152,
+  "price": 115.82,
+  "stock_packs": 14
  },
  {
   "sku": "500049111",
@@ -514,7 +652,10 @@
   "colour": "Non Smoker",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 149.22,
+  "stock_packs": 107
  },
  {
   "sku": "500049261",
@@ -525,7 +666,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 487.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.172,
+  "price": 83.88,
+  "stock_packs": 83
  },
  {
   "sku": "500049417",
@@ -536,7 +680,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 487.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.18,
+  "price": 87.79,
+  "stock_packs": 19
  },
  {
   "sku": "500049301",
@@ -547,7 +694,10 @@
   "colour": "Non Smoker",
   "pack_type": "caddy",
   "units_per_pack": 655.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.164,
+  "price": 107.45,
+  "stock_packs": 69
  },
  {
   "sku": "500049313",
@@ -558,7 +708,10 @@
   "colour": "Non Smoker",
   "pack_type": "caddy",
   "units_per_pack": 487.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.172,
+  "price": 83.88,
+  "stock_packs": 116
  },
  {
   "sku": "500049339",
@@ -569,7 +722,10 @@
   "colour": "Non Smoker",
   "pack_type": "caddy",
   "units_per_pack": 487.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.18,
+  "price": 87.79,
+  "stock_packs": 89
  },
  {
   "sku": "500056180",
@@ -580,7 +736,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1583.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.112,
+  "price": 177.3,
+  "stock_packs": 100
  },
  {
   "sku": "500053949",
@@ -591,7 +750,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2425,
+  "price": 97.0,
+  "stock_packs": 34
  },
  {
   "sku": "500053950",
@@ -602,7 +764,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.275,
+  "price": 110.0,
+  "stock_packs": 99
  },
  {
   "sku": "500053952",
@@ -613,7 +778,10 @@
   "colour": "Mahogany",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1925,
+  "price": 115.5,
+  "stock_packs": 128
  },
  {
   "sku": "500053957",
@@ -624,7 +792,10 @@
   "colour": "Light Mahogany",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1925,
+  "price": 115.5,
+  "stock_packs": 45
  },
  {
   "sku": "500053959",
@@ -635,7 +806,10 @@
   "colour": "Light Mahogany",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2175,
+  "price": 108.75,
+  "stock_packs": 79
  },
  {
   "sku": "500042286",
@@ -646,7 +820,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.205,
+  "price": 246.0,
+  "stock_packs": 52
  },
  {
   "sku": "500042291",
@@ -657,7 +834,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1080.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2175,
+  "price": 234.9,
+  "stock_packs": 84
  },
  {
   "sku": "500042787",
@@ -668,7 +848,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 800.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.23,
+  "price": 184.0,
+  "stock_packs": 47
  },
  {
   "sku": "500043571",
@@ -679,7 +862,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1675,
+  "price": 100.5,
+  "stock_packs": 30
  },
  {
   "sku": "500006281",
@@ -690,7 +876,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1028.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1325,
+  "price": 136.3,
+  "stock_packs": 50
  },
  {
   "sku": "500051069",
@@ -701,7 +890,10 @@
   "colour": "",
   "pack_type": "roll",
   "units_per_pack": 25.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 3.6,
+  "stock_packs": 78
  },
  {
   "sku": "500019820",
@@ -712,7 +904,10 @@
   "colour": "",
   "pack_type": "roll",
   "units_per_pack": 50.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 7.2,
+  "stock_packs": 46
  },
  {
   "sku": "500020071",
@@ -723,7 +918,10 @@
   "colour": "",
   "pack_type": "roll",
   "units_per_pack": 100.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 14.4,
+  "stock_packs": 108
  },
  {
   "sku": "500058468",
@@ -734,7 +932,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1143.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.156,
+  "price": 178.31,
+  "stock_packs": 43
  },
  {
   "sku": "500022455",
@@ -745,7 +946,10 @@
   "colour": "transparent Perforat",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.28,
+  "price": 140.0,
+  "stock_packs": 1
  },
  {
   "sku": "500067584",
@@ -756,7 +960,10 @@
   "colour": "BlueFDA Perforat",
   "pack_type": "roll",
   "units_per_pack": 1000.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.253,
+  "price": 253.0,
+  "stock_packs": 28
  },
  {
   "sku": "500068054",
@@ -767,7 +974,10 @@
   "colour": "BlueFDA Perforat",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.298,
+  "price": 149.0,
+  "stock_packs": 1
  },
  {
   "sku": "701999003",
@@ -778,7 +988,10 @@
   "colour": "Orange Brown",
   "pack_type": "caddy",
   "units_per_pack": 1680.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1342,
+  "price": 225.46,
+  "stock_packs": 115
  },
  {
   "sku": "500031085",
@@ -789,7 +1002,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.225,
+  "price": 135.0,
+  "stock_packs": 21
  },
  {
   "sku": "500016631",
@@ -800,7 +1016,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.255,
+  "price": 153.0,
+  "stock_packs": 15
  },
  {
   "sku": "500017324",
@@ -811,7 +1030,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2425,
+  "price": 145.5,
+  "stock_packs": 67
  },
  {
   "sku": "500017412",
@@ -822,7 +1044,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1925,
+  "price": 231.0,
+  "stock_packs": 13
  },
  {
   "sku": "500017413",
@@ -833,7 +1058,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.205,
+  "price": 246.0,
+  "stock_packs": 92
  },
  {
   "sku": "500017414",
@@ -844,7 +1072,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 960.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2175,
+  "price": 208.8,
+  "stock_packs": 1
  },
  {
   "sku": "500019996",
@@ -855,7 +1086,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.205,
+  "price": 102.5,
+  "stock_packs": 105
  },
  {
   "sku": "500020018",
@@ -866,7 +1100,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1925,
+  "price": 115.5,
+  "stock_packs": 98
  },
  {
   "sku": "500020167",
@@ -877,7 +1114,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1975,
+  "price": 118.5,
+  "stock_packs": 22
  },
  {
   "sku": "500020215",
@@ -888,7 +1128,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.18,
+  "price": 108.0,
+  "stock_packs": 84
  },
  {
   "sku": "500021388",
@@ -899,7 +1142,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 2100.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.17,
+  "price": 357.0,
+  "stock_packs": 91
  },
  {
   "sku": "500021527",
@@ -910,7 +1156,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1800.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.18,
+  "price": 324.0,
+  "stock_packs": 150
  },
  {
   "sku": "500021596",
@@ -921,7 +1170,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.17,
+  "price": 102.0,
+  "stock_packs": 0
  },
  {
   "sku": "500021791",
@@ -932,7 +1184,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1875,
+  "price": 112.5,
+  "stock_packs": 103
  },
  {
   "sku": "500025208",
@@ -943,7 +1198,10 @@
   "colour": "Mahogany",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1975,
+  "price": 118.5,
+  "stock_packs": 112
  },
  {
   "sku": "500026191",
@@ -954,7 +1212,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1975,
+  "price": 118.5,
+  "stock_packs": 0
  },
  {
   "sku": "500030291",
@@ -965,7 +1226,10 @@
   "colour": "Salmon Red",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.21,
+  "price": 105.0,
+  "stock_packs": 74
  },
  {
   "sku": "500030513",
@@ -976,7 +1240,10 @@
   "colour": "Mahogany",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.185,
+  "price": 111.0,
+  "stock_packs": 137
  },
  {
   "sku": "500041355",
@@ -987,7 +1254,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.185,
+  "price": 111.0,
+  "stock_packs": 32
  },
  {
   "sku": "500045289",
@@ -998,7 +1268,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.21,
+  "price": 105.0,
+  "stock_packs": 127
  },
  {
   "sku": "500053706",
@@ -1009,7 +1282,10 @@
   "colour": "Salmon Red",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1975,
+  "price": 118.5,
+  "stock_packs": 14
  },
  {
   "sku": "500054263",
@@ -1020,7 +1296,10 @@
   "colour": "Mahogany",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.21,
+  "price": 105.0,
+  "stock_packs": 79
  },
  {
   "sku": "500054269",
@@ -1031,7 +1310,10 @@
   "colour": "Mahogany",
   "pack_type": "roll",
   "units_per_pack": 400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.225,
+  "price": 90.0,
+  "stock_packs": 113
  },
  {
   "sku": "500054340",
@@ -1042,7 +1324,10 @@
   "colour": "Salmon Red",
   "pack_type": "roll",
   "units_per_pack": 400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.225,
+  "price": 90.0,
+  "stock_packs": 22
  },
  {
   "sku": "500056977",
@@ -1053,7 +1338,10 @@
   "colour": "Mahogany",
   "pack_type": "box",
   "units_per_pack": 1500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.21,
+  "price": 315.0,
+  "stock_packs": 149
  },
  {
   "sku": "500057239",
@@ -1064,7 +1352,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1000.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1925,
+  "price": 192.5,
+  "stock_packs": 123
  },
  {
   "sku": "500059316",
@@ -1075,7 +1366,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.225,
+  "price": 112.5,
+  "stock_packs": 62
  },
  {
   "sku": "500059738",
@@ -1086,7 +1380,10 @@
   "colour": "Salmon Red",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1975,
+  "price": 237.0,
+  "stock_packs": 47
  },
  {
   "sku": "500060241",
@@ -1097,7 +1394,10 @@
   "colour": "Mahogany",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1975,
+  "price": 237.0,
+  "stock_packs": 15
  },
  {
   "sku": "500064159",
@@ -1108,7 +1408,10 @@
   "colour": "transparent Sinuga",
   "pack_type": "roll",
   "units_per_pack": 300.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.33,
+  "price": 99.0,
+  "stock_packs": 1
  },
  {
   "sku": "500064644",
@@ -1119,7 +1422,10 @@
   "colour": "Salmon Red",
   "pack_type": "box",
   "units_per_pack": 800.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.225,
+  "price": 180.0,
+  "stock_packs": 44
  },
  {
   "sku": "300004983",
@@ -1130,7 +1436,10 @@
   "colour": "NAT40M",
   "pack_type": "box",
   "units_per_pack": 700.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.33,
+  "price": 231.0,
+  "stock_packs": 6
  },
  {
   "sku": "500043626",
@@ -1141,7 +1450,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.16,
+  "price": 96.0,
+  "stock_packs": 78
  },
  {
   "sku": "500066254",
@@ -1152,7 +1464,10 @@
   "colour": "White",
   "pack_type": "roll",
   "units_per_pack": 1000.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.28,
+  "price": 280.0,
+  "stock_packs": 97
  },
  {
   "sku": "500055078",
@@ -1163,7 +1478,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 494.8,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.16,
+  "price": 79.17,
+  "stock_packs": 42
  },
  {
   "sku": "500063872",
@@ -1174,7 +1492,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 149.22,
+  "stock_packs": 32
  },
  {
   "sku": "500069822",
@@ -1185,7 +1506,10 @@
   "colour": "",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.424,
+  "price": 212.0,
+  "stock_packs": 127
  },
  {
   "sku": "500069821",
@@ -1196,7 +1520,10 @@
   "colour": "",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.424,
+  "price": 212.0,
+  "stock_packs": 83
  },
  {
   "sku": "500052924",
@@ -1207,7 +1534,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 149.22,
+  "stock_packs": 30
  },
  {
   "sku": "500057771",
@@ -1218,7 +1548,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.132,
+  "price": 144.83,
+  "stock_packs": 1
  },
  {
   "sku": "500059617",
@@ -1229,7 +1562,10 @@
   "colour": "Amber Yellow",
   "pack_type": "caddy",
   "units_per_pack": 914.3,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 131.66,
+  "stock_packs": 134
  },
  {
   "sku": "500066407",
@@ -1240,7 +1576,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 487.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.172,
+  "price": 83.88,
+  "stock_packs": 50
  },
  {
   "sku": "500067450",
@@ -1251,7 +1590,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1143.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 164.59,
+  "stock_packs": 62
  },
  {
   "sku": "500070097",
@@ -1262,7 +1604,10 @@
   "colour": "Fresh Bloom",
   "pack_type": "caddy",
   "units_per_pack": 1219.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 175.56,
+  "stock_packs": 9
  },
  {
   "sku": "500070095",
@@ -1273,7 +1618,10 @@
   "colour": "Fresh Bloom",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 149.22,
+  "stock_packs": 99
  },
  {
   "sku": "500064158",
@@ -1284,7 +1632,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 300.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.33,
+  "price": 99.0,
+  "stock_packs": 138
  },
  {
   "sku": "500057104",
@@ -1295,7 +1646,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1536.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.132,
+  "price": 202.78,
+  "stock_packs": 34
  },
  {
   "sku": "500055279",
@@ -1306,7 +1660,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 494.8,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.16,
+  "price": 79.17,
+  "stock_packs": 87
  },
  {
   "sku": "500028682",
@@ -1317,7 +1674,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2675,
+  "price": 107.0,
+  "stock_packs": 29
  },
  {
   "sku": "300005331",
@@ -1328,7 +1688,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.42,
+  "price": 210.0,
+  "stock_packs": 89
  },
  {
   "sku": "500044913",
@@ -1339,7 +1702,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2675,
+  "price": 107.0,
+  "stock_packs": 20
  },
  {
   "sku": "500064447",
@@ -1350,7 +1716,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 487.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.172,
+  "price": 83.88,
+  "stock_packs": 77
  },
  {
   "sku": "500069903",
@@ -1361,7 +1730,10 @@
   "colour": "White Pr. Br Burduf",
   "pack_type": "box",
   "units_per_pack": 1620.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.199,
+  "price": 322.38,
+  "stock_packs": 48
  },
  {
   "sku": "701301649",
@@ -1372,7 +1744,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.049,
+  "price": 58.8,
+  "stock_packs": 1
  },
  {
   "sku": "500070184",
@@ -1383,7 +1758,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 109.73,
+  "stock_packs": 73
  },
  {
   "sku": "500070146",
@@ -1394,7 +1772,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 358.3,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.16,
+  "price": 57.33,
+  "stock_packs": 35
  },
  {
   "sku": "500070453",
@@ -1405,7 +1786,10 @@
   "colour": "Non Smoker",
   "pack_type": "caddy",
   "units_per_pack": 1371.5,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.144,
+  "price": 197.5,
+  "stock_packs": 63
  },
  {
   "sku": "500069962",
@@ -1416,7 +1800,10 @@
   "colour": "Mahogany",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.185,
+  "price": 222.0,
+  "stock_packs": 89
  },
  {
   "sku": "300005722",
@@ -1427,7 +1814,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.42,
+  "price": 210.0,
+  "stock_packs": 18
  },
  {
   "sku": "500059002",
@@ -1438,7 +1828,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1536.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.132,
+  "price": 202.78,
+  "stock_packs": 90
  },
  {
   "sku": "500049196",
@@ -1449,7 +1842,10 @@
   "colour": "Fresh Bloom",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.152,
+  "price": 115.82,
+  "stock_packs": 0
  },
  {
   "sku": "300001239",
@@ -1460,7 +1856,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.591,
+  "price": 295.5,
+  "stock_packs": 38
  },
  {
   "sku": "701301610",
@@ -1471,7 +1870,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 2130.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.043,
+  "price": 91.59,
+  "stock_packs": 94
  },
  {
   "sku": "500049315",
@@ -1482,7 +1884,10 @@
   "colour": "Non Smoker",
   "pack_type": "caddy",
   "units_per_pack": 487.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.172,
+  "price": 83.88,
+  "stock_packs": 28
  },
  {
   "sku": "500049289",
@@ -1493,7 +1898,10 @@
   "colour": "Non Smoker",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.156,
+  "price": 118.87,
+  "stock_packs": 143
  },
  {
   "sku": "500070247",
@@ -1504,7 +1912,10 @@
   "colour": "Light Mahogany",
   "pack_type": "box",
   "units_per_pack": 1400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1925,
+  "price": 269.5,
+  "stock_packs": 108
  },
  {
   "sku": "500070291",
@@ -1515,7 +1926,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 487.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.172,
+  "price": 83.88,
+  "stock_packs": 69
  },
  {
   "sku": "701301735",
@@ -1526,7 +1940,10 @@
   "colour": "transparent 4 Blue",
   "pack_type": "caddy",
   "units_per_pack": 840.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.0378,
+  "price": 31.75,
+  "stock_packs": 142
  },
  {
   "sku": "701301745",
@@ -1537,7 +1954,10 @@
   "colour": "transparent 3 Blue",
   "pack_type": "caddy",
   "units_per_pack": 1280.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.0326,
+  "price": 41.73,
+  "stock_packs": 39
  },
  {
   "sku": "701301746",
@@ -1548,7 +1968,10 @@
   "colour": "transparent 4 White",
   "pack_type": "caddy",
   "units_per_pack": 1280.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.033,
+  "price": 42.24,
+  "stock_packs": 135
  },
  {
   "sku": "500067176",
@@ -1559,7 +1982,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1048.5,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.164,
+  "price": 171.95,
+  "stock_packs": 119
  },
  {
   "sku": "500063267",
@@ -1570,7 +1996,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 2062.8,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.136,
+  "price": 280.54,
+  "stock_packs": 45
  },
  {
   "sku": "300005545",
@@ -1581,7 +2010,10 @@
   "colour": "transparent. Perf",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.429,
+  "price": 214.5,
+  "stock_packs": 98
  },
  {
   "sku": "500070902",
@@ -1592,7 +2024,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1050.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1975,
+  "price": 207.38,
+  "stock_packs": 132
  },
  {
   "sku": "500053953",
@@ -1603,7 +2038,10 @@
   "colour": "Mahogany",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.205,
+  "price": 102.5,
+  "stock_packs": 18
  },
  {
   "sku": "500071577",
@@ -1614,7 +2052,10 @@
   "colour": "Mahogany",
   "pack_type": "box",
   "units_per_pack": 1400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1925,
+  "price": 269.5,
+  "stock_packs": 66
  },
  {
   "sku": "500053051",
@@ -1625,7 +2066,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1219.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1325,
+  "price": 161.54,
+  "stock_packs": 42
  },
  {
   "sku": "500071777",
@@ -1636,7 +2080,10 @@
   "colour": "White Pr. Br Burduf",
   "pack_type": "box",
   "units_per_pack": 1050.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.226,
+  "price": 237.3,
+  "stock_packs": 39
  },
  {
   "sku": "500045927",
@@ -1647,7 +2094,10 @@
   "colour": "Salmon Red",
   "pack_type": "box",
   "units_per_pack": 800.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1875,
+  "price": 150.0,
+  "stock_packs": 63
  },
  {
   "sku": "300004525",
@@ -1658,7 +2108,10 @@
   "colour": "transparent Perf",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.39,
+  "price": 195.0,
+  "stock_packs": 80
  },
  {
   "sku": "300005475",
@@ -1669,7 +2122,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 720.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.39,
+  "price": 280.8,
+  "stock_packs": 66
  },
  {
   "sku": "500071120",
@@ -1680,7 +2136,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 487.7,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.16,
+  "price": 78.03,
+  "stock_packs": 63
  },
  {
   "sku": "500054790",
@@ -1691,7 +2150,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 1097.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.128,
+  "price": 140.44,
+  "stock_packs": 90
  },
  {
   "sku": "300006602",
@@ -1702,7 +2164,10 @@
   "colour": "Sienna",
   "pack_type": "roll",
   "units_per_pack": 1000.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2853,
+  "price": 285.3,
+  "stock_packs": 143
  },
  {
   "sku": "300006885",
@@ -1713,7 +2178,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 900.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2553,
+  "price": 229.77,
+  "stock_packs": 49
  },
  {
   "sku": "500072419",
@@ -1724,7 +2192,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 2080.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1675,
+  "price": 348.4,
+  "stock_packs": 134
  },
  {
   "sku": "500025406",
@@ -1735,7 +2206,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 800.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1875,
+  "price": 150.0,
+  "stock_packs": 29
  },
  {
   "sku": "500064642",
@@ -1746,7 +2220,10 @@
   "colour": "Mahogany",
   "pack_type": "box",
   "units_per_pack": 800.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.225,
+  "price": 180.0,
+  "stock_packs": 80
  },
  {
   "sku": "500069079",
@@ -1757,7 +2234,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1200.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2,
+  "price": 240.0,
+  "stock_packs": 1
  },
  {
   "sku": "300007445",
@@ -1768,7 +2248,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2703,
+  "price": 135.15,
+  "stock_packs": 93
  },
  {
   "sku": "300007475",
@@ -1779,7 +2262,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2703,
+  "price": 135.15,
+  "stock_packs": 149
  },
  {
   "sku": "300002969",
@@ -1790,7 +2276,10 @@
   "colour": "transparent Perf",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.39,
+  "price": 195.0,
+  "stock_packs": 67
  },
  {
   "sku": "300007655",
@@ -1801,7 +2290,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2568,
+  "price": 128.4,
+  "stock_packs": 0
  },
  {
   "sku": "500020038",
@@ -1812,7 +2304,10 @@
   "colour": "transparent",
   "pack_type": "roll",
   "units_per_pack": 400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.305,
+  "price": 122.0,
+  "stock_packs": 65
  },
  {
   "sku": "300007654",
@@ -1823,7 +2318,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 900.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2568,
+  "price": 231.12,
+  "stock_packs": 20
  },
  {
   "sku": "500071341",
@@ -1834,7 +2332,10 @@
   "colour": "White Pr. Br B Bio",
   "pack_type": "box",
   "units_per_pack": 2880.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.172,
+  "price": 495.36,
+  "stock_packs": 75
  },
  {
   "sku": "500062381",
@@ -1845,7 +2346,10 @@
   "colour": "Fresh Bloom",
   "pack_type": "caddy",
   "units_per_pack": 716.2,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.148,
+  "price": 106.0,
+  "stock_packs": 72
  },
  {
   "sku": "300007601",
@@ -1856,7 +2360,10 @@
   "colour": "DK SAL",
   "pack_type": "box",
   "units_per_pack": 810.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.3003,
+  "price": 243.24,
+  "stock_packs": 55
  },
  {
   "sku": "500053960",
@@ -1867,7 +2374,10 @@
   "colour": "Caramel",
   "pack_type": "roll",
   "units_per_pack": 600.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1925,
+  "price": 115.5,
+  "stock_packs": 144
  },
  {
   "sku": "500054120",
@@ -1878,7 +2388,10 @@
   "colour": "Onion",
   "pack_type": "roll",
   "units_per_pack": 400.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2425,
+  "price": 97.0,
+  "stock_packs": 16
  },
  {
   "sku": "701301518",
@@ -1889,7 +2402,10 @@
   "colour": "Smoke 3 Dark",
   "pack_type": "caddy",
   "units_per_pack": 1280.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.0318,
+  "price": 40.7,
+  "stock_packs": 1
  },
  {
   "sku": "500061151",
@@ -1900,7 +2416,10 @@
   "colour": "transparent",
   "pack_type": "box",
   "units_per_pack": 1260.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.1675,
+  "price": 211.05,
+  "stock_packs": 1
  },
  {
   "sku": "500073217",
@@ -1911,7 +2430,10 @@
   "colour": "Salmon Red",
   "pack_type": "box",
   "units_per_pack": 800.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.21,
+  "price": 168.0,
+  "stock_packs": 94
  },
  {
   "sku": "500057750",
@@ -1922,7 +2444,10 @@
   "colour": "transparent",
   "pack_type": "caddy",
   "units_per_pack": 762.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.148,
+  "price": 112.78,
+  "stock_packs": 144
  },
  {
   "sku": "300007602",
@@ -1933,7 +2458,10 @@
   "colour": "NAT40",
   "pack_type": "box",
   "units_per_pack": 1080.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2703,
+  "price": 291.92,
+  "stock_packs": 97
  },
  {
   "sku": "300007657",
@@ -1944,7 +2472,10 @@
   "colour": "NAT40",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2568,
+  "price": 128.4,
+  "stock_packs": 62
  },
  {
   "sku": "300007724",
@@ -1955,7 +2486,10 @@
   "colour": "LT Mahogany II",
   "pack_type": "roll",
   "units_per_pack": 500.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2703,
+  "price": 135.15,
+  "stock_packs": 18
  },
  {
   "sku": "300007662",
@@ -1966,7 +2500,10 @@
   "colour": "Sienna",
   "pack_type": "box",
   "units_per_pack": 1260.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2568,
+  "price": 323.57,
+  "stock_packs": 63
  },
  {
   "sku": "300007661",
@@ -1977,6 +2514,9 @@
   "colour": "Sienna",
   "pack_type": "box",
   "units_per_pack": 900.0,
-  "min_sale_packs": 1
+  "min_sale_packs": 1,
+  "price_per_metre": 0.2568,
+  "price": 231.12,
+  "stock_packs": 139
  }
 ]

@@ -80,6 +80,10 @@ const PROPERTIES: Record<string, Prop[]> = {
       description: "How many metres (or pieces, for clips) one pack holds. Used to turn an order in metres into whole packs." },
     { name: "min_sale_packs", label: "Minimum packs per order", type: "number", fieldType: "number",
       description: "The smallest number of packs that can be sold on one order line. Orders below it go back to the client with the minimum proposed." },
+    { name: "price_per_metre", label: "Price per metre", type: "number", fieldType: "number",
+      description: "List price per metre (demo values). The product's unit price is the price of one whole pack; this is what offers quote alongside it." },
+    { name: "stock_packs", label: "Stock (packs)", type: "number", fieldType: "number",
+      description: "Whole packs in stock (demo values). The order worker and the inventory assistant offer alternatives when an item is short." },
   ],
   companies: [
     { name: "payment_status", label: "Payment status", type: "enumeration", fieldType: "select", options: ["current", "overdue"],
@@ -189,6 +193,7 @@ function productProps(p: Product) {
     name: p.name, hs_sku: p.sku, item_type: p.item_type, casing_family: p.casing_family,
     calibre_mm: p.calibre_mm ?? "", colour: p.colour, pack_type: p.pack_type,
     units_per_pack: p.units_per_pack, min_sale_packs: p.min_sale_packs,
+    price: p.price, price_per_metre: p.price_per_metre, stock_packs: p.stock_packs,
   };
 }
 

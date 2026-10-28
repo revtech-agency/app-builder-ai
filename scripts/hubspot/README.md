@@ -32,4 +32,5 @@ The script is safe to rerun: it reuses existing properties, the pipeline, produc
 ## Data
 
 - `catalogue.json` comes from the client's item sheet. Product names are built from type, calibre and colour; supplier names, brands and customer names are left out.
+- Prices and stock in `catalogue.json` are demo values, not the client's: `price_per_metre` = a base per casing family plus a step per mm of calibre (USD, the portal currency), `price` = one whole pack, `stock_packs` = whole packs in stock. A few items are out of stock or low so the agents have to offer alternatives; the SKUs used by the demo orders always have enough stock.
 - All demo clients are fictional: their names end in "(demo)" and they use `example.com` domains.
