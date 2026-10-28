@@ -4,7 +4,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { StatusBadge } from "@/components/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
 import { listSuppliers } from "@/lib/invoices";
 import { cn } from "@/lib/utils";
@@ -30,7 +37,9 @@ function SuppliersPage() {
     <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-2xl font-semibold">Suppliers</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Vendor master data the worker checks against.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Vendor master data the worker checks against.
+        </p>
       </div>
       {suppliers.isLoading && (
         <div className="space-y-2">
@@ -38,10 +47,14 @@ function SuppliersPage() {
           <Skeleton className="h-12 w-full" />
         </div>
       )}
-      {suppliers.error && <p className="text-sm text-destructive">{(suppliers.error as Error).message}</p>}
+      {suppliers.error && (
+        <p className="text-sm text-destructive">{(suppliers.error as Error).message}</p>
+      )}
       {suppliers.data?.length === 0 && (
         <Card>
-          <CardContent className="py-10 text-center text-sm text-muted-foreground">No suppliers yet.</CardContent>
+          <CardContent className="py-10 text-center text-sm text-muted-foreground">
+            No suppliers yet.
+          </CardContent>
         </Card>
       )}
       {!!suppliers.data?.length && (
@@ -71,11 +84,15 @@ function SuppliersPage() {
                     <TableCell>{s.status ? <StatusBadge status={s.status} /> : "—"}</TableCell>
                     <TableCell className="font-mono text-xs">{s.vatId ?? "—"}</TableCell>
                     <TableCell className="font-mono text-xs">{maskIban(s.iban)}</TableCell>
-                    <TableCell className={cn("whitespace-nowrap", recent && "font-medium text-warning")}>
+                    <TableCell
+                      className={cn("whitespace-nowrap", recent && "font-medium text-warning")}
+                    >
                       {formatDate(s.ibanChangedOn)}
                       {recent && <span className="ml-1 text-xs">({changed} days ago)</span>}
                     </TableCell>
-                    <TableCell className={cn("whitespace-nowrap", expired && "font-medium text-destructive")}>
+                    <TableCell
+                      className={cn("whitespace-nowrap", expired && "font-medium text-destructive")}
+                    >
                       {formatDate(s.certificateValidUntil)}
                       {expired && <span className="ml-1 text-xs">(expired)</span>}
                     </TableCell>

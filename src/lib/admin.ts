@@ -130,20 +130,24 @@ export const getDemoSignIn = createServerFn({ method: "POST" }).handler(async ()
 });
 
 // Invoice desk demo: same one-time token flow, for the AP reviewer demo account.
+const apDemoEmail = () => process.env["DEMO_AP_EMAIL"] || "ap-demo@appbuilder.ai";
+
 export const getApDemoAvailable = createServerFn({ method: "GET" }).handler(async () => ({
-  available: Boolean(process.env["DEMO_AP_EMAIL"] && process.env["DEMO_AP_PASSWORD"]),
+  available: Boolean(apDemoEmail()),
 }));
 
 export const getApDemoSignIn = createServerFn({ method: "POST" }).handler(async () => {
-  const email = process.env["DEMO_AP_EMAIL"];
-  if (!email || !process.env["DEMO_AP_PASSWORD"]) {
-    throw new Error("The invoice desk demo isn't set up yet.");
-  }
   const db = await adminClient();
-  const { data, error } = await db.auth.admin.generateLink({ type: "magiclink", email });
+  const { data, error } = await db.auth.admin.generateLink({
+    type: "magiclink",
+    email: apDemoEmail(),
+  });
   if (error || !data.properties?.hashed_token) {
     throw new Error("The invoice desk demo account isn't set up yet.");
   }
   if (await isAdmin(data.user.id)) throw new Error("The demo account must not be an admin.");
+  if (!(await hasRole(data.user.id, "ap_reviewer"))) {
+    throw new Error("The demo account isn't an invoice desk reviewer.");
+  }
   return { tokenHash: data.properties.hashed_token };
 });

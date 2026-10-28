@@ -110,7 +110,14 @@ export type SubmitResult = {
   approval_level?: string;
   anomaly_flags?: string[] | string;
   exception_reason?: string;
-  lines?: { name?: string; sku?: string; quantity?: number; price?: number; line_check?: string; line_check_note?: string }[];
+  lines?: {
+    name?: string;
+    sku?: string;
+    quantity?: number;
+    price?: number;
+    line_check?: string;
+    line_check_note?: string;
+  }[];
   supplier_email_draft?: string;
 };
 
@@ -142,7 +149,13 @@ const INVOICE_PROPS = [
   "order_channel",
   "createdate",
 ];
-const DETAIL_PROPS = [...INVOICE_PROPS, "iban_on_invoice", "vat_amount", "raw_order_text", "approved_by"];
+const DETAIL_PROPS = [
+  ...INVOICE_PROPS,
+  "iban_on_invoice",
+  "vat_amount",
+  "raw_order_text",
+  "approved_by",
+];
 const SUPPLIER_PROPS = [
   "name",
   "supplier_status",
@@ -152,8 +165,24 @@ const SUPPLIER_PROPS = [
   "iban_changed_on",
   "tax_certificate_valid_until",
 ];
-const PO_PROPS = ["dealname", "dealstage", "pipeline", "amount", "po_number", "budget_code", "po_requester", "document_type"];
-const PO_LINE_PROPS = ["name", "hs_sku", "quantity", "price", "received_quantity", "delivery_note_ref"];
+const PO_PROPS = [
+  "dealname",
+  "dealstage",
+  "pipeline",
+  "amount",
+  "po_number",
+  "budget_code",
+  "po_requester",
+  "document_type",
+];
+const PO_LINE_PROPS = [
+  "name",
+  "hs_sku",
+  "quantity",
+  "price",
+  "received_quantity",
+  "delivery_note_ref",
+];
 
 const OPEN_KEYS = new Set(["received", "waiting_on_supplier", "needs_review", "ready_to_approve"]);
 
@@ -173,7 +202,10 @@ async function readAssoc(fromType: string, toType: string, ids: string[]) {
     ),
   );
   for (const r of batches.flatMap((b) => b.results)) {
-    map.set(String(r.from.id), r.to.map((t) => String(t.toObjectId)));
+    map.set(
+      String(r.from.id),
+      r.to.map((t) => String(t.toObjectId)),
+    );
   }
   return map;
 }
@@ -200,7 +232,11 @@ async function searchDeals(isPo: boolean, properties: string[], extra: object[] 
         {
           filters: [
             { propertyName: "pipeline", operator: "EQ", value: P2P_PIPELINE_ID },
-            { propertyName: "document_type", operator: isPo ? "EQ" : "NEQ", value: PO_DOCUMENT_TYPE },
+            {
+              propertyName: "document_type",
+              operator: isPo ? "EQ" : "NEQ",
+              value: PO_DOCUMENT_TYPE,
+            },
             ...extra,
           ],
         },
@@ -360,7 +396,12 @@ export const getInvoice = createServerFn({ method: "GET" })
       ]),
       readObjects("notes", noteAssoc.get(deal.id) ?? [], ["hs_note_body", "hs_timestamp"]),
       poNumber
-        ? searchDeals(true, PO_PROPS, [{ propertyName: "po_number", operator: "EQ", value: poNumber }], 1)
+        ? searchDeals(
+            true,
+            PO_PROPS,
+            [{ propertyName: "po_number", operator: "EQ", value: poNumber }],
+            1,
+          )
         : Promise.resolve([] as HsObject[]),
     ]);
     const supplierObj = companyId ? companies.get(companyId) : undefined;
@@ -402,7 +443,9 @@ export const listSuppliers = createServerFn({ method: "GET" })
     const [res, invoices] = await Promise.all([
       hubspot<{ results: HsObject[] }>("/crm/v3/objects/companies/search", {
         body: {
-          filterGroups: [{ filters: [{ propertyName: "supplier_status", operator: "HAS_PROPERTY" }] }],
+          filterGroups: [
+            { filters: [{ propertyName: "supplier_status", operator: "HAS_PROPERTY" }] },
+          ],
           properties: SUPPLIER_PROPS,
           sorts: [{ propertyName: "name", direction: "ASCENDING" }],
           limit: 200,
@@ -410,8 +453,14 @@ export const listSuppliers = createServerFn({ method: "GET" })
       }),
       searchDeals(false, ["dealstage", "pipeline", "document_type"]),
     ]);
-    const open = invoices.filter((d) => OPEN_KEYS.has(INVOICE_STAGES[d.properties["dealstage"] ?? ""]?.key ?? ""));
-    const assoc = await readAssoc("deals", "companies", open.map((d) => d.id));
+    const open = invoices.filter((d) =>
+      OPEN_KEYS.has(INVOICE_STAGES[d.properties["dealstage"] ?? ""]?.key ?? ""),
+    );
+    const assoc = await readAssoc(
+      "deals",
+      "companies",
+      open.map((d) => d.id),
+    );
     const counts = new Map<string, number>();
     for (const ids of assoc.values()) {
       const cid = ids[0];
@@ -422,7 +471,9 @@ export const listSuppliers = createServerFn({ method: "GET" })
 
 export const listPurchaseOrders = createServerFn({ method: "GET" })
   .middleware([requireInvoiceDesk])
-  .handler(async (): Promise<PurchaseOrder[]> => buildPurchaseOrders(await searchDeals(true, PO_PROPS)));
+  .handler(async (): Promise<PurchaseOrder[]> =>
+    buildPurchaseOrders(await searchDeals(true, PO_PROPS)),
+  );
 
 const MAX_PDF_BYTES = 5 * 1024 * 1024;
 
@@ -468,25 +519,28 @@ const DECISIONS = {
 
 export const decideInvoice = createServerFn({ method: "POST" })
   .middleware([requireInvoiceDesk])
-  .inputValidator(
-    (input: { dealId: string; decision: keyof typeof DECISIONS; comment: string }) =>
-      z
-        .object({
-          dealId: z.string().regex(/^\d+$/),
-          decision: z.enum(["approve", "send_back", "reject", "duplicate"]),
-          comment: z.string().max(2000),
-        })
-        .refine(
-          (d) => !(d.decision === "reject" || d.decision === "send_back") || d.comment.trim().length > 0,
-          "Add a comment explaining the decision.",
-        )
-        .parse(input),
+  .inputValidator((input: { dealId: string; decision: keyof typeof DECISIONS; comment: string }) =>
+    z
+      .object({
+        dealId: z.string().regex(/^\d+$/),
+        decision: z.enum(["approve", "send_back", "reject", "duplicate"]),
+        comment: z.string().max(2000),
+      })
+      .refine(
+        (d) =>
+          !(d.decision === "reject" || d.decision === "send_back") || d.comment.trim().length > 0,
+        "Add a comment explaining the decision.",
+      )
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const hubspot = await hs();
     const email = (context.claims as { email?: string }).email ?? "unknown";
     const deal = await readInvoiceDeal(data.dealId, ["dealstage", "pipeline", "document_type"]);
     const currentKey = INVOICE_STAGES[deal.properties["dealstage"] ?? ""]?.key;
+    if (currentKey && ["approved_for_payment", "rejected", "duplicate"].includes(currentKey)) {
+      throw new Error("This invoice already has a final decision.");
+    }
     if (data.decision === "approve" && currentKey !== "ready_to_approve") {
       throw new Error("Only invoices in Ready to approve can be approved for payment.");
     }
@@ -496,7 +550,10 @@ export const decideInvoice = createServerFn({ method: "POST" })
     await hubspot(`/crm/v3/objects/deals/${deal.id}`, {
       method: "PATCH",
       body: {
-        properties: { dealstage: stageId, ...(data.decision === "approve" ? { approved_by: email } : {}) },
+        properties: {
+          dealstage: stageId,
+          ...(data.decision === "approve" ? { approved_by: email } : {}),
+        },
       },
     });
     const comment = data.comment.trim();
@@ -533,7 +590,7 @@ export const askAssistant = createServerFn({ method: "POST" })
     const res = await n8n<{ reply?: string; output?: string }>("invoice-assistant", {
       session_id: data.sessionId,
       message: data.message,
-      deal_id: data.dealId ?? null,
+      invoice_deal_id: data.dealId ?? null,
       user_email: (context.claims as { email?: string }).email ?? "",
     });
     return { reply: res.reply ?? res.output ?? "No answer." };
