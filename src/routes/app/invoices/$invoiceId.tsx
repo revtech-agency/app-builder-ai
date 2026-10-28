@@ -615,7 +615,7 @@ function InvoicePage() {
                     <DialogDescription>
                       {DECISION_TEXT[dialog].effect}{" "}
                       {dialog === "duplicate"
-                        ? "We've filled in a standard comment; edit it if you need to."
+                        ? "We've started the comment for you; add which invoice this duplicates if you know it."
                         : suggestedComment(dialog, checks)
                           ? "We've started a comment from the failed checks; edit it before you save."
                           : "Add a comment explaining your decision."}{" "}
