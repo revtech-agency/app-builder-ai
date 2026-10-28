@@ -355,7 +355,7 @@ function InvoicePage() {
   const closed = d ? ["approved_for_payment", "rejected", "duplicate"].includes(d.stage) : true;
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 p-4 pb-28 md:p-6 md:pb-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6 p-4 pb-28 md:p-6 md:pb-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
         <Link to="/app/invoices">
           <ArrowLeft /> Queue
@@ -518,7 +518,7 @@ function InvoicePage() {
           </Card>
 
           <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-background p-3 md:static md:border-0 md:bg-transparent md:p-0">
-            <div className="mx-auto grid max-w-5xl grid-cols-2 gap-2 md:flex md:flex-wrap">
+            <div className="mx-auto grid max-w-6xl grid-cols-2 gap-2 md:flex md:flex-wrap">
               <Button
                 className="col-span-2"
                 disabled={d.stage !== "ready_to_approve" || decide.isPending}
