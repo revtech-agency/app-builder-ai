@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatMoney } from "@/lib/format";
 import { splitList } from "@/lib/invoice-rules";
+import { markDemoStep } from "@/lib/demo-guide";
 import { submitDocument } from "@/lib/invoices";
 
 export const Route = createFileRoute("/app/invoices/new")({
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/app/invoices/new")({
 const SAMPLES = [
   {
     label: "Clean invoice",
+    outcome: "All checks pass → Ready to approve",
     text: `Hello,
 
 Please find our invoice below.
@@ -38,6 +40,7 @@ Ioana, Office Supplies Demo`,
   },
   {
     label: "Different IBAN",
+    outcome: "Bank account differs from the one on file → Needs review",
     text: `Hello,
 
 Invoice for the October follow-up days attached. Note our payment details below.
@@ -53,6 +56,7 @@ Radu`,
   },
   {
     label: "Price and quantity off",
+    outcome: "Price above the PO, more than delivered → Needs review",
     text: `Hi,
 
 Invoice for the docking stations.
@@ -96,6 +100,7 @@ function SubmitPage() {
           ...(file ? { pdfBase64: await toBase64(file), filename: file.name } : {}),
         },
       }),
+    onSuccess: () => markDemoStep("submitted"),
   });
 
   useEffect(() => {
@@ -125,16 +130,21 @@ function SubmitPage() {
       <Card>
         <CardContent className="space-y-4 pt-6">
           <div className="flex flex-wrap gap-2">
-            <span className="self-center text-xs text-muted-foreground">Try a sample:</span>
+            <span className="w-full text-xs text-muted-foreground">
+              Try a sample: each one fills in a supplier email that shows a different outcome. Then
+              press Submit.
+            </span>
             {SAMPLES.map((s) => (
               <Button
                 key={s.label}
                 type="button"
                 variant="outline"
                 size="sm"
+                className="h-auto flex-col items-start gap-0.5 py-2 text-left"
                 onClick={() => setText(s.text)}
               >
-                {s.label}
+                <span>{s.label}</span>
+                <span className="text-xs font-normal text-muted-foreground">{s.outcome}</span>
               </Button>
             ))}
           </div>
@@ -252,11 +262,16 @@ function SubmitPage() {
               </div>
             )}
             {r.deal_id && (
-              <Button asChild>
-                <Link to="/app/invoices/$invoiceId" params={{ invoiceId: r.deal_id }}>
-                  Open invoice
-                </Link>
-              </Button>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button asChild>
+                  <Link to="/app/invoices/$invoiceId" params={{ invoiceId: r.deal_id }}>
+                    Open invoice
+                  </Link>
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  See every check, ask the worker why, and make the decision.
+                </span>
+              </div>
             )}
           </CardContent>
         </Card>

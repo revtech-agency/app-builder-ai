@@ -18,6 +18,8 @@ type AuthContextValue = {
   canManageDesk: boolean;
   // True once the roles above are known for the signed-in user.
   rolesReady: boolean;
+  // Signed in as the shared invoice desk demo account (shows the demo guide).
+  isDemo: boolean;
   signInApDemo: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInDemo: () => Promise<void>;
@@ -58,12 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [canUseInvoiceDesk, setCanUseInvoiceDesk] = useState(false);
   const [canManageDesk, setCanManageDesk] = useState(false);
   const [rolesReady, setRolesReady] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
   const userId = session?.user.id;
   useEffect(() => {
     setIsAdmin(false);
     setCanUseInvoiceDesk(false);
     setCanManageDesk(false);
     setRolesReady(false);
+    setIsDemo(false);
     if (!userId) return;
     let current = true;
     getMyRole()
@@ -72,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAdmin(role.isAdmin);
         setCanUseInvoiceDesk(role.canUseInvoiceDesk);
         setCanManageDesk(role.canManageDesk);
+        setIsDemo(role.isDemo);
         setRolesReady(true);
       })
       .catch(() => {
@@ -123,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       canUseInvoiceDesk,
       canManageDesk,
       rolesReady,
+      isDemo,
       signIn,
       signInDemo,
       signInApDemo,
@@ -136,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       canUseInvoiceDesk,
       canManageDesk,
       rolesReady,
+      isDemo,
       signIn,
       signInDemo,
       signInApDemo,

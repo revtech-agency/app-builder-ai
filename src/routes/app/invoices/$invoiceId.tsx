@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Check, ChevronDown, Loader2, MessageCircle, Send, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { AnomalyChips, approvalText } from "@/components/invoice-bits";
@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate, formatMoney } from "@/lib/format";
+import { markDemoStep } from "@/lib/demo-guide";
 import { daysBetween, invoiceChecks, normIban } from "@/lib/invoice-rules";
 import { askAssistant, decideInvoice, getInvoice } from "@/lib/invoices";
 import type { InvoiceDetail, InvoiceLine, PoLine } from "@/lib/invoices";
@@ -243,7 +244,10 @@ function AssistantPanel({ dealId }: { dealId: string }) {
   const [input, setInput] = useState("");
   const ask = useMutation({
     mutationFn: (message: string) => askAssistant({ data: { sessionId, message, dealId } }),
-    onSuccess: (r) => setMsgs((m) => [...m, { role: "worker", text: r.reply }]),
+    onSuccess: (r) => {
+      setMsgs((m) => [...m, { role: "worker", text: r.reply }]);
+      markDemoStep("asked");
+    },
     onError: (e) => setMsgs((m) => [...m, { role: "worker", text: (e as Error).message }]),
   });
   const send = (text: string) => {
@@ -306,6 +310,10 @@ function InvoicePage() {
     queryKey: ["invoice", invoiceId],
     queryFn: () => getInvoice({ data: { dealId: invoiceId } }),
   });
+  const opened = Boolean(invoice.data);
+  useEffect(() => {
+    if (opened) markDemoStep("opened");
+  }, [opened]);
   const [approveOpen, setApproveOpen] = useState(false);
   const [dialog, setDialog] = useState<Exclude<Decision, "approve"> | null>(null);
   const [comment, setComment] = useState("");
@@ -315,6 +323,7 @@ function InvoicePage() {
     mutationFn: (v: { decision: Decision; comment: string }) =>
       decideInvoice({ data: { dealId: invoiceId, ...v } }),
     onSuccess: async (_r, v) => {
+      markDemoStep("decided");
       toast.success(
         v.decision === "approve"
           ? "Approved for payment."

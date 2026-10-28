@@ -94,6 +94,10 @@ export const getMyRole = createServerFn({ method: "GET" })
     isAdmin: await isAdmin(context.userId),
     canUseInvoiceDesk: await canUseInvoiceDesk(context.userId),
     canManageDesk: await canManageDesk(context.userId),
+    // The shared invoice desk demo account sees the step-by-step demo guide.
+    isDemo:
+      ((context.claims as { email?: string }).email ?? "").toLowerCase() ===
+      apDemoEmail().toLowerCase(),
   }));
 
 // One-click demo: a one-time sign-in token for the shared demo account, redeemed in the

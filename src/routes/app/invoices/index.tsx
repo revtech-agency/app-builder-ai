@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate, formatMoney } from "@/lib/format";
+import { markDemoStep } from "@/lib/demo-guide";
 import { applyDemoReset } from "@/lib/invoice-rules";
 import { listInvoices, resetDemo } from "@/lib/invoices";
 import type { InvoiceSummary } from "@/lib/invoices";
@@ -76,6 +77,7 @@ function QueuePage() {
   const reset = useMutation({
     mutationFn: () => resetDemo(),
     onSuccess: async (r) => {
+      markDemoStep("reset");
       toast.success("Demo reset", {
         description: `${r.archivedInvoices} added invoice(s) removed, ${r.restoredInvoices} sample invoice(s) restored.`,
       });

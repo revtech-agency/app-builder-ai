@@ -1,8 +1,9 @@
-import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import headerImage from "@/assets/app-header-fulfillment-robots.jpg";
 import { AppSidebar } from "@/components/app-sidebar";
+import { DemoGuide } from "@/components/demo-guide";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth";
@@ -13,8 +14,13 @@ export const Route = createFileRoute("/app")({
 });
 
 function AppLayout() {
-  const { user, ready } = useAuth();
+  const { user, ready, isDemo } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // Invoice desk pages, where the demo account gets the step-by-step guide.
+  const deskPage = /^\/app\/(overview|invoices|purchase-orders|suppliers|rules)(\/|$)/.test(
+    pathname,
+  );
 
   // Client-side guard: auth state only exists in the browser, so SSR renders nothing here.
   useEffect(() => {
@@ -42,6 +48,7 @@ function AppLayout() {
           height={971}
           className="h-32 w-full border-b object-cover object-[center_55%] md:h-44"
         />
+        {isDemo && deskPage && <DemoGuide />}
         <Outlet />
       </SidebarInset>
     </SidebarProvider>
