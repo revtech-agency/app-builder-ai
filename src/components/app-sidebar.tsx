@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate, useParams } from "@tanstack/react-router";
 import {
   ChartColumn,
   ClipboardList,
@@ -42,6 +42,12 @@ const activeMarker =
 
 export function AppSidebar() {
   const { companyId } = useParams({ strict: false });
+  const { pathname } = useLocation();
+  // Queue stays highlighted on an invoice page, but not on Submit document (/app/invoices/new).
+  const deskActive = (to: string) =>
+    to === "/app/invoices"
+      ? pathname === to || (pathname.startsWith(`${to}/`) && pathname !== "/app/invoices/new")
+      : pathname === to;
   const navigate = useNavigate();
   const { user, isAdmin, canUseInvoiceDesk, canManageDesk, signOut } = useAuth();
   const { setOpenMobile } = useSidebar();
@@ -130,13 +136,12 @@ export function AppSidebar() {
               <SidebarMenu>
                 {deskNav.map((item) => (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild className={activeMarker}>
-                      <Link
-                        to={item.to}
-                        activeOptions={{ exact: item.to !== "/app/invoices" }}
-                        activeProps={{ "data-active": "true" }}
-                        onClick={() => setOpenMobile(false)}
-                      >
+                    <SidebarMenuButton
+                      asChild
+                      isActive={deskActive(item.to)}
+                      className={activeMarker}
+                    >
+                      <Link to={item.to} onClick={() => setOpenMobile(false)}>
                         <item.icon />
                         <span>{item.label}</span>
                       </Link>
