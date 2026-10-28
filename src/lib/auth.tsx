@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { getDemoSignIn, getMyRole } from "@/lib/admin";
+import { getApDemoSignIn, getDemoSignIn, getMyRole } from "@/lib/admin";
 
 type AuthUser = { id: string; name: string; email: string };
 
@@ -13,6 +13,8 @@ type AuthContextValue = {
   // False until the stored session has been read on the client, so SSR and first render match.
   ready: boolean;
   isAdmin: boolean;
+  canUseInvoiceDesk: boolean;
+  signInApDemo: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInDemo: () => Promise<void>;
   // Resolves to true when Supabase wants the founder to confirm their email first.
@@ -49,13 +51,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canUseInvoiceDesk, setCanUseInvoiceDesk] = useState(false);
   const userId = session?.user.id;
   useEffect(() => {
     setIsAdmin(false);
+    setCanUseInvoiceDesk(false);
     if (!userId) return;
     let current = true;
     getMyRole()
-      .then((role) => current && setIsAdmin(role.isAdmin))
+      .then((role) => {
+        if (!current) return;
+        setIsAdmin(role.isAdmin);
+        setCanUseInvoiceDesk(role.canUseInvoiceDesk);
+      })
       .catch(() => current && setIsAdmin(false));
     return () => {
       current = false;
@@ -69,6 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInDemo = useCallback(async () => {
     const { tokenHash } = await getDemoSignIn();
+    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
+    if (error) throw error;
+  }, []);
+
+  const signInApDemo = useCallback(async () => {
+    const { tokenHash } = await getApDemoSignIn();
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
     if (error) throw error;
   }, []);
@@ -88,8 +102,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user: toUser(session), ready, isAdmin, signIn, signInDemo, signUp, signOut }),
-    [session, ready, isAdmin, signIn, signInDemo, signUp, signOut],
+    () => ({
+      user: toUser(session),
+      ready,
+      isAdmin,
+      canUseInvoiceDesk,
+      signIn,
+      signInDemo,
+      signInApDemo,
+      signUp,
+      signOut,
+    }),
+    [session, ready, isAdmin, canUseInvoiceDesk, signIn, signInDemo, signInApDemo, signUp, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

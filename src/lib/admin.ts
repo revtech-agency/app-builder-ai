@@ -31,6 +31,35 @@ export async function isAdmin(userId: string): Promise<boolean> {
   return Boolean(data);
 }
 
+export async function hasRole(userId: string, role: string): Promise<boolean> {
+  const db = await adminClient();
+  const { data, error } = await db
+    .from("user_roles")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("role", role)
+    .maybeSingle();
+  if (error) {
+    if (error.code === "PGRST205") return false;
+    throw new Error(`Could not check roles: ${error.message}`);
+  }
+  return Boolean(data);
+}
+
+export async function canUseInvoiceDesk(userId: string): Promise<boolean> {
+  const [reviewer, admin] = await Promise.all([hasRole(userId, "ap_reviewer"), isAdmin(userId)]);
+  return reviewer || admin;
+}
+
+export const requireInvoiceDesk = createMiddleware({ type: "function" })
+  .middleware([requireSupabaseAuth])
+  .server(async ({ next, context }) => {
+    if (!(await canUseInvoiceDesk(context.userId))) {
+      throw new Error("Only invoice desk reviewers can do this.");
+    }
+    return next();
+  });
+
 export const requireAdmin = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ next, context }) => {
@@ -40,7 +69,10 @@ export const requireAdmin = createMiddleware({ type: "function" })
 
 export const getMyRole = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => ({ isAdmin: await isAdmin(context.userId) }));
+  .handler(async ({ context }) => ({
+    isAdmin: await isAdmin(context.userId),
+    canUseInvoiceDesk: await canUseInvoiceDesk(context.userId),
+  }));
 
 export const listUsers = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
@@ -92,6 +124,25 @@ export const getDemoSignIn = createServerFn({ method: "POST" }).handler(async ()
   const { data, error } = await db.auth.admin.generateLink({ type: "magiclink", email });
   if (error || !data.properties?.hashed_token) {
     throw new Error("The demo account isn't set up yet.");
+  }
+  if (await isAdmin(data.user.id)) throw new Error("The demo account must not be an admin.");
+  return { tokenHash: data.properties.hashed_token };
+});
+
+// Invoice desk demo: same one-time token flow, for the AP reviewer demo account.
+export const getApDemoAvailable = createServerFn({ method: "GET" }).handler(async () => ({
+  available: Boolean(process.env["DEMO_AP_EMAIL"] && process.env["DEMO_AP_PASSWORD"]),
+}));
+
+export const getApDemoSignIn = createServerFn({ method: "POST" }).handler(async () => {
+  const email = process.env["DEMO_AP_EMAIL"];
+  if (!email || !process.env["DEMO_AP_PASSWORD"]) {
+    throw new Error("The invoice desk demo isn't set up yet.");
+  }
+  const db = await adminClient();
+  const { data, error } = await db.auth.admin.generateLink({ type: "magiclink", email });
+  if (error || !data.properties?.hashed_token) {
+    throw new Error("The invoice desk demo account isn't set up yet.");
   }
   if (await isAdmin(data.user.id)) throw new Error("The demo account must not be an admin.");
   return { tokenHash: data.properties.hashed_token };
