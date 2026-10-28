@@ -33,7 +33,8 @@ function AppIndex() {
   if (rolesReady && data && data.length === 0 && !toDesk) {
     return (
       <p className="p-6 text-sm text-muted-foreground">
-        Your account isn't linked to a client company yet — contact the order desk.
+        Your account doesn't have access yet. Ask your invoice desk admin to add you on the Team
+        page, or, if you order casings, contact the order desk.
       </p>
     );
   }

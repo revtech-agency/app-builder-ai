@@ -88,29 +88,11 @@ export const requireAdmin = createMiddleware({ type: "function" })
     return next();
   });
 
-// New accounts have no role. On their first sign-in they become invoice desk reviewers, unless
-// the order portal already knows them as a casings client (those keep landing on their orders).
-async function ensureDefaultRole(userId: string, email: string) {
-  const db = await adminClient();
-  const { data, error } = await db.from("user_roles").select("id").eq("user_id", userId).limit(1);
-  if (error || (data && data.length > 0)) return;
-  const casingsDemo = (process.env["DEMO_EMAIL"] || "demo@appbuilder.ai").toLowerCase();
-  if (!email || email.toLowerCase() === casingsDemo) return;
-  const { hasClientCompany } = await import("@/lib/orders");
-  if (await hasClientCompany({ userId, email })) return;
-  const { error: insertError } = await db
-    .from("user_roles")
-    .upsert(
-      { user_id: userId, role: "ap_reviewer" },
-      { onConflict: "user_id,role", ignoreDuplicates: true },
-    );
-  if (insertError) throw new Error(`Could not set up your access: ${insertError.message}`);
-}
-
+// New accounts have no role: a desk admin adds them on the Team page after they sign up, so a
+// stranger who signs up can't see suppliers' bank details or approve invoices.
 export const getMyRole = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await ensureDefaultRole(context.userId, (context.claims as { email?: string }).email ?? "");
     return {
       isAdmin: await isAdmin(context.userId),
       canUseInvoiceDesk: await canUseInvoiceDesk(context.userId),
@@ -137,6 +119,18 @@ export const getDemoSignIn = createServerFn({ method: "POST" }).handler(async ()
 
 // Invoice desk demo: same one-time token flow, for the AP reviewer demo account.
 const apDemoEmail = () => process.env["DEMO_AP_EMAIL"] || "ap-demo@appbuilder.ai";
+
+// "Reset demo" archives every invoice except the samples, so only the shared demo account and
+// platform admins may run it; real reviewers' invoices are never at risk.
+export const requireDemoReset = createMiddleware({ type: "function" })
+  .middleware([requireSupabaseAuth])
+  .server(async ({ next, context }) => {
+    const email = ((context.claims as { email?: string }).email ?? "").toLowerCase();
+    if (email !== apDemoEmail().toLowerCase() && !(await isAdmin(context.userId))) {
+      throw new Error("Only the demo account and AppBuilder.ai admins can reset the demo.");
+    }
+    return next();
+  });
 
 export const getApDemoSignIn = createServerFn({ method: "POST" }).handler(async () => {
   const db = await adminClient();
