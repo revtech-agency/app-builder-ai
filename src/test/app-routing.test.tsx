@@ -14,4 +14,19 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
+
+  it.each([
+    ["/login", "/login"],
+    ["/app", "/app/"],
+    ["/app/co_lumen/chat", "/app/$companyId/chat"],
+    ["/app/co_lumen/growth", "/app/$companyId/growth"],
+    ["/app/co_lumen/inbox", "/app/$companyId/inbox"],
+    ["/app/co_lumen/deploys", "/app/$companyId/deploys"],
+  ])("matches %s to its own route", (path, routeId) => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const matches = router.matchRoutes(path);
+
+    expect(matches.at(-1)?.routeId).toBe(routeId);
+  });
 });

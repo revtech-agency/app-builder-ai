@@ -10,33 +10,121 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppCompanyIdChatRouteImport } from './routes/app/$companyId/chat'
+import { Route as AppCompanyIdDeploysRouteImport } from './routes/app/$companyId/deploys'
+import { Route as AppCompanyIdGrowthRouteImport } from './routes/app/$companyId/growth'
+import { Route as AppCompanyIdInboxRouteImport } from './routes/app/$companyId/inbox'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCompanyIdChatRoute = AppCompanyIdChatRouteImport.update({
+  id: '/$companyId/chat',
+  path: '/$companyId/chat',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCompanyIdDeploysRoute = AppCompanyIdDeploysRouteImport.update({
+  id: '/$companyId/deploys',
+  path: '/$companyId/deploys',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCompanyIdGrowthRoute = AppCompanyIdGrowthRouteImport.update({
+  id: '/$companyId/growth',
+  path: '/$companyId/growth',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCompanyIdInboxRoute = AppCompanyIdInboxRouteImport.update({
+  id: '/$companyId/inbox',
+  path: '/$companyId/inbox',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/app/': typeof AppIndexRoute
+  '/app/$companyId/chat': typeof AppCompanyIdChatRoute
+  '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
+  '/app/$companyId/growth': typeof AppCompanyIdGrowthRoute
+  '/app/$companyId/inbox': typeof AppCompanyIdInboxRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/app': typeof AppIndexRoute
+  '/app/$companyId/chat': typeof AppCompanyIdChatRoute
+  '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
+  '/app/$companyId/growth': typeof AppCompanyIdGrowthRoute
+  '/app/$companyId/inbox': typeof AppCompanyIdInboxRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/app/': typeof AppIndexRoute
+  '/app/$companyId/chat': typeof AppCompanyIdChatRoute
+  '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
+  '/app/$companyId/growth': typeof AppCompanyIdGrowthRoute
+  '/app/$companyId/inbox': typeof AppCompanyIdInboxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/login'
+    | '/app/'
+    | '/app/$companyId/chat'
+    | '/app/$companyId/deploys'
+    | '/app/$companyId/growth'
+    | '/app/$companyId/inbox'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/app'
+    | '/app/$companyId/chat'
+    | '/app/$companyId/deploys'
+    | '/app/$companyId/growth'
+    | '/app/$companyId/inbox'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/login'
+    | '/app/'
+    | '/app/$companyId/chat'
+    | '/app/$companyId/deploys'
+    | '/app/$companyId/growth'
+    | '/app/$companyId/inbox'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +136,80 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/$companyId/chat': {
+      id: '/app/$companyId/chat'
+      path: '/$companyId/chat'
+      fullPath: '/app/$companyId/chat'
+      preLoaderRoute: typeof AppCompanyIdChatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/$companyId/deploys': {
+      id: '/app/$companyId/deploys'
+      path: '/$companyId/deploys'
+      fullPath: '/app/$companyId/deploys'
+      preLoaderRoute: typeof AppCompanyIdDeploysRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/$companyId/growth': {
+      id: '/app/$companyId/growth'
+      path: '/$companyId/growth'
+      fullPath: '/app/$companyId/growth'
+      preLoaderRoute: typeof AppCompanyIdGrowthRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/$companyId/inbox': {
+      id: '/app/$companyId/inbox'
+      path: '/$companyId/inbox'
+      fullPath: '/app/$companyId/inbox'
+      preLoaderRoute: typeof AppCompanyIdInboxRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppIndexRoute: typeof AppIndexRoute
+  AppCompanyIdChatRoute: typeof AppCompanyIdChatRoute
+  AppCompanyIdDeploysRoute: typeof AppCompanyIdDeploysRoute
+  AppCompanyIdGrowthRoute: typeof AppCompanyIdGrowthRoute
+  AppCompanyIdInboxRoute: typeof AppCompanyIdInboxRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppIndexRoute: AppIndexRoute,
+  AppCompanyIdChatRoute: AppCompanyIdChatRoute,
+  AppCompanyIdDeploysRoute: AppCompanyIdDeploysRoute,
+  AppCompanyIdGrowthRoute: AppCompanyIdGrowthRoute,
+  AppCompanyIdInboxRoute: AppCompanyIdInboxRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
