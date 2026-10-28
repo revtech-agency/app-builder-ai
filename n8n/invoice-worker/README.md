@@ -10,6 +10,27 @@ Three importable n8n workflows for the banking demo: an AP worker that does a th
 | `2-invoice-assistant-chat.json` | Invoice assistant chat | `POST /webhook/invoice-assistant` |
 | `3-look-up-purchase-order.json` | Look up purchase order | Called by workflow 2 as a tool |
 
+## Live in n8n
+
+All AppBuilder workflows live in the
+[01-AppBuilderAI](https://revtech-agency.app.n8n.cloud/projects/LZoZHxCNLl9iD0EU/folders/t5PMIeVchFarBmhr/workflows)
+folder on revtech-agency.app.n8n.cloud. Open one at `https://revtech-agency.app.n8n.cloud/workflow/<ID>`.
+IDs and status as of 2026-10-28.
+
+| Worker | Workflow | ID | Status | Entry |
+| --- | --- | --- | --- | --- |
+| Invoice | Process supplier invoices | `Kxhmr00uS4MBXTSO` | Active | Gmail trigger and `POST /webhook/invoice-intake` (app) |
+| Invoice | Invoice assistant chat | `HI8tvI2HG70NlgPo` | Active | `POST /webhook/invoice-assistant` (app) |
+| Invoice | Look up purchase order | `rc72KPALhtJhwLZm` | Active | Tool for the invoice assistant |
+| Order | Order assistant chat | `IhNhsoxf7x1a4Eys` | Active | `POST /webhook/order-assistant` (app) |
+| Order | Send offer for app order | `1PSXF6gMFLxl1oJH` | Active | `POST /webhook/app-order-offer` (app) |
+| Order | Process order emails | `cb1oRwq7IPuFlACQ` | Active | Gmail trigger (`to:demo+orders@appbuilder.ai is:unread`) |
+| Order | Send order offer (HubSpot quote) | `h9Su42x12qcL022z` | Active | Sub-workflow of the two above |
+| Order | Look up casing catalogue | `d7YevuVNRq6Sx9s3` | Active | Tool for reading orders |
+| Order | Approve order from offer link | `rujs7V5m4YWXzaqi` | Active | `/webhook/order-approval` (link in the offer email) |
+| Order | Send order offer | `LhA7BRoC6tkibSFI` | Inactive | Older PDF version, no longer called |
+| Sales | AI Sales Proposal - Webhook to HubSpot Quote | `ONXAlT74A1TlkOPv` | Inactive | Not used by the app |
+
 ## Import
 
 1. Import workflow **3** first (n8n: Workflows, menu, Import from file). Copy its workflow ID from the URL.
