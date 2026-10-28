@@ -4,7 +4,8 @@
  *
  *   bun scripts/hubspot/check-ids.ts
  *
- * Needs HUBSPOT_API_KEY (a private app token) in .env.local, which git ignores.
+ * Needs HUBSPOT_ACCESS_TOKEN (a private app token, the one the app uses) in .env.local, which git
+ * ignores and bun loads on its own. HUBSPOT_API_KEY still works as the old name.
  */
 import { INVOICE_STAGES, P2P_PIPELINE_ID, PO_STAGES } from "../../src/lib/invoice-rules";
 import {
@@ -12,9 +13,11 @@ import {
   STAGES as ORDER_STAGES,
 } from "../../src/lib/order-rules";
 
-const TOKEN = process.env.HUBSPOT_API_KEY;
+const TOKEN = process.env.HUBSPOT_ACCESS_TOKEN ?? process.env.HUBSPOT_API_KEY;
 if (!TOKEN)
-  throw new Error("HUBSPOT_API_KEY is missing: copy .env.example to .env.local and add the token");
+  throw new Error(
+    "HUBSPOT_ACCESS_TOKEN is missing: copy .env.example to .env.local and add the token",
+  );
 
 type Pipeline = { label: string; stages: { id: string; label: string }[] };
 

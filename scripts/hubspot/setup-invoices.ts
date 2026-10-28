@@ -11,18 +11,19 @@
  *   bun scripts/hubspot/setup-invoices.ts             # writes to the portal
  *   bun scripts/hubspot/setup-invoices.ts --dry-run   # reads only, prints what it would do
  *
- * Needs HUBSPOT_API_KEY (a private app token) in .env.local, which git ignores.
+ * Needs HUBSPOT_ACCESS_TOKEN (a private app token, the one the app uses) in .env.local, which git
+ * ignores and bun loads on its own. HUBSPOT_API_KEY still works as the old name.
  */
 import data from "./data/invoices/invoices.json";
 
-const TOKEN = process.env.HUBSPOT_API_KEY;
+const TOKEN = process.env.HUBSPOT_ACCESS_TOKEN ?? process.env.HUBSPOT_API_KEY;
 const DRY = process.argv.includes("--dry-run");
 const BASE = "https://api.hubapi.com";
 const GROUP = "appbuilder_invoice_worker";
 const VAT = 0.21;
 const PRICE_TOLERANCE = 0.02;
 
-if (!TOKEN) throw new Error("HUBSPOT_API_KEY is missing: copy .env.example to .env.local and add the token");
+if (!TOKEN) throw new Error("HUBSPOT_ACCESS_TOKEN is missing: copy .env.example to .env.local and add the token");
 
 type Doc = (typeof data.documents)[number];
 type DocLine = { sku: string | null; name: string; quantity: number; price: number };
