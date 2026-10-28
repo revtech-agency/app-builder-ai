@@ -14,7 +14,7 @@ async function adminClient(): Promise<SupabaseClient> {
   return supabaseAdmin as unknown as SupabaseClient;
 }
 
-async function isAdmin(userId: string): Promise<boolean> {
+export async function isAdmin(userId: string): Promise<boolean> {
   const db = await adminClient();
   const { data, error } = await db
     .from("user_roles")

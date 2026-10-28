@@ -14,11 +14,11 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as CustomerFormRouteImport } from './routes/customer-form'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppCompanyIdRouteImport } from './routes/app/$companyId'
 import { Route as AppAdminRouteImport } from './routes/app/admin'
-import { Route as AppCompanyIdChatRouteImport } from './routes/app/$companyId/chat'
-import { Route as AppCompanyIdDeploysRouteImport } from './routes/app/$companyId/deploys'
-import { Route as AppCompanyIdGrowthRouteImport } from './routes/app/$companyId/growth'
-import { Route as AppCompanyIdInboxRouteImport } from './routes/app/$companyId/inbox'
+import { Route as AppCompanyIdInventoryRouteImport } from './routes/app/$companyId/inventory'
+import { Route as AppCompanyIdNewOrderRouteImport } from './routes/app/$companyId/new-order'
+import { Route as AppCompanyIdOrdersRouteImport } from './routes/app/$companyId/orders'
 import { Route as AppCompanyIdSalesAnalysisRouteImport } from './routes/app/$companyId/sales-analysis'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,36 +46,36 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCompanyIdRoute = AppCompanyIdRouteImport.update({
+  id: '/$companyId',
+  path: '/$companyId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
-const AppCompanyIdChatRoute = AppCompanyIdChatRouteImport.update({
-  id: '/$companyId/chat',
-  path: '/$companyId/chat',
-  getParentRoute: () => AppRoute,
+const AppCompanyIdInventoryRoute = AppCompanyIdInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => AppCompanyIdRoute,
 } as any)
-const AppCompanyIdDeploysRoute = AppCompanyIdDeploysRouteImport.update({
-  id: '/$companyId/deploys',
-  path: '/$companyId/deploys',
-  getParentRoute: () => AppRoute,
+const AppCompanyIdNewOrderRoute = AppCompanyIdNewOrderRouteImport.update({
+  id: '/new-order',
+  path: '/new-order',
+  getParentRoute: () => AppCompanyIdRoute,
 } as any)
-const AppCompanyIdGrowthRoute = AppCompanyIdGrowthRouteImport.update({
-  id: '/$companyId/growth',
-  path: '/$companyId/growth',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCompanyIdInboxRoute = AppCompanyIdInboxRouteImport.update({
-  id: '/$companyId/inbox',
-  path: '/$companyId/inbox',
-  getParentRoute: () => AppRoute,
+const AppCompanyIdOrdersRoute = AppCompanyIdOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AppCompanyIdRoute,
 } as any)
 const AppCompanyIdSalesAnalysisRoute =
   AppCompanyIdSalesAnalysisRouteImport.update({
-    id: '/$companyId/sales-analysis',
-    path: '/$companyId/sales-analysis',
-    getParentRoute: () => AppRoute,
+    id: '/sales-analysis',
+    path: '/sales-analysis',
+    getParentRoute: () => AppCompanyIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -83,24 +83,24 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/customer-form': typeof CustomerFormRoute
   '/login': typeof LoginRoute
+  '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin': typeof AppAdminRoute
   '/app/': typeof AppIndexRoute
-  '/app/$companyId/chat': typeof AppCompanyIdChatRoute
-  '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
-  '/app/$companyId/growth': typeof AppCompanyIdGrowthRoute
-  '/app/$companyId/inbox': typeof AppCompanyIdInboxRoute
+  '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
+  '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
+  '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
   '/app/$companyId/sales-analysis': typeof AppCompanyIdSalesAnalysisRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/customer-form': typeof CustomerFormRoute
   '/login': typeof LoginRoute
+  '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin': typeof AppAdminRoute
   '/app': typeof AppIndexRoute
-  '/app/$companyId/chat': typeof AppCompanyIdChatRoute
-  '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
-  '/app/$companyId/growth': typeof AppCompanyIdGrowthRoute
-  '/app/$companyId/inbox': typeof AppCompanyIdInboxRoute
+  '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
+  '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
+  '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
   '/app/$companyId/sales-analysis': typeof AppCompanyIdSalesAnalysisRoute
 }
 export interface FileRoutesById {
@@ -109,12 +109,12 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/customer-form': typeof CustomerFormRoute
   '/login': typeof LoginRoute
+  '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin': typeof AppAdminRoute
   '/app/': typeof AppIndexRoute
-  '/app/$companyId/chat': typeof AppCompanyIdChatRoute
-  '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
-  '/app/$companyId/growth': typeof AppCompanyIdGrowthRoute
-  '/app/$companyId/inbox': typeof AppCompanyIdInboxRoute
+  '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
+  '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
+  '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
   '/app/$companyId/sales-analysis': typeof AppCompanyIdSalesAnalysisRoute
 }
 export interface FileRouteTypes {
@@ -124,24 +124,24 @@ export interface FileRouteTypes {
     | '/app'
     | '/customer-form'
     | '/login'
+    | '/app/$companyId'
     | '/app/admin'
     | '/app/'
-    | '/app/$companyId/chat'
-    | '/app/$companyId/deploys'
-    | '/app/$companyId/growth'
-    | '/app/$companyId/inbox'
+    | '/app/$companyId/inventory'
+    | '/app/$companyId/new-order'
+    | '/app/$companyId/orders'
     | '/app/$companyId/sales-analysis'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/customer-form'
     | '/login'
+    | '/app/$companyId'
     | '/app/admin'
     | '/app'
-    | '/app/$companyId/chat'
-    | '/app/$companyId/deploys'
-    | '/app/$companyId/growth'
-    | '/app/$companyId/inbox'
+    | '/app/$companyId/inventory'
+    | '/app/$companyId/new-order'
+    | '/app/$companyId/orders'
     | '/app/$companyId/sales-analysis'
   id:
     | '__root__'
@@ -149,12 +149,12 @@ export interface FileRouteTypes {
     | '/app'
     | '/customer-form'
     | '/login'
+    | '/app/$companyId'
     | '/app/admin'
     | '/app/'
-    | '/app/$companyId/chat'
-    | '/app/$companyId/deploys'
-    | '/app/$companyId/growth'
-    | '/app/$companyId/inbox'
+    | '/app/$companyId/inventory'
+    | '/app/$companyId/new-order'
+    | '/app/$companyId/orders'
     | '/app/$companyId/sales-analysis'
   fileRoutesById: FileRoutesById
 }
@@ -202,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/$companyId': {
+      id: '/app/$companyId'
+      path: '/$companyId'
+      fullPath: '/app/$companyId'
+      preLoaderRoute: typeof AppCompanyIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/admin': {
       id: '/app/admin'
       path: '/admin'
@@ -209,62 +216,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/$companyId/chat': {
-      id: '/app/$companyId/chat'
-      path: '/$companyId/chat'
-      fullPath: '/app/$companyId/chat'
-      preLoaderRoute: typeof AppCompanyIdChatRouteImport
-      parentRoute: typeof AppRoute
+    '/app/$companyId/inventory': {
+      id: '/app/$companyId/inventory'
+      path: '/inventory'
+      fullPath: '/app/$companyId/inventory'
+      preLoaderRoute: typeof AppCompanyIdInventoryRouteImport
+      parentRoute: typeof AppCompanyIdRoute
     }
-    '/app/$companyId/deploys': {
-      id: '/app/$companyId/deploys'
-      path: '/$companyId/deploys'
-      fullPath: '/app/$companyId/deploys'
-      preLoaderRoute: typeof AppCompanyIdDeploysRouteImport
-      parentRoute: typeof AppRoute
+    '/app/$companyId/new-order': {
+      id: '/app/$companyId/new-order'
+      path: '/new-order'
+      fullPath: '/app/$companyId/new-order'
+      preLoaderRoute: typeof AppCompanyIdNewOrderRouteImport
+      parentRoute: typeof AppCompanyIdRoute
     }
-    '/app/$companyId/growth': {
-      id: '/app/$companyId/growth'
-      path: '/$companyId/growth'
-      fullPath: '/app/$companyId/growth'
-      preLoaderRoute: typeof AppCompanyIdGrowthRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/$companyId/inbox': {
-      id: '/app/$companyId/inbox'
-      path: '/$companyId/inbox'
-      fullPath: '/app/$companyId/inbox'
-      preLoaderRoute: typeof AppCompanyIdInboxRouteImport
-      parentRoute: typeof AppRoute
+    '/app/$companyId/orders': {
+      id: '/app/$companyId/orders'
+      path: '/orders'
+      fullPath: '/app/$companyId/orders'
+      preLoaderRoute: typeof AppCompanyIdOrdersRouteImport
+      parentRoute: typeof AppCompanyIdRoute
     }
     '/app/$companyId/sales-analysis': {
       id: '/app/$companyId/sales-analysis'
-      path: '/$companyId/sales-analysis'
+      path: '/sales-analysis'
       fullPath: '/app/$companyId/sales-analysis'
       preLoaderRoute: typeof AppCompanyIdSalesAnalysisRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppCompanyIdRoute
     }
   }
 }
 
-interface AppRouteChildren {
-  AppAdminRoute: typeof AppAdminRoute
-  AppIndexRoute: typeof AppIndexRoute
-  AppCompanyIdChatRoute: typeof AppCompanyIdChatRoute
-  AppCompanyIdDeploysRoute: typeof AppCompanyIdDeploysRoute
-  AppCompanyIdGrowthRoute: typeof AppCompanyIdGrowthRoute
-  AppCompanyIdInboxRoute: typeof AppCompanyIdInboxRoute
+interface AppCompanyIdRouteChildren {
+  AppCompanyIdInventoryRoute: typeof AppCompanyIdInventoryRoute
+  AppCompanyIdNewOrderRoute: typeof AppCompanyIdNewOrderRoute
+  AppCompanyIdOrdersRoute: typeof AppCompanyIdOrdersRoute
   AppCompanyIdSalesAnalysisRoute: typeof AppCompanyIdSalesAnalysisRoute
 }
 
+const AppCompanyIdRouteChildren: AppCompanyIdRouteChildren = {
+  AppCompanyIdInventoryRoute: AppCompanyIdInventoryRoute,
+  AppCompanyIdNewOrderRoute: AppCompanyIdNewOrderRoute,
+  AppCompanyIdOrdersRoute: AppCompanyIdOrdersRoute,
+  AppCompanyIdSalesAnalysisRoute: AppCompanyIdSalesAnalysisRoute,
+}
+
+const AppCompanyIdRouteWithChildren = AppCompanyIdRoute._addFileChildren(
+  AppCompanyIdRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppCompanyIdRoute: typeof AppCompanyIdRouteWithChildren
+  AppAdminRoute: typeof AppAdminRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
 const AppRouteChildren: AppRouteChildren = {
+  AppCompanyIdRoute: AppCompanyIdRouteWithChildren,
   AppAdminRoute: AppAdminRoute,
   AppIndexRoute: AppIndexRoute,
-  AppCompanyIdChatRoute: AppCompanyIdChatRoute,
-  AppCompanyIdDeploysRoute: AppCompanyIdDeploysRoute,
-  AppCompanyIdGrowthRoute: AppCompanyIdGrowthRoute,
-  AppCompanyIdInboxRoute: AppCompanyIdInboxRoute,
-  AppCompanyIdSalesAnalysisRoute: AppCompanyIdSalesAnalysisRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

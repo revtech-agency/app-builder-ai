@@ -2,14 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
   ChevronsUpDown,
-  Coins,
-  Inbox,
   LogOut,
-  MessageSquare,
-  Rocket,
+  MessageSquarePlus,
+  Package,
+  ReceiptText,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +23,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
@@ -32,8 +31,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getCompanies, listAsks, listDrafts } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useCartCount } from "@/lib/cart";
+import { getMyCompanies } from "@/lib/orders";
 
 // Active nav item: a square 3px gold marker on the left edge (AppBuilder.ai design system).
 const activeMarker =
@@ -45,65 +45,65 @@ export function AppSidebar() {
   const { user, isAdmin, signOut } = useAuth();
   const { setOpenMobile } = useSidebar();
 
-  const companies = useQuery({ queryKey: ["companies"], queryFn: getCompanies });
-  const asks = useQuery({
-    queryKey: ["asks", companyId],
-    queryFn: () => listAsks(companyId!),
-    enabled: !!companyId,
-  });
-  const drafts = useQuery({
-    queryKey: ["drafts", companyId],
-    queryFn: () => listDrafts(companyId!),
-    enabled: !!companyId,
-  });
+  const companies = useQuery({ queryKey: ["my-companies"], queryFn: () => getMyCompanies() });
+  const cartCount = useCartCount(companyId);
 
   const company = companies.data?.find((c) => c.id === companyId);
-  const needsYou =
-    (asks.data?.filter((a) => a.status === "open").length ?? 0) +
-    (drafts.data?.filter((d) => d.status === "draft").length ?? 0);
+  const canSwitch = isAdmin && (companies.data?.length ?? 0) > 1;
 
   const nav = [
-    { to: "/app/$companyId/chat", label: "Chat", icon: MessageSquare, badge: 0 },
-    { to: "/app/$companyId/growth", label: "Growth", icon: TrendingUp, badge: 0 },
-    { to: "/app/$companyId/inbox", label: "Inbox", icon: Inbox, badge: needsYou },
-    { to: "/app/$companyId/deploys", label: "Deploys", icon: Rocket, badge: 0 },
-    { to: "/app/$companyId/sales-analysis", label: "Sales analysis", icon: Sparkles, badge: 0 },
+    { to: "/app/$companyId/orders", label: "Orders", icon: ReceiptText, badge: 0 },
+    {
+      to: "/app/$companyId/new-order",
+      label: "New order",
+      icon: MessageSquarePlus,
+      badge: cartCount,
+    },
+    { to: "/app/$companyId/inventory", label: "Inventory", icon: Package, badge: 0 },
   ] as const;
+
+  const companyLabel = (
+    <span className="flex min-w-0 items-center gap-2">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
+        {company?.name.charAt(0) ?? "?"}
+      </span>
+      <span className="truncate text-sm font-semibold">{company?.name ?? "Select company"}</span>
+    </span>
+  );
 
   return (
     <Sidebar>
       <SidebarHeader>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="h-auto w-full justify-between border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
-                  {company?.name.charAt(0) ?? "?"}
-                </span>
-                <span className="truncate text-sm font-semibold">
-                  {company?.name ?? "Select company"}
-                </span>
-              </span>
-              <ChevronsUpDown className="size-4 shrink-0 text-sidebar-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-[--radix-dropdown-menu-trigger-width]">
-            {companies.data?.map((c) => (
-              <DropdownMenuItem
-                key={c.id}
-                onSelect={() => {
-                  setOpenMobile(false);
-                  navigate({ to: "/app/$companyId/chat", params: { companyId: c.id } });
-                }}
+        {canSwitch ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="h-auto w-full justify-between border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               >
-                {c.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                {companyLabel}
+                <ChevronsUpDown className="size-4 shrink-0 text-sidebar-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-[--radix-dropdown-menu-trigger-width]">
+              {companies.data?.map((c) => (
+                <DropdownMenuItem
+                  key={c.id}
+                  onSelect={() => {
+                    setOpenMobile(false);
+                    navigate({ to: "/app/$companyId/orders", params: { companyId: c.id } });
+                  }}
+                >
+                  {c.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="rounded-md border border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground">
+            {companyLabel}
+          </div>
+        )}
       </SidebarHeader>
 
       <SidebarContent>
@@ -131,7 +131,29 @@ export function AppSidebar() {
                     )}
                   </SidebarMenuItem>
                 ))}
-              {isAdmin && (
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {companyId && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild className={activeMarker}>
+                      <Link
+                        to="/app/$companyId/sales-analysis"
+                        params={{ companyId }}
+                        activeProps={{ "data-active": "true" }}
+                        onClick={() => setOpenMobile(false)}
+                      >
+                        <Sparkles />
+                        <span>Sales analysis</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className={activeMarker}>
                     <Link
@@ -144,20 +166,13 @@ export function AppSidebar() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="gap-3">
-        <div className="flex items-center gap-2 rounded-md bg-sidebar-accent px-3 py-2 text-sm text-sidebar-accent-foreground">
-          <Coins className="size-4 text-sidebar-primary" />
-          <span className="text-sidebar-muted-foreground">Credits</span>
-          <span className="ml-auto font-mono font-semibold tabular-nums">
-            {company?.credits_balance ?? "–"}
-          </span>
-        </div>
         <div className="flex items-center gap-2 px-1">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{user?.name}</p>

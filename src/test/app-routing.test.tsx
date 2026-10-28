@@ -18,10 +18,9 @@ describe("App routing", () => {
   it.each([
     ["/login", "/login"],
     ["/app", "/app/"],
-    ["/app/co_lumen/chat", "/app/$companyId/chat"],
-    ["/app/co_lumen/growth", "/app/$companyId/growth"],
-    ["/app/co_lumen/inbox", "/app/$companyId/inbox"],
-    ["/app/co_lumen/deploys", "/app/$companyId/deploys"],
+    ["/app/co_lumen/orders", "/app/$companyId/orders"],
+    ["/app/co_lumen/new-order", "/app/$companyId/new-order"],
+    ["/app/co_lumen/inventory", "/app/$companyId/inventory"],
     ["/app/co_lumen/sales-analysis", "/app/$companyId/sales-analysis"],
     ["/app/admin", "/app/admin"],
   ])("matches %s to its own route", (path, routeId) => {

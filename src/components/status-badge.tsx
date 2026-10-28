@@ -53,6 +53,13 @@ const statusTone: Record<string, Tone> = {
   high: "danger",
   normal: "info",
   medium: "warning",
+  // order stages (rejected is shared with drafts above)
+  received: "muted",
+  waiting_on_client: "warning",
+  needs_staff: "danger",
+  ready_to_confirm: "info",
+  confirmed: "success",
+  duplicate: "muted",
   // roles
   admin: "info",
   user: "muted",
