@@ -1,0 +1,200 @@
+[
+  {
+    "id": "01-clean-match",
+    "description": "Clean invoice: every line matches the PO and the delivery.",
+    "needs_po_lines": "PO-2026-0440 (TechNova). Copy one line exactly: code, description, ordered quantity, agreed price.",
+    "expected": {
+      "stage": "ready_to_approve",
+      "match_result": "full_match",
+      "anomaly_flags": []
+    },
+    "request": {
+      "source_id": "test-01-clean-match",
+      "filename": "01-clean-match.txt",
+      "text": "INVOICE TN-60001\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0440\nBank account (IBAN): RO34DEMO0000000000001002\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\n<FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES>\n\nNet: <FILL FROM PO LINES>\nVAT 19%: <FILL FROM PO LINES>\nTotal due: <FILL FROM PO LINES>",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "02-price-off",
+    "description": "Unit price about 9% above the PO price.",
+    "needs_po_lines": "PO-2026-0440. Copy a line, then raise the unit price by about 9%.",
+    "expected": {
+      "stage": "needs_review",
+      "match_result": "mismatch",
+      "anomaly_flags": []
+    },
+    "request": {
+      "source_id": "test-02-price-off",
+      "filename": "02-price-off.txt",
+      "text": "INVOICE TN-60002\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0440\nBank account (IBAN): RO34DEMO0000000000001002\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\n<FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES>\n\nNet: <FILL FROM PO LINES>\nVAT 19%: <FILL FROM PO LINES>\nTotal due: <FILL FROM PO LINES>",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "03-quantity-over-delivery",
+    "description": "Invoiced quantity is higher than what the delivery notes show as received.",
+    "needs_po_lines": "PO-2026-0418 (TechNova, partly received). Pick a line and invoice more than its received quantity.",
+    "expected": {
+      "stage": "waiting_on_supplier",
+      "match_result": "mismatch",
+      "anomaly_flags": []
+    },
+    "request": {
+      "source_id": "test-03-quantity-over-delivery",
+      "filename": "03-quantity-over-delivery.txt",
+      "text": "INVOICE TN-60003\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0418\nBank account (IBAN): RO34DEMO0000000000001002\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\n<FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES>\n\nNet: <FILL FROM PO LINES>\nVAT 19%: <FILL FROM PO LINES>\nTotal due: <FILL FROM PO LINES>",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "04-tax-certificate-expired",
+    "description": "SecureGuard's tax certificate expired on 2026-09-30.",
+    "needs_po_lines": "PO-2026-0425 (SecureGuard). Copy one line exactly so the match is clean.",
+    "expected": {
+      "stage": "waiting_on_supplier",
+      "anomaly_flags": [
+        "certificate_expired"
+      ]
+    },
+    "request": {
+      "source_id": "test-04-tax-certificate-expired",
+      "filename": "04-tax-certificate-expired.txt",
+      "text": "INVOICE SG-2026-310\nSupplier: SecureGuard Services SRL\nVAT ID: RO10000004\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0425\nBank account (IBAN): RO78DEMO0000000000001004\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\n<FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES>\n\nNet: <FILL FROM PO LINES>\nVAT 19%: <FILL FROM PO LINES>\nTotal due: <FILL FROM PO LINES>",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "05-duplicate",
+    "description": "The same invoice number as TN-55190, already in HubSpot.",
+    "needs_po_lines": null,
+    "expected": {
+      "stage": "duplicate",
+      "anomaly_flags": [
+        "duplicate"
+      ]
+    },
+    "request": {
+      "source_id": "test-05-duplicate",
+      "filename": "05-duplicate.txt",
+      "text": "INVOICE TN-55190\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-20\nDue date: 2026-11-19\nPurchase order: PO-2026-0440\nBank account (IBAN): RO34DEMO0000000000001002\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nHW-ANY | Hardware order (resend) | 1 | 4169.75 | 4169.75\n\nNet: 4169.75\nVAT 19%: 792.25\nTotal due: 4962.00",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "06-iban-mismatch",
+    "description": "TechNova invoice asking to be paid to a different IBAN.",
+    "needs_po_lines": null,
+    "expected": {
+      "stage": "needs_review",
+      "anomaly_flags": [
+        "iban_mismatch"
+      ]
+    },
+    "request": {
+      "source_id": "test-06-iban-mismatch",
+      "filename": "06-iban-mismatch.txt",
+      "text": "INVOICE TN-60006\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0440\nBank account (IBAN): RO99DEMO0000000000009999\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nHW-ANY | Hardware order | 2 | 500 | 1000.00\n\nNet: 1000.00\nVAT 19%: 190.00\nTotal due: 1190.00",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "07-iban-changed-recently",
+    "description": "CleanPro changed its IBAN on 2026-10-23, 4 days before this invoice.",
+    "needs_po_lines": null,
+    "expected": {
+      "stage": "needs_review",
+      "anomaly_flags": [
+        "iban_recently_changed"
+      ]
+    },
+    "request": {
+      "source_id": "test-07-iban-changed-recently",
+      "filename": "07-iban-changed-recently.txt",
+      "text": "INVOICE CP-2026-455\nSupplier: CleanPro Facility Services SRL\nVAT ID: RO10000003\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0421\nBank account (IBAN): RO56DEMO0000000000001903\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nSVC-CLEAN | Monthly cleaning service | 1 | 1800 | 1800.00\n\nNet: 1800.00\nVAT 19%: 342.00\nTotal due: 2142.00",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "08-supplier-not-approved",
+    "description": "PrintHouse is still pending onboarding.",
+    "needs_po_lines": null,
+    "expected": {
+      "stage": "needs_review",
+      "anomaly_flags": [
+        "supplier_blocked"
+      ]
+    },
+    "request": {
+      "source_id": "test-08-supplier-not-approved",
+      "filename": "08-supplier-not-approved.txt",
+      "text": "INVOICE PH-802\nSupplier: PrintHouse Demo SRL\nVAT ID: RO10000006\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0433\nBank account (IBAN): RO43DEMO0000000000001006\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nPRINT-FLY | Flyers A5 | 1000 | 0.4 | 400.00\n\nNet: 400.00\nVAT 19%: 76.00\nTotal due: 476.00",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "09-unknown-supplier",
+    "description": "A supplier that is not in HubSpot.",
+    "needs_po_lines": null,
+    "expected": {
+      "stage": "needs_review",
+      "anomaly_flags": [
+        "unknown_supplier"
+      ]
+    },
+    "request": {
+      "source_id": "test-09-unknown-supplier",
+      "filename": "09-unknown-supplier.txt",
+      "text": "INVOICE NW-7001\nSupplier: Northwind Traders Demo SRL\nVAT ID: RO99999999\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0440\nBank account (IBAN): RO11DEMO0000000000007777\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nMISC | Consulting | 1 | 750 | 750.00\n\nNet: 750.00\nVAT 19%: 142.50\nTotal due: 892.50",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "10-no-po-number",
+    "description": "A valid supplier invoice with no purchase order number.",
+    "needs_po_lines": null,
+    "expected": {
+      "stage": "waiting_on_supplier",
+      "match_result": "no_po",
+      "anomaly_flags": []
+    },
+    "request": {
+      "source_id": "test-10-no-po-number",
+      "filename": "10-no-po-number.txt",
+      "text": "INVOICE OS-2026-1300\nSupplier: Office Supplies Demo SRL\nVAT ID: RO10000001\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: (none)\nBank account (IBAN): RO12DEMO0000000000001001\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nOFF-PAPER | Copy paper A4, 40 boxes | 40 | 22.5 | 900.00\n\nNet: 900.00\nVAT 19%: 171.00\nTotal due: 1071.00",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "11-split-purchase",
+    "description": "Two TechNova invoices within 14 days, each under 5,000 EUR but 7,361 EUR together (TN-55190 is 4,961).",
+    "needs_po_lines": null,
+    "expected": {
+      "stage": "needs_review",
+      "anomaly_flags": [
+        "split_purchase"
+      ]
+    },
+    "request": {
+      "source_id": "test-11-split-purchase",
+      "filename": "11-split-purchase.txt",
+      "text": "INVOICE TN-60011\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0440\nBank account (IBAN): RO34DEMO0000000000001002\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nHW-ANY | Hardware order | 2 | 1008.4 | 2016.80\n\nNet: 2016.80\nVAT 19%: 383.19\nTotal due: 2399.99",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  },
+  {
+    "id": "12-supplier-question",
+    "description": "Not an invoice: the supplier asks when it will be paid.",
+    "needs_po_lines": null,
+    "expected": {
+      "stage": "needs_review",
+      "document_type": "question"
+    },
+    "request": {
+      "source_id": "test-12-supplier-question",
+      "filename": "12-supplier-question.txt",
+      "text": "Subject: Payment status\n\nHello Accounts Payable,\nCould you tell me when invoice TN-55190 will be paid? Our finance team is asking.\n\nThanks,\nTechNova Hardware SRL",
+      "submitted_by": "demo+test@appbuilder.ai"
+    }
+  }
+]

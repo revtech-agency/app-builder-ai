@@ -1,0 +1,399 @@
+{
+  "name": "Invoice assistant chat",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoice-assistant",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0bccff62-3912-4c13-8c09-edeeaafc6d8c",
+      "name": "Invoice Assistant Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "2c0f4e24-8195-4dcf-a09b-84e40f3d6ea4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "AppBuilder app key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message + ($json.body.invoice_deal_id ? '\\n\\n[The reviewer is looking at invoice deal id ' + $json.body.invoice_deal_id + '.]' : '') }}",
+        "options": {
+          "systemMessage": "You help the bank's accounts-payable reviewer understand why a supplier invoice is in its stage. Use your tools to look up the invoice, its lines and audit note, the supplier and the purchase order before answering. Cite the rule and the numbers. Never approve, reject or change anything: the reviewer does that in the app. Keep answers short. If a tool returns nothing, say so instead of guessing."
+        }
+      },
+      "id": "9fb926ec-2e65-486a-9b03-2a716467980b",
+      "name": "Invoice Assistant",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        280,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5-5"
+        },
+        "options": {}
+      },
+      "id": "afa6dc85-2024-4751-aa2c-a908efe738e1",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        60,
+        260
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "name": "RTA Anthropic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Invoice Assistant Webhook').item.json.body.session_id }}",
+        "contextWindowLength": 10
+      },
+      "id": "b026bdab-f764-44da-be5d-5cd0a4e0b306",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        260,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get an invoice deal (stage, match result, approval level, anomaly flags, exception reason) by its HubSpot deal id.",
+        "method": "GET",
+        "url": "={{ 'https://api.hubapi.com/crm/v3/objects/deals/' + $fromAI('deal_id', 'The HubSpot deal id of the invoice', 'string') + '?properties=dealname,dealstage,document_type,invoice_number,invoice_date,due_date,po_number,amount,vat_amount,iban_on_invoice,match_result,approval_level,anomaly_flags,exception_reason,order_channel,min_field_confidence' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "options": {}
+      },
+      "id": "8785e470-5b83-4b81-9f12-559ff7f0e82e",
+      "name": "get_invoice_by_deal_id",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        260
+      ],
+      "credentials": {
+        "hubspotAppToken": {
+          "name": "AppBuilder HubSpot Service Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Find invoice deals by the supplier's invoice number.",
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/deals/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'document_type', operator: 'EQ', value: 'invoice' }, { propertyName: 'invoice_number', operator: 'EQ', value: $fromAI('invoice_number', 'The supplier invoice number', 'string') }] }], properties: ['dealname','dealstage','document_type','invoice_number','invoice_date','due_date','po_number','amount','vat_amount','iban_on_invoice','match_result','approval_level','anomaly_flags','exception_reason','order_channel','min_field_confidence'], limit: 5 }) }}"
+      },
+      "id": "783ace6b-8b29-4973-ad9f-913a65a38dd0",
+      "name": "find_invoice_by_number",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        260
+      ],
+      "credentials": {
+        "hubspotAppToken": {
+          "name": "AppBuilder HubSpot Service Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get the line items of an invoice deal with their PO check result (matched, price_off, qty_off, not_on_po) and the explanation.",
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/line_items/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'associations.deal', operator: 'EQ', value: $fromAI('deal_id', 'The HubSpot deal id of the invoice', 'string') }] }], properties: ['hs_sku','name','quantity','price','po_line_ref','line_check','line_check_note','field_confidence'], limit: 50 }) }}"
+      },
+      "id": "912d2d8a-33ce-43ec-b8da-65e9dc86c4d2",
+      "name": "get_invoice_lines",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        60,
+        400
+      ],
+      "credentials": {
+        "hubspotAppToken": {
+          "name": "AppBuilder HubSpot Service Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get the audit notes the invoice worker wrote on an invoice deal, listing each check with a tick or cross.",
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/notes/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'associations.deal', operator: 'EQ', value: $fromAI('deal_id', 'The HubSpot deal id of the invoice', 'string') }] }], properties: ['hs_note_body','hs_timestamp'], limit: 5 }) }}"
+      },
+      "id": "c9e5485b-8572-4ac8-b02d-7a4f7464838e",
+      "name": "get_audit_note",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        400
+      ],
+      "credentials": {
+        "hubspotAppToken": {
+          "name": "AppBuilder HubSpot Service Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Look up a supplier by name or VAT ID: status, IBAN on file, previous IBAN and change date, tax certificate expiry.",
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/companies/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: $fromAI('query', 'Supplier name or VAT ID', 'string'), filterGroups: [{ filters: [{ propertyName: 'supplier_status', operator: 'HAS_PROPERTY' }] }], properties: ['name','supplier_status','supplier_vat_id','supplier_iban','previous_iban','iban_changed_on','tax_certificate_valid_until','domain'], limit: 5 }) }}"
+      },
+      "id": "c1481ff3-cab4-4eef-b7c2-dda65ee21b81",
+      "name": "get_supplier",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        400
+      ],
+      "credentials": {
+        "hubspotAppToken": {
+          "name": "AppBuilder HubSpot Service Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "get_purchase_order",
+        "description": "Look up purchase orders by po_number or supplier_id: ordered, received and remaining quantities per line, and the budget code.",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_LOOK_UP_PURCHASE_ORDER_WORKFLOW_ID"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "po_number": "={{ $fromAI('po_number', 'The purchase order number, or empty', 'string') }}",
+            "supplier_id": "={{ $fromAI('supplier_id', 'The HubSpot company id of the supplier, or empty', 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "po_number",
+              "displayName": "po_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "supplier_id",
+              "displayName": "supplier_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "id": "4db066a4-7f27-42b6-91c9-cd6e38ca8fe5",
+      "name": "get_purchase_order",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { reply: $json.output } }}",
+        "options": {}
+      },
+      "id": "088f8baa-4cc6-4cc0-8d70-eabccbb2d824",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Invoice Assistant Webhook": {
+      "main": [
+        [
+          {
+            "node": "Invoice Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Assistant": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Invoice Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Invoice Assistant",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_invoice_by_deal_id": {
+      "ai_tool": [
+        [
+          {
+            "node": "Invoice Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find_invoice_by_number": {
+      "ai_tool": [
+        [
+          {
+            "node": "Invoice Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_invoice_lines": {
+      "ai_tool": [
+        [
+          {
+            "node": "Invoice Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_audit_note": {
+      "ai_tool": [
+        [
+          {
+            "node": "Invoice Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_supplier": {
+      "ai_tool": [
+        [
+          {
+            "node": "Invoice Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_purchase_order": {
+      "ai_tool": [
+        [
+          {
+            "node": "Invoice Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "appbuilder"
+    },
+    {
+      "name": "invoice-worker"
+    }
+  ],
+  "pinData": {}
+}
