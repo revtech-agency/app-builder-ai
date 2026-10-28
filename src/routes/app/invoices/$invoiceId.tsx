@@ -596,8 +596,9 @@ function InvoicePage() {
                   <DialogHeader>
                     <DialogTitle>{DECISION_TEXT[dialog].title}</DialogTitle>
                     <DialogDescription>
-                      We've started a comment from the failed checks. Edit it, then save; it goes on
-                      the invoice's activity.
+                      {dialog === "duplicate"
+                        ? "We've started the comment for you. Add which invoice this duplicates if you know it, then save; it goes on the invoice's activity."
+                        : "We've started a comment from the failed checks. Edit it, then save; it goes on the invoice's activity."}
                     </DialogDescription>
                   </DialogHeader>
                   <Textarea
