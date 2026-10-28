@@ -20,27 +20,22 @@ const CustomerDetails = z.object({
     .string()
     .trim()
     .regex(/^\+?[\d\s().-]{7,20}$/, "Enter a valid phone number."),
-  jobtitle: z.string().trim(),
+  jobtitle: z.string().trim().min(1, "Enter your job title."),
   company: z.string().trim().min(1, "Enter your company name."),
 });
 
 type CustomerDetails = z.infer<typeof CustomerDetails>;
 type Errors = Partial<Record<keyof CustomerDetails, string>>;
 
-const FIELDS: {
-  key: keyof CustomerDetails;
-  label: string;
-  type?: string;
-  autoComplete: string;
-  optional?: boolean;
-}[] = [
-  { key: "firstname", label: "First name", autoComplete: "given-name" },
-  { key: "lastname", label: "Last name", autoComplete: "family-name" },
-  { key: "email", label: "Email", type: "email", autoComplete: "email" },
-  { key: "phone", label: "Phone", type: "tel", autoComplete: "tel" },
-  { key: "jobtitle", label: "Job title", autoComplete: "organization-title", optional: true },
-  { key: "company", label: "Company name", autoComplete: "organization" },
-];
+const FIELDS: { key: keyof CustomerDetails; label: string; type?: string; autoComplete: string }[] =
+  [
+    { key: "firstname", label: "First name", autoComplete: "given-name" },
+    { key: "lastname", label: "Last name", autoComplete: "family-name" },
+    { key: "email", label: "Email", type: "email", autoComplete: "email" },
+    { key: "phone", label: "Phone", type: "tel", autoComplete: "tel" },
+    { key: "jobtitle", label: "Job title", autoComplete: "organization-title" },
+    { key: "company", label: "Company name", autoComplete: "organization" },
+  ];
 
 const EMPTY: CustomerDetails = {
   firstname: "",
@@ -58,10 +53,7 @@ async function submitToHubSpot(data: CustomerDetails) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        // Optional fields left blank (job title) are omitted rather than sent empty.
-        fields: Object.entries(data)
-          .filter(([, value]) => value !== "")
-          .map(([name, value]) => ({ objectTypeId: "0-1", name, value })),
+        fields: Object.entries(data).map(([name, value]) => ({ objectTypeId: "0-1", name, value })),
         context: { pageUri: window.location.href, pageName: document.title },
       }),
     },
@@ -118,10 +110,7 @@ export function ContactForm() {
     >
       {FIELDS.map((f) => (
         <div key={f.key} className="space-y-2">
-          <Label htmlFor={f.key}>
-            {f.label}
-            {f.optional && <span className="font-normal text-muted-foreground"> (optional)</span>}
-          </Label>
+          <Label htmlFor={f.key}>{f.label}</Label>
           <Input
             id={f.key}
             type={f.type ?? "text"}
