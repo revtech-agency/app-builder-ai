@@ -22,24 +22,45 @@ check() {
   fi
 }
 
-base=$(git merge-base origin/main HEAD)
-changed=$(git diff --name-only --diff-filter=d "$base" -- '*.ts' '*.tsx' '*.js' '*.mjs' | grep -v '^scripts/hubspot/data/')
+base=$(git merge-base origin/main HEAD 2>/dev/null) || base=""
+changed=""
+[ -n "$base" ] && changed=$(git diff --name-only --diff-filter=d "$base" -- '*.ts' '*.tsx' '*.js' '*.mjs' | grep -v '^scripts/hubspot/data/')
+
+# Counts eslint problems in its output; an eslint crash (exit 2) fails instead of counting 0.
+count_problems() {
+  local out rc
+  out=$("$@"); rc=$?
+  [ $rc -ge 2 ] && { echo "eslint crashed (exit $rc) on: $*" >&2; return 1; }
+  printf '%s\n' "$out" | grep -cE '^ +[0-9]+:[0-9]+ '
+  return 0
+}
 
 # Fails only if a changed file has more lint problems than it had at the branch point.
 lint_new() {
   local f now before bad=0
-  for f in $changed; do
-    now=$(bunx eslint "$f" | grep -cE '^ +[0-9]+:[0-9]+ ')
-    before=$(git show "$base:$f" 2>/dev/null | bunx eslint --stdin --stdin-filename "$f" | grep -cE '^ +[0-9]+:[0-9]+ ')
+  while IFS= read -r f; do
+    now=$(count_problems bunx eslint "$f") || return 1
+    if git cat-file -e "$base:$f" 2>/dev/null; then
+      before=$(git show "$base:$f" | count_problems bunx eslint --stdin --stdin-filename "$f") || return 1
+    else
+      before=0
+    fi
     echo "$f: $before -> $now"
     [ "$now" -gt "$before" ] && bad=1
-  done
+  done <<< "$changed"
   return $bad
 }
 
 check tests bun run test
 check types bunx tsc --noEmit -p .
-if [ -n "$changed" ]; then check lint lint_new; else echo "SKIP  lint  (no changed files)"; fi
+if [ -z "$base" ]; then
+  echo "FAIL  lint  (no merge base with origin/main: run git fetch origin)"
+  failed=1
+elif [ -n "$changed" ]; then
+  check lint lint_new
+else
+  echo "SKIP  lint  (no changed files)"
+fi
 check build bun run build
 check hubspot-ids bun scripts/hubspot/check-ids.ts
 
