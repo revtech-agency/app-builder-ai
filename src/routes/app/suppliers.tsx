@@ -34,7 +34,7 @@ function SuppliersPage() {
   const suppliers = useQuery({ queryKey: ["suppliers"], queryFn: () => listSuppliers() });
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-2xl font-semibold">Suppliers</h1>
         <p className="mt-1 text-sm text-muted-foreground">

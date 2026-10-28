@@ -117,7 +117,7 @@ function OrdersPage() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Orders</h1>

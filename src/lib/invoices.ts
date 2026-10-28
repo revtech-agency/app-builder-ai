@@ -5,7 +5,9 @@ import { z } from "zod";
 
 import { requireInvoiceDesk } from "@/lib/admin";
 import {
+  DEMO_HISTORY,
   INVOICE_STAGES,
+  isHistoryAuditNote,
   P2P_PIPELINE_ID,
   PO_DOCUMENT_TYPE,
   PO_STAGES,
@@ -596,4 +598,100 @@ export const askAssistant = createServerFn({ method: "POST" })
       user_email: (context.claims as { email?: string }).email ?? "",
     });
     return { reply: res.reply ?? res.output ?? "No answer." };
+  });
+
+export type ResetResult = {
+  archivedInvoices: number;
+  restoredInvoices: number;
+  removedNotes: number;
+};
+
+async function archive(type: string, ids: string[]) {
+  const hubspot = await hs();
+  await Promise.all(
+    chunk([...new Set(ids)], 100).map((c) =>
+      hubspot(`/crm/v3/objects/${type}/batch/archive`, {
+        body: { inputs: c.map((id) => ({ id })) },
+      }),
+    ),
+  );
+}
+
+// "Reset demo": archives every invoice a visitor created (with its line items and notes) and puts
+// the six sample invoices back to their starting stage, approver and audit note. Purchase orders
+// and suppliers are not touched. Archived records stay in HubSpot's recycle bin for 90 days.
+export const resetDemo = createServerFn({ method: "POST" })
+  .middleware([requireInvoiceDesk])
+  .handler(async (): Promise<ResetResult> => {
+    const hubspot = await hs();
+    const deals = await searchDeals(false, [
+      "source_message_id",
+      "dealstage",
+      "approved_by",
+      "pipeline",
+      "document_type",
+    ]);
+    const isHistory = (d: HsObject) =>
+      Boolean(DEMO_HISTORY[d.properties["source_message_id"] ?? ""]);
+    const history = deals.filter(isHistory);
+    const created = deals.filter((d) => !isHistory(d));
+
+    const [lineAssoc, noteAssoc] = await Promise.all([
+      readAssoc(
+        "deals",
+        "line_items",
+        created.map((d) => d.id),
+      ),
+      readAssoc(
+        "deals",
+        "notes",
+        deals.map((d) => d.id),
+      ),
+    ]);
+    const historyNoteIds = history.flatMap((d) => noteAssoc.get(d.id) ?? []);
+    const historyNotes = await readObjects("notes", historyNoteIds, ["hs_note_body"]);
+    const decisionNotes = historyNoteIds.filter(
+      (id) => !isHistoryAuditNote(historyNotes.get(id)?.properties["hs_note_body"]),
+    );
+
+    const changed = history.filter((d) => {
+      const h = DEMO_HISTORY[d.properties["source_message_id"] ?? ""];
+      return (
+        h &&
+        (d.properties["dealstage"] !== stageIdFor(h.stage) ||
+          (d.properties["approved_by"] || null) !== h.approvedBy)
+      );
+    });
+    if (changed.length) {
+      await hubspot("/crm/v3/objects/deals/batch/update", {
+        body: {
+          inputs: changed.map((d) => {
+            const h = DEMO_HISTORY[d.properties["source_message_id"] ?? ""]!;
+            return {
+              id: d.id,
+              properties: { dealstage: stageIdFor(h.stage), approved_by: h.approvedBy ?? "" },
+            };
+          }),
+        },
+      });
+    }
+
+    const createdNotes = created.flatMap((d) => noteAssoc.get(d.id) ?? []);
+    await Promise.all([
+      archive(
+        "line_items",
+        created.flatMap((d) => lineAssoc.get(d.id) ?? []),
+      ),
+      archive("notes", [...createdNotes, ...decisionNotes]),
+    ]);
+    await archive(
+      "deals",
+      created.map((d) => d.id),
+    );
+
+    return {
+      archivedInvoices: created.length,
+      restoredInvoices: changed.length,
+      removedNotes: createdNotes.length + decisionNotes.length,
+    };
   });

@@ -109,12 +109,16 @@ function SubmitPage() {
   const flags = Array.isArray(r?.anomaly_flags) ? r.anomaly_flags : splitList(r?.anomaly_flags);
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-2xl font-semibold">Submit document</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Paste a supplier email or attach a PDF invoice. The worker reads it, runs the three-way
           match and files it.
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Use a sample, or your own invoice: it's checked against the sample suppliers and purchase
+          orders, so an invoice from a supplier or PO that isn't in the demo lands in Needs review.
         </p>
       </div>
 
