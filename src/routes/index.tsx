@@ -12,6 +12,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
+import { ContactForm } from "@/components/contact-form";
 import { DemoButton } from "@/components/demo-button";
 import { Button } from "@/components/ui/button";
 
@@ -152,7 +153,7 @@ function Index() {
             <OpenAppButton size="lg" />
             <DemoButton size="lg" variant="outline" />
             <Button asChild size="lg" variant="ghost">
-              <a href="mailto:daniel@appbuilder.ai">Talk to us</a>
+              <a href="#contact">Talk to us</a>
             </Button>
           </div>
         </section>
@@ -245,7 +246,22 @@ function Index() {
       </main>
 
       <footer className="border-t">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-muted-foreground">
+        <div
+          id="contact"
+          className="mx-auto grid w-full max-w-6xl scroll-mt-20 gap-8 px-4 py-12 md:grid-cols-2"
+        >
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">Contact us</h2>
+            <p className="mt-3 max-w-md text-muted-foreground">
+              Tell us who you are and we'll get back to you about running your order, quote or
+              purchasing flow on an AI worker.
+            </p>
+          </div>
+          <div className="rounded-xl border bg-card p-6">
+            <ContactForm />
+          </div>
+        </div>
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 border-t px-4 py-6 text-sm text-muted-foreground">
           <span>© 2026 AppBuilder.ai</span>
           <a href="mailto:daniel@appbuilder.ai" className="hover:text-foreground">
             daniel@appbuilder.ai

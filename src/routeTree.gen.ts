@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as CustomerFormRouteImport } from './routes/customer-form'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppAdminRouteImport } from './routes/app/admin'
@@ -28,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerFormRoute = CustomerFormRouteImport.update({
+  id: '/customer-form',
+  path: '/customer-form',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -75,6 +81,7 @@ const AppCompanyIdSalesAnalysisRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/customer-form': typeof CustomerFormRoute
   '/login': typeof LoginRoute
   '/app/admin': typeof AppAdminRoute
   '/app/': typeof AppIndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/customer-form': typeof CustomerFormRoute
   '/login': typeof LoginRoute
   '/app/admin': typeof AppAdminRoute
   '/app': typeof AppIndexRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/customer-form': typeof CustomerFormRoute
   '/login': typeof LoginRoute
   '/app/admin': typeof AppAdminRoute
   '/app/': typeof AppIndexRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/customer-form'
     | '/login'
     | '/app/admin'
     | '/app/'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/customer-form'
     | '/login'
     | '/app/admin'
     | '/app'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/customer-form'
     | '/login'
     | '/app/admin'
     | '/app/'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  CustomerFormRoute: typeof CustomerFormRoute
   LoginRoute: typeof LoginRoute
 }
 
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer-form': {
+      id: '/customer-form'
+      path: '/customer-form'
+      fullPath: '/customer-form'
+      preLoaderRoute: typeof CustomerFormRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -252,6 +272,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  CustomerFormRoute: CustomerFormRoute,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
