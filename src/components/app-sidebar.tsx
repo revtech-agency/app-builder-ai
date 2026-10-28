@@ -137,8 +137,8 @@ export function AppSidebar() {
             variant="ghost"
             size="icon"
             aria-label="Sign out"
-            onClick={() => {
-              signOut();
+            onClick={async () => {
+              await signOut();
               navigate({ to: "/login" });
             }}
           >

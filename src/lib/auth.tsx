@@ -1,63 +1,71 @@
-// Placeholder auth to be replaced by Lovable Cloud auth.
+// Founder auth on Lovable Cloud (Supabase Auth, email + password).
+import type { Session } from "@supabase/supabase-js";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const DEMO_FOUNDER = { name: "Demo Founder", email: "demo@appbuilder.ai" };
+import { supabase } from "@/integrations/supabase/client";
 
-const STORAGE_KEY = "appbuilder_demo_signed_in";
+type AuthUser = { id: string; name: string; email: string };
 
 type AuthContextValue = {
-  user: typeof DEMO_FOUNDER | null;
-  // False until localStorage has been read on the client, so SSR and first render match.
+  user: AuthUser | null;
+  // False until the stored session has been read on the client, so SSR and first render match.
   ready: boolean;
-  signIn: () => void;
-  signOut: () => void;
+  signIn: (email: string, password: string) => Promise<void>;
+  // Resolves to true when Supabase wants the founder to confirm their email first.
+  signUp: (email: string, password: string, name: string) => Promise<boolean>;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function readFlag(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.localStorage.getItem(STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function writeFlag(signedIn: boolean) {
-  if (typeof window === "undefined") return;
-  try {
-    if (signedIn) window.localStorage.setItem(STORAGE_KEY, "1");
-    else window.localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // Storage unavailable (private mode etc.): the session just lasts until reload.
-  }
+function toUser(session: Session | null): AuthUser | null {
+  const u = session?.user;
+  if (!u) return null;
+  const email = u.email ?? "";
+  const name = (u.user_metadata?.name as string | undefined) || email.split("@")[0] || "Founder";
+  return { id: u.id, name, email };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [signedIn, setSignedIn] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setSignedIn(readFlag());
-    setReady(true);
+    // Subscribe first so a session restored during getSession isn't missed.
+    const { data } = supabase.auth.onAuthStateChange((_event, next) => {
+      setSession(next);
+      setReady(true);
+    });
+    supabase.auth.getSession().then(({ data: { session: current } }) => {
+      setSession(current);
+      setReady(true);
+    });
+    return () => data.subscription.unsubscribe();
   }, []);
 
-  const signIn = useCallback(() => {
-    writeFlag(true);
-    setSignedIn(true);
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   }, []);
 
-  const signOut = useCallback(() => {
-    writeFlag(false);
-    setSignedIn(false);
+  const signUp = useCallback(async (email: string, password: string, name: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name }, emailRedirectTo: `${window.location.origin}/app` },
+    });
+    if (error) throw error;
+    return !data.session;
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
   }, []);
 
   const value = useMemo(
-    () => ({ user: signedIn ? DEMO_FOUNDER : null, ready, signIn, signOut }),
-    [signedIn, ready, signIn, signOut],
+    () => ({ user: toUser(session), ready, signIn, signUp, signOut }),
+    [session, ready, signIn, signUp, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
