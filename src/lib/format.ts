@@ -1,8 +1,7 @@
-const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-
-export const formatMoney = (n: number) => money.format(n);
-
 const eur = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" });
+
+// HubSpot amounts (prices, line items, orders) are in the portal currency, EUR.
+export const formatMoney = (n: number) => eur.format(n);
 
 export const formatEur = (n: number) => eur.format(n);
 

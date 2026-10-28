@@ -303,6 +303,7 @@ async function loadOrders(pipeline: { id: string; stages: Record<string, string>
     const deal = await write(`deal ${o.id}`, "POST", "/crm/v3/objects/deals", {
       properties: {
         dealname: `${o.id} · ${client.name}`,
+        deal_currency_code: "EUR",
         pipeline: pipeline.id,
         dealstage: pipeline.stages[o.stage],
         delivery_date: o.delivery_date,
@@ -325,6 +326,7 @@ async function loadOrders(pipeline: { id: string; stages: Record<string, string>
           ...(product
             ? { hs_product_id: skuToId.get(product.sku), quantity: packs }
             : { name: `${line.client_code} (no match yet, closest: ${line.suggested_sku})`, quantity: 0 }),
+          hs_line_item_currency_code: "EUR",
           ordered_quantity: line.metres,
           ordered_unit: "m",
           client_code_as_written: line.client_code ?? "",
