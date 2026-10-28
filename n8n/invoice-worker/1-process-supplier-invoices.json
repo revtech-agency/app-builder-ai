@@ -18,7 +18,7 @@
           "downloadAttachments": true
         }
       },
-      "id": "0c38233b-066e-439e-b5fb-73ceeb384b1e",
+      "id": "ccd15618-724b-4a2a-acb6-287b7e935c58",
       "name": "Gmail Trigger",
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1.2,
@@ -40,7 +40,7 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "4aef0e88-ee96-4db4-a1bd-ee98917cce3d",
+      "id": "e0b5d30f-d80b-4602-aea8-6466ee04c311",
       "name": "Invoice Intake Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
@@ -48,7 +48,7 @@
         0,
         180
       ],
-      "webhookId": "237a6d8a-0847-4dcd-acd8-cb8798c101ef",
+      "webhookId": "b6317d62-fc5c-421d-b80b-759b37df043e",
       "credentials": {
         "httpHeaderAuth": {
           "name": "AppBuilder app key"
@@ -60,7 +60,7 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const j = $json;\nconst from = (j.from && j.from.value && j.from.value[0] && j.from.value[0].address) || (typeof j.from === 'string' ? j.from : '') || '';\nconst out = { json: { source_message_id: 'gmail-' + j.id, gmail_id: j.id, channel: 'email', submitted_by: from, subject: j.subject || '', filename: '', text: (j.text || j.snippet || '') } };\nconst bin = $input.item.binary;\nif (bin) {\n  const pdfKey = Object.keys(bin).find((k) => String(bin[k].mimeType || '').indexOf('pdf') >= 0);\n  if (pdfKey) {\n    out.binary = { data: bin[pdfKey] };\n    out.json.filename = bin[pdfKey].fileName || '';\n  }\n}\nreturn out;"
       },
-      "id": "4817072b-9bf6-481b-9047-5680b27b2aae",
+      "id": "874b9391-87cf-4af8-91fd-b1802b7dcbc6",
       "name": "Prepare Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -74,7 +74,7 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const b = $json.body || {};\nconst out = { json: { source_message_id: 'app-' + b.source_id, gmail_id: '', channel: 'app', submitted_by: b.submitted_by || '', subject: '', filename: b.filename || '', text: b.text || '' } };\nif (b.pdf_base64) {\n  const buf = Buffer.from(b.pdf_base64, 'base64');\n  out.binary = { data: await this.helpers.prepareBinaryData(buf, b.filename || 'invoice.pdf', 'application/pdf') };\n}\nreturn out;"
       },
-      "id": "619cc4e5-9992-4b74-af85-bccaf8539ac8",
+      "id": "a500e9c5-412c-420c-880f-2c4f65408959",
       "name": "Prepare App Request",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -94,7 +94,7 @@
           },
           "conditions": [
             {
-              "id": "8c38ea3e-ce32-4411-9a72-0abe3dcc1634",
+              "id": "ce281cf0-9f1b-4c78-859b-8fdf6fb57118",
               "leftValue": "={{ !!($binary && $binary.data) }}",
               "rightValue": "",
               "operator": {
@@ -108,7 +108,7 @@
         },
         "options": {}
       },
-      "id": "eeea98c1-0d35-40e3-86ee-ea71225922fa",
+      "id": "4ef4aef5-1a93-4082-9afb-0611ee2bb8ce",
       "name": "Has PDF?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -123,7 +123,7 @@
         "binaryPropertyName": "data",
         "options": {}
       },
-      "id": "710ea57c-7211-4f16-9efa-645ea68885c2",
+      "id": "c736bcde-1230-4cb4-84f6-77306ed943a9",
       "name": "Extract PDF Text",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
@@ -137,7 +137,7 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const m = $('Has PDF?').item.json;\nconst hasPdf = !!($('Has PDF?').item.binary && $('Has PDF?').item.binary.data);\nconst pdf = hasPdf ? String($json.text || ($json.pdf_text && $json.pdf_text.text) || '') : '';\nconst body = ((m.subject ? 'Subject: ' + m.subject + '\\n' : '') + (m.text || '') + '\\n' + pdf).trim().slice(0, 60000);\nreturn { json: { source_message_id: m.source_message_id, gmail_id: m.gmail_id, channel: m.channel, submitted_by: m.submitted_by, subject: m.subject, document_text: body } };"
       },
-      "id": "6c893541-c204-4885-a654-1cd22f25eb35",
+      "id": "0aa88704-261c-48b0-b958-3e2d65b1bf86",
       "name": "Build Document Text",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -157,7 +157,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'source_message_id', operator: 'EQ', value: $('Build Document Text').item.json.source_message_id }] }], properties: ['dealname','dealstage','document_type','invoice_number','invoice_date','due_date','po_number','amount','vat_amount','iban_on_invoice','match_result','approval_level','anomaly_flags','exception_reason','order_channel','min_field_confidence'], limit: 1 }) }}"
       },
-      "id": "5e208d47-7fff-4d23-8001-c8d9543b0075",
+      "id": "697f2a65-2ba4-4667-9a01-ef734c02f306",
       "name": "Find Existing",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -182,7 +182,7 @@
           },
           "conditions": [
             {
-              "id": "55440828-a564-41a1-a08f-2e0cb8129afb",
+              "id": "313a4adf-6c04-45fd-931e-10fbfa2dd4ef",
               "leftValue": "={{ $json.total > 0 }}",
               "rightValue": "",
               "operator": {
@@ -196,7 +196,7 @@
         },
         "options": {}
       },
-      "id": "90abb7f3-49c3-44e1-ba47-7677b61c48f1",
+      "id": "b9e17dd5-5f2b-475d-acda-5a708868c72c",
       "name": "Already processed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -210,7 +210,7 @@
         "mode": "runOnceForAllItems",
         "jsCode": "const r = ($json.results || [])[0];\nconst p = r.properties || {};\nreturn [{ json: { already_processed: true, deal_id: r.id, stage_id: p.dealstage, document_type: p.document_type, invoice_number: p.invoice_number, amount: p.amount, match_result: p.match_result, approval_level: p.approval_level, anomaly_flags: p.anomaly_flags ? String(p.anomaly_flags).split(';') : [], exception_reason: p.exception_reason || '' } }];"
       },
-      "id": "da5accc2-4719-4255-8039-170863ca8506",
+      "id": "53424271-9440-4fd0-8c56-156f4769b0dd",
       "name": "Existing Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -230,7 +230,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'supplier_status', operator: 'HAS_PROPERTY' }] }], properties: ['name','supplier_status','supplier_vat_id','supplier_iban','previous_iban','iban_changed_on','tax_certificate_valid_until','domain'], limit: 100 }) }}"
       },
-      "id": "99074c67-20e1-4f7c-af82-c09916dc6971",
+      "id": "fdd2e93a-075e-4089-9082-22498cd5f22b",
       "name": "Fetch Suppliers",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -253,7 +253,7 @@
           "systemPromptTemplate": "You are the accounts-payable desk of a bank. First classify document_type as one of: invoice, credit_note, reminder, question, other. For invoices and credit notes extract: supplier_name, vat_id, iban, invoice_number, invoice_date and due_date (YYYY-MM-DD), po_number, currency, net_amount, vat_amount, total_amount, and every line (item_code as written, description, quantity, unit_price, line_total), each line with a confidence between 0 and 1. Also give a confidence between 0 and 1 for supplier_name, vat_id, iban, invoice_number, invoice_date, po_number and total_amount. For a question or reminder write a two-sentence summary in the summary field. Never invent values: leave a text field as an empty string and a number as 0 when it is not on the document."
         }
       },
-      "id": "df73a542-5da8-4a23-b502-144fb952ad13",
+      "id": "66a9503e-6276-4a01-b23a-89f0fed2ddbd",
       "name": "Read Document",
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
       "typeVersion": 1.2,
@@ -271,7 +271,7 @@
         },
         "options": {}
       },
-      "id": "5c9cc83d-7a49-4252-8ff5-5350783cc084",
+      "id": "c9f0fbf0-45fb-4248-bb92-b3a76c05dcd5",
       "name": "Anthropic Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
@@ -290,7 +290,7 @@
         "mode": "runOnceForAllItems",
         "jsCode": "const ex = $('Read Document').item.json.output || {};\nconst list = (($('Fetch Suppliers').item.json.results) || []).map((r) => Object.assign({ id: r.id }, r.properties));\nconst norm = (s) => String(s || '').toLowerCase().replace(/\\(demo\\)/g, '').replace(/[^a-z0-9]/g, '');\nconst vat = norm(ex.vat_id);\nlet supplier = vat ? (list.find((c) => norm(c.supplier_vat_id) === vat) || null) : null;\nif (!supplier && ex.supplier_name) {\n  const n = norm(ex.supplier_name);\n  if (n.length >= 4) {\n    supplier = list.find((c) => { const m = norm(c.name); return m.length >= 4 && (m === n || m.includes(n) || n.includes(m)); }) || null;\n  }\n}\nreturn [{ json: { supplier } }];"
       },
-      "id": "96041dbd-562c-471a-beb5-ef406b14a216",
+      "id": "05e39a17-0d0b-4af0-beb0-47cbd83ef7ff",
       "name": "Match Supplier",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -310,7 +310,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'po_number', operator: 'EQ', value: ($('Read Document').item.json.output.po_number || 'NONE') }, { propertyName: 'document_type', operator: 'EQ', value: 'purchase_order' }] }], properties: ['dealname','po_number','budget_code','po_requester','dealstage'], limit: 5 }) }}"
       },
-      "id": "b9d7d164-1d8a-41f9-9329-d7ff0864c4a4",
+      "id": "98ddd0b0-5edc-4dba-8a5c-221768c53b69",
       "name": "Look Up PO",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -335,7 +335,7 @@
           },
           "conditions": [
             {
-              "id": "3213695a-3c8d-4024-b3ea-53cdd6b3ea5c",
+              "id": "061d33d6-b9c2-4a7c-8110-720db616b2a6",
               "leftValue": "={{ !!($json.results && $json.results.length > 0) }}",
               "rightValue": "",
               "operator": {
@@ -349,7 +349,7 @@
         },
         "options": {}
       },
-      "id": "92ea6626-f1b5-4997-81df-e7b5875aaa8e",
+      "id": "fe40e965-4cbb-43b9-a766-3cb8010d5b57",
       "name": "PO found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -369,7 +369,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'associations.deal', operator: 'EQ', value: $json.results[0].id }] }], properties: ['hs_sku','name','quantity','price','received_quantity','delivery_note_ref'], limit: 100 }) }}"
       },
-      "id": "65d9dd68-b80f-42df-b94a-c5b1f0845f1b",
+      "id": "3cb30ce1-b5de-4fcd-ae46-f64d481fa1a6",
       "name": "Get PO Lines",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -388,7 +388,7 @@
         "mode": "runOnceForAllItems",
         "jsCode": "let po = null;\nlet lines = [];\ntry { const r = $('Look Up PO').item.json.results || []; po = r[0] ? Object.assign({ id: r[0].id }, r[0].properties) : null; } catch (e) { po = null; }\ntry { lines = ($('Get PO Lines').item.json.results || []).map((l) => Object.assign({ id: l.id }, l.properties)); } catch (e) { lines = []; }\nreturn [{ json: { po, po_lines: lines } }];"
       },
-      "id": "475c6da8-00ce-4059-a04c-b5bfc16827d2",
+      "id": "a2ccedda-26b2-4cc7-891c-94b20ec9818b",
       "name": "Collect PO",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -408,7 +408,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'document_type', operator: 'EQ', value: 'invoice' }, { propertyName: 'associations.company', operator: 'EQ', value: ($('Match Supplier').item.json.supplier ? $('Match Supplier').item.json.supplier.id : '0') }] }], properties: ['invoice_number','amount','invoice_date','dealstage'], limit: 100 }) }}"
       },
-      "id": "4f7701d2-d018-4c52-93c9-590c8b3ca443",
+      "id": "7ee525c2-1676-4458-8a14-09af50b43836",
       "name": "Look Up History",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -425,9 +425,9 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const S = {\"received\":\"6318170298\",\"waiting_on_supplier\":\"6318170299\",\"needs_review\":\"6318170300\",\"ready_to_approve\":\"6318170301\",\"approved\":\"6318170302\",\"duplicate\":\"6318170303\",\"rejected\":\"6318170304\"};\nconst LABEL = { waiting_on_supplier: 'Waiting on supplier', needs_review: 'Needs review', ready_to_approve: 'Ready to approve', duplicate: 'Duplicate' };\nconst ex = $('Read Document').item.json.output || {};\nconst meta = $('Build Document Text').item.json;\nconst supplier = $('Match Supplier').item.json.supplier;\nconst poData = $('Collect PO').item.json;\nconst po = poData.po;\nconst poLines = poData.po_lines || [];\nconst history = (($('Look Up History').item.json.results) || []).map((r) => Object.assign({ id: r.id }, r.properties));\nconst LIMIT = 5000;\nconst DAY = 86400000;\nconst today = new Date();\ntoday.setHours(0, 0, 0, 0);\nconst toDate = (s) => { if (s === undefined || s === null || s === '') return null; const d = /^\\d{10,}$/.test(String(s)) ? new Date(Number(s)) : new Date(s); return isNaN(d) ? null : d; };\nconst normIban = (s) => String(s || '').toUpperCase().replace(/\\s+/g, '');\nconst normText = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst docType = ['invoice', 'credit_note', 'reminder', 'question', 'other'].indexOf(ex.document_type) >= 0 ? ex.document_type : 'other';\nconst invDateObj = toDate(ex.invoice_date) || today;\nconst invDate = toDate(ex.invoice_date) ? String(ex.invoice_date).slice(0, 10) : '';\nconst total = Number(ex.total_amount) || 0;\n\nconst order = { ready_to_approve: 1, waiting_on_supplier: 2, needs_review: 3, duplicate: 4 };\nlet stage = 'ready_to_approve';\nconst raise = (s) => { if (order[s] > order[stage]) stage = s; };\nconst flags = [];\nconst reasons = [];\nconst checks = [];\nconst missing = [];\nconst fail = (flag, stg, reason, name) => { if (flag) flags.push(flag); reasons.push(reason); raise(stg); checks.push({ ok: false, name: name || flag, detail: reason }); };\nconst pass = (name, detail) => checks.push({ ok: true, name, detail });\n\nconst target = history.find((h) => normText(h.invoice_number) === normText(ex.invoice_number) && normText(ex.invoice_number));\nconst routeReminder = docType === 'reminder' && !!target;\n\nlet matchResult = '';\nlet lines = [];\n\nif (docType === 'question') {\n  fail(null, 'needs_review', ex.summary || 'Supplier question needs a person.', 'Supplier question');\n} else if (docType === 'other') {\n  fail(null, 'needs_review', 'Document is not an invoice, credit note, reminder or question.', 'Document type');\n} else if (docType === 'reminder') {\n  if (target) { pass('Payment reminder', 'Matched to invoice ' + ex.invoice_number + '.'); }\n  else { fail(null, 'needs_review', 'Payment reminder for invoice ' + (ex.invoice_number || '(no number)') + ', which is not in the system.', 'Payment reminder'); }\n} else {\n  // duplicate\n  const dup = history.find((h) => normText(h.invoice_number) === normText(ex.invoice_number) && normText(ex.invoice_number) && h.dealstage !== S.rejected);\n  if (dup) fail('duplicate', 'duplicate', 'Invoice ' + ex.invoice_number + ' from this supplier was already received.', 'Duplicate check');\n  else pass('Duplicate check', 'No earlier invoice with this number.');\n\n  // supplier\n  if (!supplier) fail('unknown_supplier', 'needs_review', 'The sender could not be matched to a known supplier.', 'Supplier');\n  else if (supplier.supplier_status !== 'approved') fail('supplier_blocked', 'needs_review', 'Supplier ' + supplier.name + ' has status ' + supplier.supplier_status + ', not approved.', 'Supplier status');\n  else pass('Supplier', supplier.name + ' is approved.');\n\n  if (supplier) {\n    // IBAN\n    if (ex.iban && supplier.supplier_iban && normIban(ex.iban) !== normIban(supplier.supplier_iban)) {\n      fail('iban_mismatch', 'needs_review', 'IBAN on the invoice differs from the one on file. Verify by phone before paying.', 'IBAN');\n    } else pass('IBAN', 'Matches the IBAN on file.');\n    const changed = toDate(supplier.iban_changed_on);\n    if (changed) {\n      const diff = (invDateObj - changed) / DAY;\n      if (diff >= 0 && diff <= 30) fail('iban_recently_changed', 'needs_review', 'Supplier IBAN was changed ' + Math.round(diff) + ' days before this invoice. Confirm the change by phone.', 'IBAN change');\n      else pass('IBAN change', 'No recent change.');\n    }\n    // certificate\n    const cert = toDate(supplier.tax_certificate_valid_until);\n    if (!cert || cert < today) {\n      fail('certificate_expired', 'waiting_on_supplier', 'Tax-compliance certificate is ' + (cert ? 'expired' : 'missing') + '.', 'Tax certificate');\n      missing.push('a current tax-compliance certificate');\n    } else pass('Tax certificate', 'Valid until ' + String(supplier.tax_certificate_valid_until).slice(0, 10) + '.');\n  }\n\n  // split purchase\n  const win = history.filter((h) => toDate(h.invoice_date) && Math.abs((toDate(h.invoice_date) - invDateObj) / DAY) <= 14 && h.dealstage !== S.rejected && normText(h.invoice_number) !== normText(ex.invoice_number));\n  const amounts = win.map((h) => Number(h.amount) || 0).concat([total]);\n  const sum = amounts.reduce((a, b) => a + b, 0);\n  if (win.length >= 1 && amounts.every((a) => a <= LIMIT) && sum > LIMIT) {\n    fail('split_purchase', 'needs_review', amounts.length + ' invoices from this supplier within 14 days each under EUR ' + LIMIT + ' but EUR ' + sum.toFixed(2) + ' together.', 'Split purchase');\n  } else pass('Split purchase', 'No pattern of invoices just under the approval limit.');\n\n  // confidence\n  const conf = [];\n  const c = ex.confidence || {};\n  const fieldMap = { supplier_name: ex.supplier_name, vat_id: ex.vat_id, iban: ex.iban, invoice_number: ex.invoice_number, invoice_date: ex.invoice_date, po_number: ex.po_number, total_amount: ex.total_amount };\n  Object.keys(fieldMap).forEach((k) => { if (fieldMap[k] && typeof c[k] === 'number') conf.push(c[k]); });\n  (ex.lines || []).forEach((l) => { if (typeof l.confidence === 'number') conf.push(l.confidence); });\n  var minConf = conf.length ? Math.min.apply(null, conf) : null;\n  if (minConf !== null && minConf < 0.8) fail('low_confidence', 'needs_review', 'Lowest field confidence is ' + minConf.toFixed(2) + ', below 0.80.', 'Extraction confidence');\n  else pass('Extraction confidence', minConf === null ? 'No confidence data.' : 'Lowest field confidence ' + minConf.toFixed(2) + '.');\n\n  // PO and lines\n  const findPoLine = (l) => {\n    const code = normText(l.item_code);\n    let m = code ? (poLines.find((p) => normText(p.hs_sku) === code) || null) : null;\n    if (!m) { const d = normText(l.description); if (d.length >= 4) m = poLines.find((p) => { const n = normText(p.name); return n && (n === d || n.indexOf(d) >= 0 || d.indexOf(n) >= 0); }) || null; }\n    return m;\n  };\n  let anyOff = false;\n  let anyPct = false;\n  lines = (ex.lines || []).map((l) => {\n    const qty = Number(l.quantity) || 0;\n    const price = Number(l.unit_price) || 0;\n    let check = 'matched';\n    let note = '';\n    let pct = 0;\n    let pl = null;\n    if (!po) { check = 'not_on_po'; note = 'No purchase order to match against.'; }\n    else {\n      pl = findPoLine(l);\n      if (!pl) { check = 'not_on_po'; note = 'Item ' + (l.item_code || l.description) + ' is not on PO ' + po.po_number + '.'; }\n      else {\n        const poPrice = Number(pl.price) || 0;\n        const received = Number(pl.received_quantity) || 0;\n        pct = poPrice ? (price - poPrice) / poPrice : 0;\n        const pctText = (pct > 0 ? '+' : '') + (pct * 100).toFixed(1) + '%';\n        if (Math.abs(pct) > 0.02) { check = 'price_off'; note = 'Invoiced ' + qty + ' at EUR ' + price.toFixed(2) + '; PO price EUR ' + poPrice.toFixed(2) + ' (' + pctText + ').'; }\n        else if (qty > received) { check = 'qty_off'; note = 'Invoiced ' + qty + '; only ' + received + ' received per delivery notes (ordered ' + pl.quantity + ').'; }\n        else note = pct !== 0 ? 'Price within 2% of the PO (' + pctText + ').' : 'Matches the PO line and the delivery.';\n      }\n    }\n    if (check !== 'matched') anyOff = true;\n    if (pct !== 0) anyPct = true;\n    return { name: l.description || l.item_code || 'Line', hs_sku: l.item_code || '', quantity: qty, price: price, po_line_ref: pl ? String(pl.id) : '', line_check: check, line_check_note: note, field_confidence: Number(l.confidence) || 0 };\n  });\n\n  if (!ex.po_number || !po) {\n    matchResult = 'no_po';\n    fail(null, 'waiting_on_supplier', ex.po_number ? 'Purchase order ' + ex.po_number + ' was not found.' : 'The invoice has no purchase order number.', 'Purchase order');\n    missing.push('the purchase order number this invoice relates to');\n  } else {\n    pass('Purchase order', 'Found ' + po.po_number + ' (budget ' + (po.budget_code || 'n/a') + ').');\n    lines.forEach((l) => {\n      if (l.line_check === 'not_on_po' || l.line_check === 'price_off') fail(null, 'needs_review', l.name + ': ' + l.line_check_note, 'Line check');\n      else if (l.line_check === 'qty_off') { fail(null, 'waiting_on_supplier', l.name + ': ' + l.line_check_note, 'Line check'); missing.push('a corrected quantity or delivery note for ' + l.name); }\n      else pass('Line check', l.name + ': ' + l.line_check_note);\n    });\n    matchResult = anyOff ? 'mismatch' : (anyPct ? 'within_tolerance' : 'full_match');\n  }\n}\n\nconst approvalLevel = total <= LIMIT ? 'team_lead' : (total <= 25000 ? 'head_of_department' : 'cfo');\nconst stageKey = stage;\nlet draft = '';\nif (stage === 'waiting_on_supplier' && missing.length) {\n  draft = 'Dear ' + (supplier ? supplier.name : 'supplier') + ',\\n\\nThank you for invoice ' + (ex.invoice_number || '') + '. Before we can process it we still need:\\n- ' + missing.join('\\n- ') + '\\n\\nPlease reply to this email with the details.\\n\\nKind regards,\\nAccounts Payable (demo)';\n}\nconst esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst audit = '<p><b>Invoice worker audit</b> - result: ' + LABEL[stageKey] + '</p><ul>' + checks.map((k) => '<li>' + (k.ok ? '&#10003;' : '&#10007;') + ' ' + esc(k.name) + ': ' + esc(k.detail) + '</li>').join('') + '</ul>';\n\nconst props = {\n  dealname: (ex.invoice_number || docType) + ' · ' + (supplier ? supplier.name : (ex.supplier_name || 'Unknown supplier')),\n  pipeline: 'default',\n  dealstage: S[stageKey === 'ready_to_approve' ? 'ready_to_approve' : stageKey],\n  amount: total || '',\n  document_type: docType,\n  invoice_number: ex.invoice_number || '',\n  invoice_date: invDate,\n  due_date: toDate(ex.due_date) ? String(ex.due_date).slice(0, 10) : '',\n  po_number: ex.po_number || '',\n  iban_on_invoice: ex.iban || '',\n  vat_amount: Number(ex.vat_amount) || '',\n  match_result: matchResult,\n  approval_level: (docType === 'invoice' || docType === 'credit_note') ? approvalLevel : '',\n  anomaly_flags: flags.join(';'),\n  exception_reason: reasons.join(' '),\n  source_message_id: meta.source_message_id,\n  raw_order_text: String(meta.document_text || '').slice(0, 5000),\n  order_channel: meta.channel,\n  min_field_confidence: typeof minConf === 'number' ? minConf : ''\n};\nObject.keys(props).forEach((k) => { if (props[k] === '' || props[k] === null || props[k] === undefined) delete props[k]; });\n\nreturn [{ json: {\n  stage: stageKey,\n  stage_label: LABEL[stageKey],\n  channel: meta.channel,\n  source_id: meta.gmail_id,\n  reply_to: meta.submitted_by,\n  subject: meta.subject,\n  route_reminder: routeReminder,\n  reminder_target_deal_id: target ? target.id : null,\n  supplier_id: supplier ? supplier.id : null,\n  supplier_name: supplier ? supplier.name : (ex.supplier_name || ''),\n  document_type: docType,\n  invoice_number: ex.invoice_number || '',\n  amount: total,\n  match_result: matchResult,\n  approval_level: props.approval_level || '',\n  anomaly_flags: flags,\n  exception_reason: reasons.join(' '),\n  deal_properties: props,\n  line_items: lines,\n  audit_html: audit,\n  supplier_email_draft: draft\n} }];"
+        "jsCode": "const S = {\"received\":\"6318170298\",\"waiting_on_supplier\":\"6318170299\",\"needs_review\":\"6318170300\",\"ready_to_approve\":\"6318170301\",\"approved\":\"6318170302\",\"duplicate\":\"6318170303\",\"rejected\":\"6318170304\"};\nconst LABEL = { waiting_on_supplier: 'Waiting on supplier', needs_review: 'Needs review', ready_to_approve: 'Ready to approve', duplicate: 'Duplicate' };\nconst ex = $('Read Document').item.json.output || {};\nconst meta = $('Build Document Text').item.json;\nconst supplier = $('Match Supplier').item.json.supplier;\nconst poData = $('Collect PO').item.json;\nconst po = poData.po;\nconst poLines = poData.po_lines || [];\nconst history = (($('Look Up History').item.json.results) || []).map((r) => Object.assign({ id: r.id }, r.properties));\nconst LIMIT = 5000;\nconst DAY = 86400000;\nconst today = new Date();\ntoday.setHours(0, 0, 0, 0);\nconst toDate = (s) => { if (s === undefined || s === null || s === '') return null; const d = /^\\d{10,}$/.test(String(s)) ? new Date(Number(s)) : new Date(s); return isNaN(d) ? null : d; };\nconst normIban = (s) => String(s || '').toUpperCase().replace(/\\s+/g, '');\nconst normText = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst docType = ['invoice', 'credit_note', 'reminder', 'question', 'other'].indexOf(ex.document_type) >= 0 ? ex.document_type : 'other';\nconst invDateObj = toDate(ex.invoice_date) || today;\nconst invDate = toDate(ex.invoice_date) ? String(ex.invoice_date).slice(0, 10) : '';\nconst total = Number(ex.total_amount) || 0;\n\nconst order = { ready_to_approve: 1, waiting_on_supplier: 2, needs_review: 3, duplicate: 4 };\nlet stage = 'ready_to_approve';\nconst raise = (s) => { if (order[s] > order[stage]) stage = s; };\nconst flags = [];\nconst reasons = [];\nconst checks = [];\nconst missing = [];\nconst fail = (flag, stg, reason, name) => { if (flag) flags.push(flag); reasons.push(reason); raise(stg); checks.push({ ok: false, name: name || flag, detail: reason }); };\nconst pass = (name, detail) => checks.push({ ok: true, name, detail });\n\nconst target = history.find((h) => normText(h.invoice_number) === normText(ex.invoice_number) && normText(ex.invoice_number));\nconst routeReminder = docType === 'reminder' && !!target;\n\nlet matchResult = '';\nlet lines = [];\n\nif (docType === 'question') {\n  fail(null, 'needs_review', ex.summary || 'Supplier question needs a person.', 'Supplier question');\n} else if (docType === 'other') {\n  fail(null, 'needs_review', 'Document is not an invoice, credit note, reminder or question.', 'Document type');\n} else if (docType === 'reminder') {\n  if (target) { pass('Payment reminder', 'Matched to invoice ' + ex.invoice_number + '.'); }\n  else { fail(null, 'needs_review', 'Payment reminder for invoice ' + (ex.invoice_number || '(no number)') + ', which is not in the system.', 'Payment reminder'); }\n} else {\n  // duplicate\n  const dup = history.find((h) => normText(h.invoice_number) === normText(ex.invoice_number) && normText(ex.invoice_number) && h.dealstage !== S.rejected);\n  if (dup) fail('duplicate', 'duplicate', 'Invoice ' + ex.invoice_number + ' from this supplier was already received.', 'Duplicate check');\n  else pass('Duplicate check', 'No earlier invoice with this number.');\n\n  // supplier\n  if (!supplier) fail('unknown_supplier', 'needs_review', 'The sender could not be matched to a known supplier.', 'Supplier');\n  else if (supplier.supplier_status !== 'approved') fail('supplier_blocked', 'needs_review', 'Supplier ' + supplier.name + ' has status ' + supplier.supplier_status + ', not approved.', 'Supplier status');\n  else pass('Supplier', supplier.name + ' is approved.');\n\n  if (supplier) {\n    // IBAN\n    if (ex.iban && supplier.supplier_iban && normIban(ex.iban) !== normIban(supplier.supplier_iban)) {\n      fail('iban_mismatch', 'needs_review', 'IBAN on the invoice differs from the one on file. Verify by phone before paying.', 'IBAN');\n    } else pass('IBAN', 'Matches the IBAN on file.');\n    const changed = toDate(supplier.iban_changed_on);\n    if (changed) {\n      const diff = (invDateObj - changed) / DAY;\n      if (diff >= 0 && diff <= 30) fail('iban_recently_changed', 'needs_review', 'Supplier IBAN was changed ' + Math.round(diff) + ' days before this invoice. Confirm the change by phone.', 'IBAN change');\n      else pass('IBAN change', 'No recent change.');\n    }\n    // certificate\n    const cert = toDate(supplier.tax_certificate_valid_until);\n    if (!cert || cert < today) {\n      fail('certificate_expired', 'waiting_on_supplier', 'Tax-compliance certificate is ' + (cert ? 'expired' : 'missing') + '.', 'Tax certificate');\n      missing.push('a current tax-compliance certificate');\n    } else pass('Tax certificate', 'Valid until ' + String(supplier.tax_certificate_valid_until).slice(0, 10) + '.');\n  }\n\n  // split purchase\n  const win = history.filter((h) => toDate(h.invoice_date) && Math.abs((toDate(h.invoice_date) - invDateObj) / DAY) <= 14 && h.dealstage !== S.rejected && normText(h.invoice_number) !== normText(ex.invoice_number));\n  const amounts = win.map((h) => Number(h.amount) || 0).concat([total]);\n  const sum = amounts.reduce((a, b) => a + b, 0);\n  if (win.length >= 1 && amounts.every((a) => a <= LIMIT) && sum > LIMIT) {\n    fail('split_purchase', 'needs_review', amounts.length + ' invoices from this supplier within 14 days each under EUR ' + LIMIT + ' but EUR ' + sum.toFixed(2) + ' together.', 'Split purchase');\n  } else pass('Split purchase', 'No pattern of invoices just under the approval limit.');\n\n  // confidence\n  const conf = [];\n  const c = ex.confidence || {};\n  const fieldMap = { supplier_name: ex.supplier_name, vat_id: ex.vat_id, iban: ex.iban, invoice_number: ex.invoice_number, invoice_date: ex.invoice_date, po_number: ex.po_number, total_amount: ex.total_amount };\n  Object.keys(fieldMap).forEach((k) => { if (fieldMap[k] && typeof c[k] === 'number') conf.push(c[k]); });\n  (ex.lines || []).forEach((l) => { if (typeof l.confidence === 'number') conf.push(l.confidence); });\n  var minConf = conf.length ? Math.min.apply(null, conf) : null;\n  if (minConf !== null && minConf < 0.8) fail('low_confidence', 'needs_review', 'Lowest field confidence is ' + minConf.toFixed(2) + ', below 0.80.', 'Extraction confidence');\n  else pass('Extraction confidence', minConf === null ? 'No confidence data.' : 'Lowest field confidence ' + minConf.toFixed(2) + '.');\n\n  // PO and lines\n  const findPoLine = (l) => {\n    const code = normText(l.item_code);\n    let m = code ? (poLines.find((p) => normText(p.hs_sku) === code) || null) : null;\n    if (!m) { const d = normText(l.description); if (d.length >= 4) m = poLines.find((p) => { const n = normText(p.name); return n && (n === d || n.indexOf(d) >= 0 || d.indexOf(n) >= 0); }) || null; }\n    return m;\n  };\n  let anyOff = false;\n  let anyPct = false;\n  lines = (ex.lines || []).map((l) => {\n    const qty = Number(l.quantity) || 0;\n    const price = Number(l.unit_price) || 0;\n    let check = 'matched';\n    let note = '';\n    let pct = 0;\n    let pl = null;\n    if (!po) { check = 'not_on_po'; note = 'No purchase order to match against.'; }\n    else {\n      pl = findPoLine(l);\n      if (!pl) { check = 'not_on_po'; note = 'Item ' + (l.item_code || l.description) + ' is not on PO ' + po.po_number + '.'; }\n      else {\n        const poPrice = Number(pl.price) || 0;\n        const received = Number(pl.received_quantity) || 0;\n        pct = poPrice ? (price - poPrice) / poPrice : 0;\n        const pctText = (pct > 0 ? '+' : '') + (pct * 100).toFixed(1) + '%';\n        const qtyNote = qty > received ? qty + ' invoiced but only ' + received + ' received per delivery notes' + (pl.delivery_note_ref ? ' (' + pl.delivery_note_ref + ')' : '') + ' (ordered ' + pl.quantity + ').' : '';\n        if (Math.abs(pct) > 0.02) { check = 'price_off'; note = 'Invoiced at EUR ' + price.toFixed(2) + '; PO price EUR ' + poPrice.toFixed(2) + ' (' + pctText + ', over the 2% tolerance).' + (qtyNote ? ' ' + qtyNote : ''); }\n        else if (qtyNote) { check = 'qty_off'; note = qtyNote; }\n        else note = pct !== 0 ? 'Price within 2% of the PO (' + pctText + ').' : 'Matches the PO line and the delivery.';\n      }\n    }\n    if (check !== 'matched') anyOff = true;\n    if (pct !== 0) anyPct = true;\n    return { name: l.description || l.item_code || 'Line', hs_sku: l.item_code || '', quantity: qty, price: price, po_line_ref: pl ? String(pl.id) : '', line_check: check, line_check_note: note, field_confidence: Number(l.confidence) || 0 };\n  });\n\n  if (!ex.po_number || !po) {\n    matchResult = 'no_po';\n    fail(null, 'waiting_on_supplier', ex.po_number ? 'Purchase order ' + ex.po_number + ' was not found.' : 'The invoice has no purchase order number.', 'Purchase order');\n    missing.push('the purchase order number this invoice relates to');\n  } else {\n    pass('Purchase order', 'Found ' + po.po_number + ' (budget ' + (po.budget_code || 'n/a') + ').');\n    lines.forEach((l) => {\n      if (l.line_check === 'not_on_po' || l.line_check === 'price_off') fail(null, 'needs_review', l.name + ': ' + l.line_check_note, 'Line check');\n      else if (l.line_check === 'qty_off') { fail(null, 'waiting_on_supplier', l.name + ': ' + l.line_check_note, 'Line check'); missing.push('a corrected quantity or delivery note for ' + l.name); }\n      else pass('Line check', l.name + ': ' + l.line_check_note);\n    });\n    matchResult = anyOff ? 'mismatch' : (anyPct ? 'within_tolerance' : 'full_match');\n  }\n}\n\nconst approvalLevel = total <= LIMIT ? 'team_lead' : (total <= 25000 ? 'head_of_department' : 'cfo');\nconst stageKey = stage;\nlet draft = '';\nif (stage === 'waiting_on_supplier' && missing.length) {\n  draft = 'Dear ' + (supplier ? supplier.name : 'supplier') + ',\\n\\nThank you for invoice ' + (ex.invoice_number || '') + '. Before we can process it we still need:\\n- ' + missing.join('\\n- ') + '\\n\\nPlease reply to this email with the details.\\n\\nKind regards,\\nAccounts Payable (demo)';\n}\nconst esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst audit = '<p><b>Invoice worker audit</b> - result: ' + LABEL[stageKey] + '</p><ul>' + checks.map((k) => '<li>' + (k.ok ? '&#10003;' : '&#10007;') + ' ' + esc(k.name) + ': ' + esc(k.detail) + '</li>').join('') + '</ul>';\n\nconst props = {\n  dealname: (ex.invoice_number || docType) + ' · ' + (supplier ? supplier.name : (ex.supplier_name || 'Unknown supplier')),\n  pipeline: 'default',\n  dealstage: S[stageKey === 'ready_to_approve' ? 'ready_to_approve' : stageKey],\n  amount: total || '',\n  document_type: docType,\n  invoice_number: ex.invoice_number || '',\n  invoice_date: invDate,\n  due_date: toDate(ex.due_date) ? String(ex.due_date).slice(0, 10) : '',\n  po_number: ex.po_number || '',\n  iban_on_invoice: ex.iban || '',\n  vat_amount: Number(ex.vat_amount) || '',\n  match_result: matchResult,\n  approval_level: (docType === 'invoice' || docType === 'credit_note') ? approvalLevel : '',\n  anomaly_flags: flags.join(';'),\n  exception_reason: reasons.join(' '),\n  source_message_id: meta.source_message_id,\n  raw_order_text: String(meta.document_text || '').slice(0, 5000),\n  order_channel: meta.channel,\n  min_field_confidence: typeof minConf === 'number' ? minConf : ''\n};\nObject.keys(props).forEach((k) => { if (props[k] === '' || props[k] === null || props[k] === undefined) delete props[k]; });\n\nreturn [{ json: {\n  stage: stageKey,\n  stage_label: LABEL[stageKey],\n  channel: meta.channel,\n  source_id: meta.gmail_id,\n  reply_to: meta.submitted_by,\n  subject: meta.subject,\n  route_reminder: routeReminder,\n  reminder_target_deal_id: target ? target.id : null,\n  supplier_id: supplier ? supplier.id : null,\n  supplier_name: supplier ? supplier.name : (ex.supplier_name || ''),\n  document_type: docType,\n  invoice_number: ex.invoice_number || '',\n  amount: total,\n  match_result: matchResult,\n  approval_level: props.approval_level || '',\n  anomaly_flags: flags,\n  exception_reason: reasons.join(' '),\n  deal_properties: props,\n  line_items: lines,\n  audit_html: audit,\n  supplier_email_draft: draft\n} }];"
       },
-      "id": "2179254d-2696-482e-a11f-5a989dbbbd6f",
+      "id": "c87fbdc8-3346-4529-8b87-3add67bd23c9",
       "name": "Apply Rules",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -447,7 +447,7 @@
           },
           "conditions": [
             {
-              "id": "4f1246d7-b315-4cd4-85cb-6b848f5d84a5",
+              "id": "177e530b-b813-49d6-b017-832b7d8eb8fc",
               "leftValue": "={{ $json.route_reminder }}",
               "rightValue": "",
               "operator": {
@@ -461,7 +461,7 @@
         },
         "options": {}
       },
-      "id": "92a736ab-6ae0-461d-8797-61fb2e28ed4b",
+      "id": "4537fbec-48bb-4d53-9539-483d89e77d81",
       "name": "Reminder for known invoice?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -481,7 +481,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ properties: { hs_note_body: 'Payment reminder received ' + new Date().toISOString().slice(0, 10), hs_timestamp: new Date().toISOString() }, associations: [{ to: { id: $json.reminder_target_deal_id }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 214 }] }] }) }}"
       },
-      "id": "b1f413f9-5fc3-4c96-9f3c-447fb573ba08",
+      "id": "8d049736-2e43-4bed-a658-184cae29ee3b",
       "name": "Add Reminder Note",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -506,7 +506,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ properties: $json.deal_properties, associations: $json.supplier_id ? [{ to: { id: $json.supplier_id }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 5 }] }] : [] }) }}"
       },
-      "id": "5674b10f-a4c4-4c88-9b6b-d546fb64443d",
+      "id": "2c38f797-d2c7-4b51-a013-995ffd4d9b6f",
       "name": "Create Invoice Deal",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -531,7 +531,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ inputs: $('Apply Rules').item.json.line_items.map((l) => ({ properties: l, associations: [{ to: { id: $json.id }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 20 }] }] })) }) }}"
       },
-      "id": "9ec86f5a-f728-480b-a536-b54fe4a4fdc6",
+      "id": "d8e7416a-2a01-43c5-9bec-b2e067a34b98",
       "name": "Create Line Items",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -557,7 +557,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ properties: { hs_note_body: $('Apply Rules').item.json.audit_html, hs_timestamp: new Date().toISOString() }, associations: [{ to: { id: $('Create Invoice Deal').item.json.id }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 214 }] }] }) }}"
       },
-      "id": "45e77b96-bde4-4d8c-ada0-7f464e37997a",
+      "id": "7068c708-cfdd-4e1c-afda-a27719f31bc7",
       "name": "Create Audit Note",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -582,7 +582,7 @@
           },
           "conditions": [
             {
-              "id": "10ef201b-f2ee-4ad7-bb72-dfc410040ba6",
+              "id": "f6a7e271-61ba-4aa3-8c20-1a3ee3a0b22c",
               "leftValue": "={{ $('Apply Rules').item.json.stage === 'waiting_on_supplier' && $('Apply Rules').item.json.channel === 'email' && !!$('Apply Rules').item.json.reply_to && !!$('Apply Rules').item.json.supplier_email_draft }}",
               "rightValue": "",
               "operator": {
@@ -596,7 +596,7 @@
         },
         "options": {}
       },
-      "id": "7b1f5843-d38e-4c4b-9c46-3f5041019703",
+      "id": "1b270fe8-de43-4eff-a1f9-5c7da5a79ef5",
       "name": "Send supplier email?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -618,7 +618,7 @@
           "appendAttribution": false
         }
       },
-      "id": "f878470b-dd11-40d3-a85a-c4502b180983",
+      "id": "f4d96ab5-e035-4601-8f26-e134f6806751",
       "name": "Send Supplier Email",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
@@ -643,7 +643,7 @@
           },
           "conditions": [
             {
-              "id": "0f64fb84-2432-4a9f-96e1-91abf31257fb",
+              "id": "c54e0da5-ed54-4cd4-ac91-5419b276f301",
               "leftValue": "={{ $('Apply Rules').item.json.channel === 'email' && !!$('Apply Rules').item.json.source_id }}",
               "rightValue": "",
               "operator": {
@@ -657,7 +657,7 @@
         },
         "options": {}
       },
-      "id": "9273a161-1f78-4fe6-92d3-3c868505a685",
+      "id": "9ece98f6-739d-4ac2-90b1-7b92cc6697fa",
       "name": "Email channel?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -672,7 +672,7 @@
         "operation": "markAsRead",
         "messageId": "={{ $('Apply Rules').item.json.source_id }}"
       },
-      "id": "2b4c45eb-323d-4c70-9736-8a22bb20a94f",
+      "id": "f98d72cf-7e5a-4934-b1c6-80187bdaefe2",
       "name": "Mark As Read",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
@@ -691,7 +691,7 @@
         "mode": "runOnceForAllItems",
         "jsCode": "const r = $('Apply Rules').item.json;\nlet dealId = null;\ntry { dealId = $('Create Invoice Deal').item.json.id || null; } catch (e) { dealId = null; }\nif (!dealId) dealId = r.reminder_target_deal_id || null;\nconst out = {\n  deal_id: dealId,\n  stage: r.stage,\n  stage_label: r.stage_label,\n  document_type: r.document_type,\n  supplier_name: r.supplier_name,\n  invoice_number: r.invoice_number,\n  amount: r.amount,\n  match_result: r.match_result,\n  approval_level: r.approval_level,\n  anomaly_flags: r.anomaly_flags,\n  exception_reason: r.exception_reason,\n  lines: (r.line_items || []).map((l) => ({ name: l.name, quantity: l.quantity, price: l.price, line_check: l.line_check, line_check_note: l.line_check_note }))\n};\nif (r.channel === 'app' && r.supplier_email_draft) out.supplier_email_draft = r.supplier_email_draft;\nreturn [{ json: out }];"
       },
-      "id": "176815ae-6178-4ded-a02e-f68c37dac74f",
+      "id": "dd383bac-fabe-48e1-a656-d63dc5e16489",
       "name": "Build Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -706,7 +706,7 @@
         "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "7cc6c1ac-71cb-476d-a917-b377f3ee64b6",
+      "id": "cded50d1-9ace-4127-aa51-873b815795d4",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,

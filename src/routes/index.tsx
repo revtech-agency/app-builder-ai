@@ -2,12 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BadgeCheck,
+  Check,
   ClipboardList,
-  Plug,
   Receipt,
   ShieldCheck,
-  ShoppingCart,
-  Sparkles,
   UserCheck,
 } from "lucide-react";
 
@@ -21,17 +19,20 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AppBuilder.ai — AI workers for SME back-office work" },
+      { title: "AppBuilder.ai — Supplier invoice worker for accounts payable" },
       {
         name: "description",
         content:
-          "AI workers that take SME purchasing and orders off the phone and the inbox, priced per piece of work, with a person approving every sensitive step.",
+          "Supplier invoices checked against the purchase order and delivery note. Clean ones go to one-click approval, risky ones are held with the reason.",
       },
-      { property: "og:title", content: "AppBuilder.ai — AI workers for SME back-office work" },
+      {
+        property: "og:title",
+        content: "AppBuilder.ai — Supplier invoice worker for accounts payable",
+      },
       {
         property: "og:description",
         content:
-          "AI workers that take SME purchasing and orders off the phone and the inbox. Priced per piece of work done.",
+          "Three-way match on every invoice. Clean invoices go to one-click approval, risky ones are held with the reason, and people approve what matters.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -41,68 +42,78 @@ export const Route = createFileRoute("/")({
 });
 
 const STATS = [
-  { value: "5%", text: "of Romanian enterprises use AI (EU: 20%), Eurostat 2025" },
-  { value: "12 min", text: "to retype one order by hand" },
+  { value: "9", text: "rules checked on every supplier invoice" },
+  {
+    value: "6 min",
+    text: "assumed hand-processing time per clean invoice, used for the time-saved figure",
+  },
 ];
 
 const PROBLEMS = [
   {
-    title: "Orders and quotes retyped",
-    text: "Orders arrive by email, WhatsApp, PDF and phone. Someone keys each one into the ERP, prices the quote by hand and confirms it.",
+    title: "Invoices retyped and matched by hand",
+    text: "Invoices arrive by email and PDF. Someone keys each one in and checks it line by line against the purchase order and the delivery note.",
   },
   {
-    title: "Purchasing by phone",
-    text: "Supplier invoices are checked line by line against orders and deliveries, and suppliers are chased one call at a time.",
+    title: "Duplicate and fraud risk",
+    text: "The same invoice paid twice, or a supplier whose bank details quietly changed, are easy to miss in a queue.",
   },
   {
-    title: "No IT, real risk",
-    text: "Nobody inside can set up AI safely, so staff paste client data into personal AI accounts.",
+    title: "Slow approvals",
+    text: "Clean invoices wait in the same queue as risky ones, so approvers cannot see what needs real attention.",
   },
 ];
 
-const WORKERS = [
+const RULES = [
+  "Duplicate invoice",
+  "IBAN differs, or changed in the last 30 days",
+  "Unknown or unapproved supplier",
+  "Split purchases just under an approval limit",
+  "Price more than 2% off the PO",
+  "Quantity above what was delivered",
+  "Missing PO",
+  "Expired tax certificate",
+  "Low extraction confidence",
+];
+
+const OUTCOMES = [
+  { name: "Ready to approve", text: "Every check passed. One click from the right approver." },
   {
-    icon: ClipboardList,
-    side: "Selling side",
-    name: "Quote & order worker",
-    text: "Customer order by email, live chat or WhatsApp → quote → confirmed order. Maps each client's codes to your items and converts quantities into packs.",
+    name: "Waiting on supplier",
+    text: "Something is missing; the worker drafts the question to the supplier.",
   },
-  {
-    icon: ShoppingCart,
-    side: "Buying side",
-    name: "Purchasing worker",
-    text: "Supplier invoice → matched three ways to the purchase order and the delivery note → approved for payment. Catches changed IBANs, duplicates, split purchases and overbilling.",
-  },
+  { name: "Needs review", text: "A rule fired. Held with the reason and the numbers behind it." },
+  { name: "Duplicate", text: "Already processed. Stopped before it can be paid twice." },
 ];
 
 const STEPS = [
-  { name: "Read", text: "Sorts each email and attachment." },
-  { name: "Extract", text: "Pulls every field, with a confidence score." },
-  { name: "Check", text: "Against POs, catalogue and history." },
-  { name: "Decide", text: "Clear: one click. Fixable: asks a question. Risky: to a person." },
-  { name: "Act", text: "Updates the system, replies and logs every step." },
+  { name: "Read", text: "Takes each invoice from email or upload." },
+  { name: "Extract", text: "Pulls supplier, IBAN, amounts and lines, with a confidence score." },
+  { name: "Check", text: "Against the PO, the delivery note and the supplier record." },
+  { name: "Decide", text: "Clear: one click. Fixable: asks the supplier. Risky: to a person." },
+  { name: "Act", text: "Moves the invoice to its stage and writes an audit note." },
 ];
 
 const PRINCIPLES = [
   {
-    icon: Receipt,
-    title: "Priced on work done",
-    text: "You pay per order or purchasing document handled, not per seat.",
-  },
-  {
     icon: UserCheck,
     title: "People approve what matters",
-    text: "Every sensitive step waits for a person, with the reason shown.",
+    text: "Nothing is approved for payment without a person, with the reason shown.",
   },
   {
     icon: ShieldCheck,
-    title: "Hosted in the EU",
-    text: "Production runs in the EU, with permissions and an audit trail on every action.",
+    title: "Every decision shows its working",
+    text: "Each hold shows the rule and the numbers behind it.",
   },
   {
-    icon: Plug,
-    title: "Works with what you use",
-    text: "Email, WhatsApp, your CRM and ERP. No IT team needed: partners set it up.",
+    icon: Receipt,
+    title: "Approval limits by role",
+    text: "Team lead, head of department or CFO, depending on the amount.",
+  },
+  {
+    icon: ClipboardList,
+    title: "An audit note on every invoice",
+    text: "Each check is recorded as a tick or a cross on the invoice.",
   },
 ];
 
@@ -141,15 +152,14 @@ function Index() {
             <div className="mx-auto w-full max-w-6xl px-4 pt-16 pb-20 md:pt-24">
               <p className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
                 <BadgeCheck className="size-3.5 text-foreground" />
-                AI workers for SME back-office work
+                AI for accounts payable
               </p>
               <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
-                AI workers that take SME purchasing and orders off the phone and the inbox.
+                Supplier invoices checked against the PO and delivery note, automatically.
               </h1>
               <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-                Two workers today: quote &amp; order, and purchasing. Each handles the clean cases
-                on its own and flags only the exceptions, with a person approving every sensitive
-                step.
+                Every invoice gets a three-way match. Clean ones go to one-click approval, risky
+                ones are held with the reason, and people approve what matters.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <OpenAppButton size="lg" />
@@ -165,7 +175,7 @@ function Index() {
         <section className="border-y bg-muted/40">
           <div className="mx-auto w-full max-w-6xl px-4 py-16">
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              SMEs still run purchasing and orders by phone and email
+              Accounts payable still runs on retyping and manual matching
             </h2>
             <dl className="mt-8 grid gap-6 sm:grid-cols-2">
               {STATS.map((s) => (
@@ -187,33 +197,19 @@ function Index() {
         </section>
 
         <section className="mx-auto w-full max-w-6xl px-4 py-16">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            We sell the worker, not the tool
-          </h2>
+          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">What it checks</h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            Start with one flow. Every worker runs on the same modules, so the next one goes live
-            faster.
+            Fixed rules, applied the same way to every invoice. A rule that fires is shown on the
+            invoice with the numbers behind it.
           </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {WORKERS.map((w) => (
-              <div key={w.name} className="flex gap-4 rounded-xl border p-5">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <w.icon className="size-5" />
-                </span>
-                <div>
-                  <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                    {w.side}
-                  </p>
-                  <h3 className="font-semibold">{w.name}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{w.text}</p>
-                </div>
-              </div>
+          <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {RULES.map((r) => (
+              <li key={r} className="flex items-start gap-3 rounded-xl border p-4 text-sm">
+                <Check className="mt-0.5 size-4 shrink-0 text-foreground" />
+                {r}
+              </li>
             ))}
-          </div>
-          <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <Sparkles className="size-4 shrink-0 text-foreground" />
-            Payment reminders, delivery scheduling: the next worker runs on the same modules.
-          </p>
+          </ul>
         </section>
 
         <section className="border-y bg-muted/40">
@@ -232,9 +228,15 @@ function Index() {
                 </li>
               ))}
             </ol>
-            <p className="mt-6 text-muted-foreground">
-              A person fixes a match once, and the worker gets it right the next time.
-            </p>
+            <p className="mt-6 text-muted-foreground">Each invoice ends in one of four outcomes.</p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {OUTCOMES.map((o) => (
+                <div key={o.name} className="rounded-xl border bg-card p-5">
+                  <h3 className="font-semibold">{o.name}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{o.text}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -253,10 +255,11 @@ function Index() {
         <section className="mx-auto w-full max-w-6xl px-4 pb-20">
           <div className="rounded-2xl bg-primary px-6 py-12 text-center text-primary-foreground md:px-12">
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              See a worker handle real orders and invoices
+              See the invoice worker at work
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-primary-foreground/80">
-              Sign in to the app to try it, or tell us which flow eats your team's week.
+              Sign in to the app to try it. The demo uses synthetic data, and a CRM stands in for
+              the bank's ERP.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Button asChild size="lg" variant="secondary">
@@ -277,12 +280,12 @@ function Index() {
           <div>
             <h2 className="text-2xl font-semibold tracking-tight">Contact us</h2>
             <p className="mt-3 max-w-md text-muted-foreground">
-              Tell us who you are and we'll get back to you about running your quote &amp; order or
-              purchasing flow on an AI worker.
+              Tell us who you are and we'll get back to you about running supplier invoices through
+              an AI worker.
             </p>
             <img
               src={aiWorkersImage}
-              alt="AI workers read, understand and act on paper business documents, taking a B2B order from processing to fulfilment without manual work."
+              alt="AI workers read, understand and act on paper business documents without manual work."
               width={900}
               height={900}
               loading="lazy"

@@ -6,7 +6,7 @@
         "inputSource": "jsonExample",
         "jsonExample": "{\n  \"po_number\": \"PO-2026-0433\",\n  \"supplier_id\": \"\"\n}"
       },
-      "id": "67fe3015-fab7-40a1-88f1-f25f479ba753",
+      "id": "fa306cf2-c1fe-43b7-8106-bf74ac86bc54",
       "name": "When called by another workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'document_type', operator: 'EQ', value: 'purchase_order' }].concat($json.po_number ? [{ propertyName: 'po_number', operator: 'EQ', value: $json.po_number }] : []).concat($json.supplier_id ? [{ propertyName: 'associations.company', operator: 'EQ', value: String($json.supplier_id) }] : []) }], properties: ['dealname','po_number','budget_code','po_requester','dealstage'], limit: 10 }) }}"
       },
-      "id": "be4b27d5-43dd-4e7f-adf0-d9b501ba7983",
+      "id": "7d03b900-3676-409a-8232-cdb6475e2057",
       "name": "Search POs",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -51,7 +51,7 @@
           },
           "conditions": [
             {
-              "id": "8a23af79-2b5e-4d88-aa60-64a6d0883304",
+              "id": "514fd473-5d7a-4d1f-a600-9f908b8593bf",
               "leftValue": "={{ !!($json.results && $json.results.length > 0) }}",
               "rightValue": "",
               "operator": {
@@ -65,7 +65,7 @@
         },
         "options": {}
       },
-      "id": "a990519d-30c5-433b-8f51-2c0acbf87671",
+      "id": "002f31af-8354-46c7-b74b-2ba54d030186",
       "name": "POs found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -79,7 +79,7 @@
         "fieldToSplitOut": "results",
         "options": {}
       },
-      "id": "374a0dd7-11fd-4654-bdc9-47a37e95f7d3",
+      "id": "60c7408d-37a4-45c7-a03e-45334e912cae",
       "name": "Split POs",
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
@@ -99,7 +99,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'associations.deal', operator: 'EQ', value: $json.id }] }], properties: ['hs_sku','name','quantity','price','received_quantity','delivery_note_ref'], limit: 100 }) }}"
       },
-      "id": "4995b357-9885-4c37-ae3c-44d2fefb46ea",
+      "id": "9c9ecc18-bc57-40da-82f1-e25c79f51267",
       "name": "Get PO Lines",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -118,7 +118,7 @@
         "mode": "runOnceForAllItems",
         "jsCode": "const pos = $('Split POs').all();\nconst lineResults = $input.all();\nconst out = pos.map((p, i) => {\n  const lines = ((lineResults[i] && lineResults[i].json.results) || []).map((l) => {\n    const ordered = Number(l.properties.quantity) || 0;\n    const received = Number(l.properties.received_quantity) || 0;\n    return { sku: l.properties.hs_sku || '', name: l.properties.name || '', ordered, unit_price: Number(l.properties.price) || 0, received, remaining: Math.max(ordered - received, 0), delivery_note_ref: l.properties.delivery_note_ref || '' };\n  });\n  return { deal_id: p.json.id, po_number: p.json.properties.po_number, budget_code: p.json.properties.budget_code || '', requester: p.json.properties.po_requester || '', stage_id: p.json.properties.dealstage, lines };\n});\nreturn [{ json: { found: true, purchase_orders: out } }];"
       },
-      "id": "1bf28114-4d99-4d80-bdf5-c99247d37aaf",
+      "id": "4b482f8d-b2a9-41ef-a27e-5ab6c59a9f4c",
       "name": "Format POs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -132,7 +132,7 @@
         "mode": "runOnceForAllItems",
         "jsCode": "return [{ json: { found: false, purchase_orders: [] } }];"
       },
-      "id": "dbd5601d-5aa9-4d23-acea-c7fee66a2767",
+      "id": "19d79603-dd48-4f6e-b1c3-cb5250b0acdc",
       "name": "No PO",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,

@@ -1,22 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import {
-  ChartColumn,
-  ChevronsUpDown,
-  LogOut,
-  MessageSquarePlus,
-  Package,
-  ReceiptText,
-  ShieldCheck,
-} from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ChartColumn, FilePlus2, LogOut, ReceiptText, ShieldCheck, Truck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -32,105 +18,70 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth";
-import { useCartCount } from "@/lib/cart";
-import { getMyCompanies } from "@/lib/orders";
+import { listInvoices } from "@/lib/invoices";
 
 // Active nav item: a square 3px gold marker on the left edge (AppBuilder.ai design system).
 const activeMarker =
   "relative data-[active=true]:font-semibold data-[active=true]:before:absolute data-[active=true]:before:inset-y-1.5 data-[active=true]:before:left-0 data-[active=true]:before:w-[3px] data-[active=true]:before:bg-sidebar-primary data-[active=true]:before:content-['']";
 
 export function AppSidebar() {
-  const { companyId } = useParams({ strict: false });
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
   const { setOpenMobile } = useSidebar();
 
-  const companies = useQuery({ queryKey: ["my-companies"], queryFn: () => getMyCompanies() });
-  const cartCount = useCartCount(companyId);
-
-  const company = companies.data?.find((c) => c.id === companyId);
-  const canSwitch = isAdmin && (companies.data?.length ?? 0) > 1;
+  // Shares the cache with the invoices page; only used for the "needs review" badge.
+  const invoices = useQuery({ queryKey: ["invoices"], queryFn: () => listInvoices() });
+  const needsReview = invoices.data?.filter((i) => i.stage === "needs_review").length ?? 0;
 
   const nav = [
-    { to: "/app/$companyId/orders", label: "Orders", icon: ReceiptText, badge: 0 },
-    {
-      to: "/app/$companyId/new-order",
-      label: "New order",
-      icon: MessageSquarePlus,
-      badge: cartCount,
-    },
-    { to: "/app/$companyId/inventory", label: "Inventory", icon: Package, badge: 0 },
+    { to: "/app/overview", label: "Overview", icon: ChartColumn, badge: 0 },
+    { to: "/app/invoices", label: "Invoices", icon: ReceiptText, badge: needsReview },
+    { to: "/app/intake", label: "Intake", icon: FilePlus2, badge: 0 },
+    { to: "/app/suppliers", label: "Suppliers", icon: Truck, badge: 0 },
   ] as const;
-
-  const companyLabel = (
-    <span className="flex min-w-0 items-center gap-2">
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
-        {company?.name.charAt(0) ?? "?"}
-      </span>
-      <span className="truncate text-sm font-semibold">{company?.name ?? "Select company"}</span>
-    </span>
-  );
 
   return (
     <Sidebar>
       <SidebarHeader>
-        {canSwitch ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-auto w-full justify-between border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                {companyLabel}
-                <ChevronsUpDown className="size-4 shrink-0 text-sidebar-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[--radix-dropdown-menu-trigger-width]">
-              {companies.data?.map((c) => (
-                <DropdownMenuItem
-                  key={c.id}
-                  onSelect={() => {
-                    setOpenMobile(false);
-                    navigate({ to: "/app/$companyId/orders", params: { companyId: c.id } });
-                  }}
-                >
-                  {c.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <div className="rounded-md border border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground">
-            {companyLabel}
-          </div>
-        )}
+        <div className="flex items-center gap-2 rounded-md border border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground">
+          <span
+            className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground"
+            aria-hidden
+          >
+            A
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold">AppBuilder.ai</span>
+            <span className="block truncate text-xs text-sidebar-muted-foreground">
+              Accounts payable
+            </span>
+          </span>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {companyId &&
-                nav.map((item) => (
-                  <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild className={activeMarker}>
-                      <Link
-                        to={item.to}
-                        params={{ companyId }}
-                        activeProps={{ "data-active": "true" }}
-                        onClick={() => setOpenMobile(false)}
-                      >
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                    {item.badge > 0 && (
-                      <SidebarMenuBadge className="rounded-sm bg-sidebar-primary font-mono font-bold text-sidebar-primary-foreground">
-                        {item.badge}
-                      </SidebarMenuBadge>
-                    )}
-                  </SidebarMenuItem>
-                ))}
+              {nav.map((item) => (
+                <SidebarMenuItem key={item.to}>
+                  <SidebarMenuButton asChild className={activeMarker}>
+                    <Link
+                      to={item.to}
+                      activeProps={{ "data-active": "true" }}
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  {item.badge > 0 && (
+                    <SidebarMenuBadge className="rounded-sm bg-sidebar-primary font-mono font-bold text-sidebar-primary-foreground">
+                      {item.badge}
+                    </SidebarMenuBadge>
+                  )}
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -139,18 +90,6 @@ export function AppSidebar() {
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild className={activeMarker}>
-                    <Link
-                      to="/app/dashboard"
-                      activeProps={{ "data-active": "true" }}
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <ChartColumn />
-                      <span>Dashboard</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className={activeMarker}>
                     <Link

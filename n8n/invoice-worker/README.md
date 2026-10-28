@@ -62,23 +62,17 @@ or run against HubSpot. Check these first:
 - The `order_channel` options include `email` and `app`.
 - Respond to Webhook behaves quietly when the run started from the Gmail trigger.
 - Node versions match your n8n version (the nodes were written from memory of the current node set).
-- The expected-versus-actual run has not been done yet (see below).
+- The expected-versus-actual run (see Test set) has not been done yet.
 
 ## Test set
 
-`test-cases.json` holds 12 synthetic documents written against the suppliers, POs and invoices that are
-in the HubSpot portal now, each with its expected stage and flags. `run-tests.mjs` posts them to
-`/webhook/invoice-intake` and prints a pass/fail table:
+The 10 live documents in `scripts/hubspot/data/invoices/live-messages.json` (built from the real POs,
+with 21% VAT) are the test set, each with its expected stage, flags and match result. `run-tests.mjs`
+posts them to `/webhook/invoice-intake` and prints a pass/fail table:
 
 ```sh
 INVOICE_APP_KEY=<the AppBuilder app key value> node n8n/invoice-worker/run-tests.mjs
 ```
 
-Add `--test` for n8n's test webhook, `--only 05-duplicate` for one case, or `--suffix -2` to rerun under
-new source IDs (a repeated ID returns the deal that already exists). Each run creates real deals in HubSpot.
-
-Eight cases (duplicate, IBAN mismatch, recent IBAN change, unapproved supplier, unknown supplier, no PO,
-split purchase, supplier question) can run as they are. Cases 01 to 04 (clean match, price off, quantity over
-delivery, expired certificate) need real PO line data, which could not be read from HubSpot, so they contain
-`<FILL FROM PO LINES>` placeholders and the runner skips them until you fill them in from the PO deals named
-in each case's `needs_po_lines` field.
+Add `--test` for n8n's test webhook, `--only INV-L5` for one case, or `--suffix -2` to rerun under new
+source IDs (a repeated ID returns the deal that already exists). Each run creates real deals in HubSpot.

@@ -9,7 +9,7 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "0bccff62-3912-4c13-8c09-edeeaafc6d8c",
+      "id": "eb07668b-3209-48d8-b7d6-ef6a9ffb86d2",
       "name": "Invoice Assistant Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
@@ -17,7 +17,7 @@
         0,
         0
       ],
-      "webhookId": "2c0f4e24-8195-4dcf-a09b-84e40f3d6ea4",
+      "webhookId": "644aa072-c590-4334-aed2-4911e03d5ebd",
       "credentials": {
         "httpHeaderAuth": {
           "name": "AppBuilder app key"
@@ -32,7 +32,7 @@
           "systemMessage": "You help the bank's accounts-payable reviewer understand why a supplier invoice is in its stage. Use your tools to look up the invoice, its lines and audit note, the supplier and the purchase order before answering. Cite the rule and the numbers. Never approve, reject or change anything: the reviewer does that in the app. Keep answers short. If a tool returns nothing, say so instead of guessing."
         }
       },
-      "id": "9fb926ec-2e65-486a-9b03-2a716467980b",
+      "id": "0d34d3c8-4234-4bfd-b4f3-50ce032074b1",
       "name": "Invoice Assistant",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
@@ -50,7 +50,7 @@
         },
         "options": {}
       },
-      "id": "afa6dc85-2024-4751-aa2c-a908efe738e1",
+      "id": "622376c0-e1f0-4053-9632-a8b4be0b6c7c",
       "name": "Anthropic Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
@@ -70,7 +70,7 @@
         "sessionKey": "={{ $('Invoice Assistant Webhook').item.json.body.session_id }}",
         "contextWindowLength": 10
       },
-      "id": "b026bdab-f764-44da-be5d-5cd0a4e0b306",
+      "id": "230afb7e-ffa3-480e-9336-abf3772e12f2",
       "name": "Conversation Memory",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
@@ -88,7 +88,7 @@
         "nodeCredentialType": "hubspotAppToken",
         "options": {}
       },
-      "id": "8785e470-5b83-4b81-9f12-559ff7f0e82e",
+      "id": "137342f1-a9c7-43b5-a83d-1e9350b17caa",
       "name": "get_invoice_by_deal_id",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
@@ -114,7 +114,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'document_type', operator: 'EQ', value: 'invoice' }, { propertyName: 'invoice_number', operator: 'EQ', value: $fromAI('invoice_number', 'The supplier invoice number', 'string') }] }], properties: ['dealname','dealstage','document_type','invoice_number','invoice_date','due_date','po_number','amount','vat_amount','iban_on_invoice','match_result','approval_level','anomaly_flags','exception_reason','order_channel','min_field_confidence'], limit: 5 }) }}"
       },
-      "id": "783ace6b-8b29-4973-ad9f-913a65a38dd0",
+      "id": "f91ccfb4-0d19-4838-9b82-799369d4a931",
       "name": "find_invoice_by_number",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
@@ -140,7 +140,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'associations.deal', operator: 'EQ', value: $fromAI('deal_id', 'The HubSpot deal id of the invoice', 'string') }] }], properties: ['hs_sku','name','quantity','price','po_line_ref','line_check','line_check_note','field_confidence'], limit: 50 }) }}"
       },
-      "id": "912d2d8a-33ce-43ec-b8da-65e9dc86c4d2",
+      "id": "f3400087-b283-46ca-af89-215b66b999dc",
       "name": "get_invoice_lines",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
@@ -166,7 +166,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'associations.deal', operator: 'EQ', value: $fromAI('deal_id', 'The HubSpot deal id of the invoice', 'string') }] }], properties: ['hs_note_body','hs_timestamp'], limit: 5 }) }}"
       },
-      "id": "c9e5485b-8572-4ac8-b02d-7a4f7464838e",
+      "id": "687b4b18-8dc5-44a3-b0dd-33b209f62345",
       "name": "get_audit_note",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
@@ -192,7 +192,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ query: $fromAI('query', 'Supplier name or VAT ID', 'string'), filterGroups: [{ filters: [{ propertyName: 'supplier_status', operator: 'HAS_PROPERTY' }] }], properties: ['name','supplier_status','supplier_vat_id','supplier_iban','previous_iban','iban_changed_on','tax_certificate_valid_until','domain'], limit: 5 }) }}"
       },
-      "id": "c1481ff3-cab4-4eef-b7c2-dda65ee21b81",
+      "id": "6cf25ac5-91a7-482c-9774-a7382eeab953",
       "name": "get_supplier",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
@@ -246,7 +246,7 @@
           "convertFieldsToString": true
         }
       },
-      "id": "4db066a4-7f27-42b6-91c9-cd6e38ca8fe5",
+      "id": "d0e23c1e-3c04-4f9b-b79d-fa62cda48f46",
       "name": "get_purchase_order",
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
@@ -261,7 +261,7 @@
         "responseBody": "={{ { reply: $json.output } }}",
         "options": {}
       },
-      "id": "088f8baa-4cc6-4cc0-8d70-eabccbb2d824",
+      "id": "d205c095-bef5-4ed2-abae-25291b5d94f6",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,

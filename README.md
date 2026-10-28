@@ -1,6 +1,24 @@
 # App Builder AI
 
-Just create an empty project for now, called AppBuilder.AI
+A demo of an AI worker for a bank's accounts-payable team. It reads supplier invoices, checks each one
+against the purchase order and delivery note (a three-way match), sends clean invoices to one-click
+approval and holds risky ones with the reason. People approve what matters. The demo uses synthetic data,
+and a CRM (HubSpot) stands in for the bank's ERP.
+
+## Run it locally
+
+```sh
+bun install
+bun run dev
+```
+
+To run without HubSpot or n8n, add this to `.env.local` and the app uses built-in sample data:
+
+```sh
+INVOICE_DATA_SOURCE=mock
+```
+
+Run the tests with `bun run test`.
 
 This project was built with [Lovable](https://lovable.dev).
 
@@ -23,20 +41,9 @@ and routes each one to the right HubSpot stage:
   for anything missing.
 - `2-invoice-assistant-chat.json`: a read-only chat for the reviewer, on `POST /webhook/invoice-assistant`.
 - `3-look-up-purchase-order.json`: the PO lookup used by the chat.
-- `test-cases.json` and `run-tests.mjs`: 12 synthetic invoices with expected results, and a runner that
-  prints expected versus actual.
+- `run-tests.mjs`: a runner that sends the 10 documents in `scripts/hubspot/data/invoices/live-messages.json`
+  to the intake webhook and prints expected versus actual.
 
 The workflows are saved inactive and have not yet been imported or run. See the
 [folder README](n8n/invoice-worker/README.md) for import steps, the rules, how this differs from the
 original brief, and what still needs checking.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```

@@ -80,10 +80,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AppBuilder.ai" },
-      { name: "description", content: "AppBuilder.ai" },
-      { property: "og:title", content: "AppBuilder.ai" },
-      { property: "og:description", content: "AppBuilder.ai" },
+      { title: "AppBuilder.ai — Supplier invoice worker" },
+      {
+        name: "description",
+        content:
+          "AI that checks supplier invoices against the purchase order and delivery note, approves clean ones in one click and holds risky ones with the reason.",
+      },
+      { property: "og:title", content: "AppBuilder.ai — Supplier invoice worker" },
+      {
+        property: "og:description",
+        content:
+          "AI that checks supplier invoices against the purchase order and delivery note, approves clean ones in one click and holds risky ones with the reason.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
