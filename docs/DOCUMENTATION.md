@@ -127,7 +127,7 @@ bun scripts/hubspot/setup.ts --history-only    # 6 comenzi confirmate; restul î
 ```
 Portalul trebuie să aibă moneda EUR. Scriptul e idempotent.
 
-Supabase: schema = `drizzle/migrations/0000_create_user_roles.sql`, aplicată prin Lovable. `supabase db push` din ciornă **nu funcționează pe `main`** (nu există `supabase/migrations/`; există doar pe branch-ul `landing-cta-hubspot`, cu o definiție diferită — vezi BUGS B-07).
+Supabase: **singura sursă a schemei este `drizzle/migrations/`** (acum `0000_create_user_roles.sql`: enum `app_role`, tabelul `user_roles` cu RLS, funcția `has_role`). Se modifică prin prompturi Lovable pentru baza de date, care adaugă o migrare nouă aici; `src/integrations/supabase/types.ts` se regenerează din baza reală și nu se editează de mână. `drizzle/schema.ts` e gol intenționat. `supabase db push` din ciornă nu se folosește: nu există `supabase/migrations/` pe `main` și nu trebuie creat (varianta din branch-ul `landing-cta-hubspot` e depășită, vezi BUGS B-07).
 
 ⚠️ ID-urile pipeline/stadii și compania demo (`458454559952`) sunt hardcodate pentru portalul 149650024; pe alt portal trebuie înlocuite (`order-rules.ts`, `orders.ts`).
 

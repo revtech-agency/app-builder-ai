@@ -17,7 +17,7 @@
 
 | ID | Îmbunătățire | Criteriu | Efort | Owner | Stare |
 |---|---|---|---|---|---|
-| I-06 | **O singură sursă de schemă**: alegeți `supabase/migrations/`, ștergeți duplicatele (`drizzle/…`, varianta din PR #1), regenerați `types.ts`. Schema HubSpot (proprietăți/pipeline) rămâne în `setup.ts`; scoateți ID-urile hardcodate din `order-rules.ts` într-un config | ARCH 15% | S | Daniel | 🔴 (BUGS B-07, B-19) |
+| I-06 | **O singură sursă de schemă**: `drizzle/migrations/` (decis 28 oct); varianta din PR #1 nu se merge-uiește. Schema HubSpot (proprietăți/pipeline) rămâne în `setup.ts`; scoateți ID-urile hardcodate din `order-rules.ts` într-un config | ARCH 15% | S | Daniel | 🟡 schema decisă; ID-urile hardcodate rămân (BUGS B-07, B-19) |
 | I-07 | **Secrete și config**: `.env.example` complet (toate numele din DOCUMENTATION §3), un singur nume pentru tokenul HubSpot, `.env` scos din git. Nu s-au găsit secrete reale în cod/istoric — verificați și n8n (`x-appbuilder-key`) | ARCH | S | ⚠️ | 🔴 (B-08) |
 | I-08 | **Teste unde sunt banii și accesul**: `placeOrder` (cu HubSpot mock), `visibleCompanies` (admin / demo / domeniu / email neconfirmat), un test de paritate între regulile din TS și cele din n8n; CI cu `bun run test` + `lint` + `build` | ARCH, FUNC | M | ⚠️ | 🔴 (B-14) |
 | I-09 | **Reguli ca date, partajate**: fișier unic de reguli (praguri, toleranțe, limite de aprobare) citit și de app, și de n8n (prin endpoint al app-ului), în loc de copii în Code node + TS | AGENT, ARCH, DOM | M | Lip | 🔴 (B-10) |

@@ -26,7 +26,7 @@
 | Componentă | Stare | Owner | Blocaj |
 |---|---|---|---|
 | Landing page (nexxt.appbuilder.ai) | 🟡 pe `main`: CTA demo, formular HubSpot și `Talk to us → #contact` există deja; `main` tratează lipsa tabelului `user_roles` (nimeni nu e admin). ⚠️ site-ul live poate rula alt build | Daniel | verifică ce build e live |
-| PR #1 (branch `landing-cta-hubspot`) | 🟡 NEMERGE-UIT, a divergat de `main` (parte din conținut e refăcut pe `main` cu alte commit-uri). Aduce `supabase/migrations/…user_roles.sql` care **intră în conflict** cu `drizzle/migrations/0000…` de pe `main` (vezi BUGS B-07) | Daniel | decide: merge sau închide |
+| PR #1 (branch `landing-cta-hubspot`) | 🟡 NEMERGE-UIT, a divergat de `main` (parte din conținut e refăcut pe `main` cu alte commit-uri). Aduce `supabase/migrations/…user_roles.sql`, care **nu trebuie merge-uit** (vezi BUGS B-07: schema rămâne în `drizzle/migrations/`). Merge doar dacă scoți acel fișier și `types.ts`/`drizzle` din diff | Daniel | decide: merge sau închide |
 | Agentul de comenzi (order worker) | 🟡 rulează în n8n (6 workflow-uri citate în prompt), **nu e în repo**; app-ul îl cheamă prin 2 webhook-uri (`order-assistant`, `app-order-offer`). Regulile de comandă sunt în cod (`order-rules.ts`, testate) | Daniel | export JSON + prompt în repo |
 | Invoice worker (n8n, scenariu bancar AP) | 🔴 doar prompt scris (`prompts/n8n/`); depinde de ID-uri HubSpot `<…>` necompletate | ⚠️ | D2 + setup HubSpot facturi |
 | Invoice desk (Lovable: coadă, detaliu, submit) | 🔴 doar prompt scris (`prompts/lovable/`) | Lip (Lovable) | D2, prompt 1 (rol `ap_reviewer`) |
@@ -58,14 +58,14 @@ Problema: avem 6+ unelte și nu e clar cine are acces unde, cine poate schimba c
 |---|---|---|---|---|
 | **GitHub** | cod, migrări SQL, documentație | **tot codul și docs** | toată echipa (read) | toți, **doar prin PR** pe `main` |
 | **Lovable** | generare UI | nimic — e editor | Daniel + 1 | doar pe branch, sincronizat în GitHub |
-| **Supabase** | DB, auth | schema (prin migrări din repo) | Daniel + 1 backup | azi: `drizzle/migrations/` pe `main` (generat de Lovable); `supabase/migrations/` există doar pe branch-ul PR #1. **Alegeți una.** Un singur tabel: `user_roles` |
+| **Supabase** | DB, auth | schema (prin migrări din repo) | Daniel + 1 backup | **`drizzle/migrations/` (decis 28 oct)**. Baza reală = `types.ts` de pe `main` = migrarea din `drizzle/`. Fișierul `supabase/migrations/…` din PR #1 nu se merge-uiește. Un singur tabel: `user_roles` |
 | **HubSpot** | „sistemul băncii” în demo + formular contact | date demo CRM (portal 149650024); schema proprietăților e în `scripts/hubspot/setup.ts` | ⚠️ | token în `HUBSPOT_ACCESS_TOKEN` (app) și `HUBSPOT_API_KEY` (script) |
 | **n8n** | lipici între sisteme + toți agenții/LLM-ul | fluxuri (`revtech-agency.app.n8n.cloud`) | ⚠️ | **niciun export în repo azi**; webhook-urile cer header `x-appbuilder-key` |
 | **Claude / Gemini** | asistență | nimic | toți | — |
 
 Reguli de bază:
 1. **Un singur loc de adevăr: repo-ul.** Ce nu e în GitHub nu există pentru juriu.
-2. **Nicio schimbare direct în Supabase.** Orice schimbare de schemă = fișier SQL în `supabase/migrations/` + PR.
+2. **Nicio schimbare direct în Supabase.** Singurul loc pentru schema DB este `drizzle/migrations/` (decis 28 oct, B-07). Îl scrie Lovable când îi dai un prompt de bază de date; fișierul SQL intră în repo prin PR. **Nu** se creează `supabase/migrations/`.
 3. **Minim 2 oameni cu acces admin** la fiecare unealtă (Daniel + un backup). Dacă Daniel doarme la 3 dimineața, nu ne oprim.
 4. **Secretele nu se pun în chat, Discord sau cod.** Doar în `.env` local și în setările de deploy. `.env.example` în repo, fără valori.
 5. **Un branch per feature**, nume `feat/…`, `fix/…`. Merge după un review de la oricine altcineva.
