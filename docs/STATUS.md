@@ -2,6 +2,7 @@
 
 > Actualizat: miercuri, 28 oct 2026 · Owner document: Lip
 > Verificat cu codul de pe `main` @ `a6508fc` și cu `prompts/` (28 oct). Ce nu se vede în cod rămâne ⚠️.
+> Autori: `prompts/` (n8n + Lovable) = Daniel. Cele 5 documente = Lip, revizuite din cod cu Claude.
 > Regulă: fiecare membru își actualizează rândul **la fiecare 2 ore** sau când se blochează. Nu se discută status pe Discord fără să fie trecut aici.
 
 ## Termene
@@ -18,7 +19,7 @@
 | # | Decizie | Opțiuni | Cine decide | Până când |
 |---|---|---|---|---|
 | D1 | Pe ce track suntem înscriși | Operational Efficiency / Provocare Deschisă | întrebare la organizatori | ACUM |
-| D2 | Scenariul bancar | Order-to-cash / Validare dosar credit / **Facturi furnizor, three-way match (AP)** / rămânem pe comenzi. Ultima variantă bancară e deja scrisă în `prompts/` (n8n + Lovable), dar **nimic din ea nu e construit** (0 fișiere de factură în repo) | echipa + 1 mentor Raiffeisen | azi |
+| D2 | Scenariul bancar | Order-to-cash / Validare dosar credit / **Facturi furnizor, three-way match (AP)** / rămânem pe comenzi. Varianta AP este **propunerea lui Daniel**: prompturile din `prompts/` (n8n + Lovable) sunt scrise de el, nu e o decizie de echipă. **Nimic din ea nu e construit** (0 fișiere de factură în repo) | echipa + 1 mentor Raiffeisen | azi |
 | D3 | LLM-ul folosit în demo | `prompts/n8n/n8n-prompt.md` cere Claude `claude-sonnet-5-5`, credențial n8n „RTA Anthropic API". **Propunere: D3 = Claude**; ⚠️ de confirmat în n8n live ce model rulează fluxurile de comenzi. În repo nu există niciun apel LLM | Daniel | azi |
 
 ## Stare pe componente

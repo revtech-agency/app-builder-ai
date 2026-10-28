@@ -9,7 +9,7 @@
 
 AppBuilder.ai este un „order worker": preia comenzi ale clienților unui distribuitor (în datele demo: **membrane/învelișuri pentru mezeluri, vândute la metru**), le convertește în pachete întregi, aplică reguli de business și le scrie ca *deals* într-un pipeline HubSpot. Ce nu e clar trimite la om (stadiile „Waiting on client" / „Needs staff"). Clienții comandă din aplicație (chat + inventar + coș); comenzile din email/WhatsApp sunt procesate de un flux n8n.
 
-**Scenariul pentru Raiffeisen:** ⚠️ DE CONFIRMAT după D2. `prompts/` descrie un pivot spre *procesarea facturilor furnizor (AP, three-way match PO → aviz → factură)* cu un „invoice desk" nou; **nimic din el nu e implementat încă** (nici cod, nici HubSpot, nici date). Atenție: tot ce există în cod azi este scenariul *comenzi de la IMM-uri*, nu un proces bancar (vezi IMPROVEMENTS I-10).
+**Scenariul pentru Raiffeisen:** ⚠️ DE CONFIRMAT după D2. `prompts/` (scrise de Daniel) descrie un pivot propus spre *procesarea facturilor furnizor (AP, three-way match PO → aviz → factură)* cu un „invoice desk" nou; **nimic din el nu e implementat încă** (nici cod, nici HubSpot, nici date). Atenție: tot ce există în cod azi este scenariul *comenzi de la IMM-uri*, nu un proces bancar (vezi IMPROVEMENTS I-10).
 
 Fluxul real, așa cum e în cod:
 
