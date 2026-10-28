@@ -7,6 +7,7 @@ import {
   LogOut,
   MessageSquare,
   Rocket,
+  Sparkles,
   TrendingUp,
 } from "lucide-react";
 
@@ -61,6 +62,7 @@ export function AppSidebar() {
     { to: "/app/$companyId/growth", label: "Growth", icon: TrendingUp, badge: 0 },
     { to: "/app/$companyId/inbox", label: "Inbox", icon: Inbox, badge: needsYou },
     { to: "/app/$companyId/deploys", label: "Deploys", icon: Rocket, badge: 0 },
+    { to: "/app/$companyId/sales-analysis", label: "Sales analysis", icon: Sparkles, badge: 0 },
   ] as const;
 
   return (

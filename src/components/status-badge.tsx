@@ -52,6 +52,7 @@ const statusTone: Record<string, Tone> = {
   // priority
   high: "danger",
   normal: "info",
+  medium: "warning",
   low: "muted",
 };
 

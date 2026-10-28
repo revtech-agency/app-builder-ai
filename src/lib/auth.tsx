@@ -23,7 +23,7 @@ function toUser(session: Session | null): AuthUser | null {
   const u = session?.user;
   if (!u) return null;
   const email = u.email ?? "";
-  const name = (u.user_metadata?.name as string | undefined) || email.split("@")[0] || "Founder";
+  const name = (u.user_metadata?.["name"] as string | undefined) || email.split("@")[0] || "Founder";
   return { id: u.id, name, email };
 }
 

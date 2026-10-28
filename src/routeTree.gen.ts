@@ -17,6 +17,7 @@ import { Route as AppCompanyIdChatRouteImport } from './routes/app/$companyId/ch
 import { Route as AppCompanyIdDeploysRouteImport } from './routes/app/$companyId/deploys'
 import { Route as AppCompanyIdGrowthRouteImport } from './routes/app/$companyId/growth'
 import { Route as AppCompanyIdInboxRouteImport } from './routes/app/$companyId/inbox'
+import { Route as AppCompanyIdSalesAnalysisRouteImport } from './routes/app/$companyId/sales-analysis'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,12 @@ const AppCompanyIdInboxRoute = AppCompanyIdInboxRouteImport.update({
   path: '/$companyId/inbox',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCompanyIdSalesAnalysisRoute =
+  AppCompanyIdSalesAnalysisRouteImport.update({
+    id: '/$companyId/sales-analysis',
+    path: '/$companyId/sales-analysis',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
   '/app/$companyId/growth': typeof AppCompanyIdGrowthRoute
   '/app/$companyId/inbox': typeof AppCompanyIdInboxRoute
+  '/app/$companyId/sales-analysis': typeof AppCompanyIdSalesAnalysisRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,6 +85,7 @@ export interface FileRoutesByTo {
   '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
   '/app/$companyId/growth': typeof AppCompanyIdGrowthRoute
   '/app/$companyId/inbox': typeof AppCompanyIdInboxRoute
+  '/app/$companyId/sales-analysis': typeof AppCompanyIdSalesAnalysisRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,6 +97,7 @@ export interface FileRoutesById {
   '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
   '/app/$companyId/growth': typeof AppCompanyIdGrowthRoute
   '/app/$companyId/inbox': typeof AppCompanyIdInboxRoute
+  '/app/$companyId/sales-analysis': typeof AppCompanyIdSalesAnalysisRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/app/$companyId/deploys'
     | '/app/$companyId/growth'
     | '/app/$companyId/inbox'
+    | '/app/$companyId/sales-analysis'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/app/$companyId/deploys'
     | '/app/$companyId/growth'
     | '/app/$companyId/inbox'
+    | '/app/$companyId/sales-analysis'
   id:
     | '__root__'
     | '/'
@@ -119,6 +131,7 @@ export interface FileRouteTypes {
     | '/app/$companyId/deploys'
     | '/app/$companyId/growth'
     | '/app/$companyId/inbox'
+    | '/app/$companyId/sales-analysis'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCompanyIdInboxRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/$companyId/sales-analysis': {
+      id: '/app/$companyId/sales-analysis'
+      path: '/$companyId/sales-analysis'
+      fullPath: '/app/$companyId/sales-analysis'
+      preLoaderRoute: typeof AppCompanyIdSalesAnalysisRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -194,6 +214,7 @@ interface AppRouteChildren {
   AppCompanyIdDeploysRoute: typeof AppCompanyIdDeploysRoute
   AppCompanyIdGrowthRoute: typeof AppCompanyIdGrowthRoute
   AppCompanyIdInboxRoute: typeof AppCompanyIdInboxRoute
+  AppCompanyIdSalesAnalysisRoute: typeof AppCompanyIdSalesAnalysisRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -202,6 +223,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCompanyIdDeploysRoute: AppCompanyIdDeploysRoute,
   AppCompanyIdGrowthRoute: AppCompanyIdGrowthRoute,
   AppCompanyIdInboxRoute: AppCompanyIdInboxRoute,
+  AppCompanyIdSalesAnalysisRoute: AppCompanyIdSalesAnalysisRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
