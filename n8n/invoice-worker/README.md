@@ -71,16 +71,12 @@ up to 5,000 team lead, up to 25,000 head of department, above that the CFO.
 
 ## Not verified against the live accounts
 
+Checked against portal 149650024 on 2026-10-28: the line-item properties, anomaly_flags options and order_channel options exist.
+
 These files were built and checked offline: the JSON parses, every connection points at a real node,
 all code compiles, and the rules ran correctly on 15 mock cases. They are now imported and active in n8n,
-but these points have not been confirmed against HubSpot yet:
+but these points have not been confirmed yet:
 
-- Line-item properties (`received_quantity`, `delivery_note_ref`, `po_line_ref`, `line_check`,
-  `line_check_note`, `field_confidence`) exist in HubSpot. The connector that checked HubSpot could not read them.
-- The options on `anomaly_flags` include: `duplicate`, `iban_mismatch`, `iban_recently_changed`,
-  `unknown_supplier`, `supplier_blocked`, `split_purchase`, `low_confidence`, `certificate_expired`.
-  HubSpot rejects values that are not options.
-- The `order_channel` options include `email` and `app`.
 - Respond to Webhook behaves quietly when the run started from the Gmail trigger.
 - Node versions match your n8n version (the nodes were written from memory of the current node set).
 - The expected-versus-actual run has not been done yet (see below).
