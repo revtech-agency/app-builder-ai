@@ -90,6 +90,14 @@ const PROPERTIES: Record<string, Prop[]> = {
       description: "Whether the client is up to date with payments. New orders from an overdue client are held and finance is alerted." },
     { name: "negotiated_skus", label: "Negotiated items (SKUs)", type: "string", fieldType: "textarea",
       description: "The item codes this client may order, one per line. Anything else is left out of the order and turned into a quote request." },
+    { name: "appbuilder_plan", label: "AppBuilder.ai plan", type: "enumeration", fieldType: "select", options: ["order_worker"],
+      description: "The AppBuilder.ai subscription this client is on. The admin dashboard uses it, with the fees below, to show what each client pays." },
+    { name: "appbuilder_monthly_fee", label: "AppBuilder.ai monthly fee (EUR)", type: "number", fieldType: "number",
+      description: "Platform subscription the client pays AppBuilder.ai each month, in euros (demo pricing from the deck: 99)." },
+    { name: "appbuilder_fee_per_order", label: "AppBuilder.ai fee per order (EUR)", type: "number", fieldType: "number",
+      description: "What AppBuilder.ai charges for each order the order worker handles for this client, in euros (demo pricing from the deck: 0.60)." },
+    { name: "appbuilder_subscription_start", label: "AppBuilder.ai subscription start", type: "date", fieldType: "date",
+      description: "First month the client is billed for. The dashboard counts subscription months and orders from this date." },
   ],
   deals: [
     { name: "delivery_date", label: "Delivery date", type: "date", fieldType: "date",
@@ -241,6 +249,8 @@ async function upsertClients(): Promise<Map<string, { companyId: string; contact
     const props = {
       name: c.name, domain: c.domain, city: c.city, country: "Romania",
       payment_status: c.payment_status, negotiated_skus: c.negotiated_skus.join("\n"),
+      appbuilder_plan: c.plan.name, appbuilder_monthly_fee: c.plan.monthly_fee,
+      appbuilder_fee_per_order: c.plan.fee_per_order, appbuilder_subscription_start: c.plan.start,
     };
     let companyId = await findOne("companies", "domain", c.domain);
     if (companyId) await write(`update company ${c.name}`, "PATCH", `/crm/v3/objects/companies/${companyId}`, { properties: props });

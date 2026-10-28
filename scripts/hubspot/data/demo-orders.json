@@ -7,6 +7,7 @@
    "city": "Alba Iulia",
    "payment_status": "current",
    "negotiated_skus": ["500045289", "500030513", "500059316", "500041355"],
+   "plan": {"name": "order_worker", "monthly_fee": 99, "fee_per_order": 0.6, "start": "2026-08-01"},
    "contact": {"firstname": "Ana", "lastname": "Demo Alba", "email": "ana@alba.example.com", "mobilephone": "+40700000001"}
   },
   {
@@ -16,6 +17,7 @@
    "city": "Cluj-Napoca",
    "payment_status": "current",
    "negotiated_skus": ["300004214", "300004289", "300005331"],
+   "plan": {"name": "order_worker", "monthly_fee": 99, "fee_per_order": 0.6, "start": "2026-08-01"},
    "contact": {"firstname": "Mihai", "lastname": "Demo Cluj", "email": "mihai@cluj.example.com", "mobilephone": "+40700000002"}
   },
   {
@@ -25,6 +27,7 @@
    "city": "Sibiu",
    "payment_status": "overdue",
    "negotiated_skus": ["500052051", "500063406"],
+   "plan": {"name": "order_worker", "monthly_fee": 99, "fee_per_order": 0.6, "start": "2026-09-01"},
    "contact": {"firstname": "Elena", "lastname": "Demo Sibiu", "email": "elena@sibiu.example.com", "mobilephone": "+40700000003"}
   },
   {
@@ -34,7 +37,18 @@
    "city": "Brasov",
    "payment_status": "current",
    "negotiated_skus": ["300004214", "701099508", "500042787", "300004289"],
+   "plan": {"name": "order_worker", "monthly_fee": 99, "fee_per_order": 0.6, "start": "2026-10-01"},
    "contact": {"firstname": "Radu", "lastname": "Demo Brasov", "email": "radu@brasov.example.com", "mobilephone": "+40700000004"}
+  },
+  {
+   "key": "revtech",
+   "name": "RevTech Agency",
+   "domain": "revtechagency.com",
+   "city": "Brasov",
+   "payment_status": "current",
+   "negotiated_skus": ["500045289", "500030513", "500059316", "500041355"],
+   "plan": {"name": "order_worker", "monthly_fee": 99, "fee_per_order": 0.6, "start": "2026-10-01"},
+   "contact": {"firstname": "Daniel", "lastname": "Secareanu", "email": "daniel@revtechagency.com"}
   }
  ],
  "orders": [
