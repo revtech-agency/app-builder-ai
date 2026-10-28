@@ -95,7 +95,7 @@ function DashboardPage() {
               note={changeNote(d.totals.revenueThisMonth, d.totals.revenueLastMonth)}
             />
             <Stat
-              label="Billable orders this month"
+              label="Documents processed this month"
               value={String(d.totals.billableOrdersThisMonth)}
             />
             <Stat label="Active clients" value={String(d.totals.activeClients)} />
@@ -105,8 +105,8 @@ function DashboardPage() {
             <CardHeader>
               <CardTitle className="text-base">Revenue by month</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Revenue to date {formatEur(d.totals.revenueToDate)}. Order value handled for
-                clients: {formatMoney(d.totals.orderValueToDate)} (their sales, not AppBuilder.ai
+                Revenue to date {formatEur(d.totals.revenueToDate)}. Invoice value processed:{" "}
+                {formatEur(d.totals.orderValueToDate)} (supplier invoices, not AppBuilder.ai
                 revenue).
               </p>
             </CardHeader>
@@ -156,9 +156,9 @@ function DashboardPage() {
                     <TableHead>Client</TableHead>
                     <TableHead>Plan</TableHead>
                     <TableHead className="text-right">Per month</TableHead>
-                    <TableHead className="text-right">Per order</TableHead>
+                    <TableHead className="text-right">Per document</TableHead>
                     <TableHead>Since</TableHead>
-                    <TableHead className="text-right">Orders this month</TableHead>
+                    <TableHead className="text-right">Documents this month</TableHead>
                     <TableHead className="text-right">Revenue this month</TableHead>
                     <TableHead className="text-right">Revenue to date</TableHead>
                     <TableHead>Payment</TableHead>
@@ -168,13 +168,7 @@ function DashboardPage() {
                   {d.clients.map((c) => (
                     <TableRow key={c.id}>
                       <TableCell className="whitespace-nowrap font-medium">
-                        <Link
-                          to="/app/$companyId/orders"
-                          params={{ companyId: c.id }}
-                          className="hover:underline"
-                        >
-                          {c.name}
-                        </Link>
+                        {c.name}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">{c.plan ?? "No plan"}</TableCell>
                       <TableCell className="whitespace-nowrap text-right">

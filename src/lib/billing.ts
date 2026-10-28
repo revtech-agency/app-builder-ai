@@ -1,10 +1,8 @@
-// Pure AppBuilder.ai revenue model: a monthly subscription plus a fee per billable order.
+// Pure AppBuilder.ai revenue model: a monthly subscription plus a fee per billable item
+// (for the invoice worker: each processed supplier document).
 // Kept free of server imports so the dashboard and unit tests can share it.
 
 export const CURRENCY = "EUR";
-
-// Deal stages that don't count as billable orders (Duplicate, Rejected).
-const NON_BILLABLE_STAGES = new Set(["6315918558", "6315918559"]);
 
 export type BillingOrder = { createdAt: string; stage: string; amount: number };
 
@@ -45,7 +43,8 @@ export type DashboardTotals = {
   orderValueToDate: number;
 };
 
-export const isBillableStage = (stageId: string) => !NON_BILLABLE_STAGES.has(stageId);
+export const isBillableStage = (stageId: string, nonBillableStages: readonly string[]) =>
+  !nonBillableStages.includes(stageId);
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -90,6 +89,8 @@ export function computeClientBilling(
   plan: ClientPlan,
   orders: BillingOrder[],
   months: string[],
+  // Deal stage ids that are not billable (e.g. Duplicate, Rejected).
+  nonBillableStages: readonly string[],
   now: Date = new Date(),
 ): ClientBilling {
   const startMonth = monthOf(plan.start);
@@ -97,7 +98,7 @@ export function computeClientBilling(
   const cur = currentMonth(now);
   const prev = previousMonth(cur);
 
-  const billable = orders.filter((o) => isBillableStage(o.stage));
+  const billable = orders.filter((o) => isBillableStage(o.stage, nonBillableStages));
   const counts = new Map<string, number>();
   for (const o of billable) {
     const m = monthOf(o.createdAt);
