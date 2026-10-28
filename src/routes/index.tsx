@@ -12,6 +12,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
+import { ContactForm } from "@/components/contact-form";
 import { DemoButton } from "@/components/demo-button";
 import { Button } from "@/components/ui/button";
 
@@ -55,28 +56,34 @@ const PROBLEMS = [
   },
 ];
 
+// cta "demo" opens the live demo (only the order worker runs there today);
+// "contact" scrolls to the form.
 const WORKERS = [
   {
     icon: ClipboardList,
     name: "Order worker",
     text: "Reads orders from email, WhatsApp and PDF, maps each client's codes to your items, then enters and confirms them.",
+    cta: { kind: "demo", label: "Try it in the demo" },
   },
   {
     icon: FileText,
     name: "Quote worker",
     text: "Prices each request from your rules and past jobs, sends the offer and follows up.",
+    cta: { kind: "contact", label: "Talk to us about quotes" },
   },
   {
     icon: ShoppingCart,
     name: "Purchasing worker",
     text: "Compares supplier offers, raises the PO after approval and chases late deliveries.",
+    cta: { kind: "contact", label: "Talk to us about purchasing" },
   },
   {
     icon: Sparkles,
     name: "The next worker",
     text: "Invoice matching, delivery scheduling, payment reminders: any repeatable flow, built on the same modules.",
+    cta: { kind: "contact", label: "Tell us your flow" },
   },
-];
+] as const;
 
 const STEPS = [
   { name: "Read", text: "Sorts each message: order, change or request." },
@@ -109,28 +116,36 @@ const PRINCIPLES = [
   },
 ];
 
-function OpenAppButton({ size = "default" }: { size?: "default" | "lg" }) {
+function TalkToUsLink({ className, children = "Talk to us" }: { className?: string; children?: React.ReactNode }) {
   return (
-    <Button asChild size={size}>
-      <Link to="/app">
-        Open the app <ArrowRight className="size-4" />
-      </Link>
-    </Button>
+    <a href="#contact" className={className}>
+      {children}
+    </a>
   );
 }
 
 function Index() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen scroll-smooth bg-background text-foreground">
       <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4">
           <span className="flex items-center gap-2 font-semibold">
             <span className="flex size-7 items-center justify-center rounded-md bg-primary text-sm text-primary-foreground">
               A
             </span>
             AppBuilder.ai
           </span>
-          <OpenAppButton />
+          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+            <a href="#workers" className="hover:text-foreground">Workers</a>
+            <a href="#how-it-works" className="hover:text-foreground">How it works</a>
+            <a href="#contact" className="hover:text-foreground">Contact</a>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/app">Sign in</Link>
+            </Button>
+            <DemoButton size="sm" />
+          </div>
         </div>
       </header>
 
@@ -149,12 +164,14 @@ function Index() {
             person approving every sensitive step.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <OpenAppButton size="lg" />
-            <DemoButton size="lg" variant="outline" />
-            <Button asChild size="lg" variant="ghost">
-              <a href="mailto:daniel@appbuilder.ai">Talk to us</a>
+            <DemoButton size="lg" />
+            <Button asChild size="lg" variant="outline">
+              <a href="#contact">Talk to us</a>
             </Button>
           </div>
+          <p className="mt-3 text-sm text-muted-foreground">
+            No sign-up: the demo opens a shared account with sample orders.
+          </p>
         </section>
 
         <section className="border-y bg-muted/40">
@@ -173,7 +190,7 @@ function Index() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-6xl px-4 py-16">
+        <section id="workers" className="mx-auto w-full max-w-6xl scroll-mt-16 px-4 py-16">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
             We sell the worker, not the tool
           </h2>
@@ -187,16 +204,33 @@ function Index() {
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <w.icon className="size-5" />
                 </span>
-                <div>
+                <div className="flex flex-col">
                   <h3 className="font-semibold">{w.name}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{w.text}</p>
+                  <div className="mt-3">
+                    {w.cta.kind === "demo" ? (
+                      <DemoButton variant="link" className="h-auto px-0">
+                        {w.cta.label}
+                      </DemoButton>
+                    ) : (
+                      <TalkToUsLink className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                        {w.cta.label} <ArrowRight className="size-4" />
+                      </TalkToUsLink>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <DemoButton size="lg" />
+            <span className="text-sm text-muted-foreground">
+              See the order worker handle real messages.
+            </span>
+          </div>
         </section>
 
-        <section className="border-y bg-muted/40">
+        <section id="how-it-works" className="scroll-mt-16 border-y bg-muted/40">
           <div className="mx-auto w-full max-w-6xl px-4 py-16">
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
               Five steps, people only for decisions
@@ -225,21 +259,21 @@ function Index() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-6xl px-4 pb-20">
-          <div className="rounded-2xl bg-primary px-6 py-12 text-center text-primary-foreground md:px-12">
-            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              See a worker handle real orders
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-primary-foreground/80">
-              Sign in to the app to try it, or tell us which flow eats your team's week.
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Button asChild size="lg" variant="secondary">
-                <Link to="/app">
-                  Open the app <ArrowRight className="size-4" />
-                </Link>
-              </Button>
+        <section id="contact" className="mx-auto w-full max-w-6xl scroll-mt-16 px-4 pb-20">
+          <div className="grid gap-10 rounded-2xl bg-primary px-6 py-12 text-primary-foreground md:grid-cols-2 md:px-12">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                See a worker handle real orders
+              </h2>
+              <p className="mt-3 max-w-md text-primary-foreground/80">
+                Open the demo in one click, or tell us which flow eats your team's week and we'll
+                show you that one.
+              </p>
+              <div className="mt-6">
+                <DemoButton size="lg" variant="secondary" />
+              </div>
             </div>
+            <ContactForm />
           </div>
         </section>
       </main>
@@ -247,9 +281,14 @@ function Index() {
       <footer className="border-t">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-muted-foreground">
           <span>© 2026 AppBuilder.ai</span>
-          <a href="mailto:daniel@appbuilder.ai" className="hover:text-foreground">
-            daniel@appbuilder.ai
-          </a>
+          <div className="flex items-center gap-4">
+            <a href="/privacy" className="hover:text-foreground">
+              Privacy
+            </a>
+            <a href="mailto:daniel@appbuilder.ai" className="hover:text-foreground">
+              daniel@appbuilder.ai
+            </a>
+          </div>
         </div>
       </footer>
     </div>
