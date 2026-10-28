@@ -1,0 +1,73 @@
+[
+ {
+  "id": "ORD-1007",
+  "channel": "email",
+  "from": "ana@alba.example.com",
+  "client": "Demo Processor Alba (demo)",
+  "subject": "Comanda Demo Processor Alba",
+  "text": "Buna ziua,\nPentru marti 3.11:\nMB52-T 2000 m\nMB42-M 1200 m\nMultumim, Ana",
+  "expected": {
+   "stage": "Ready to confirm",
+   "exception": null
+  }
+ },
+ {
+  "id": "ORD-1008",
+  "channel": "email",
+  "from": "mihai@cluj.example.com",
+  "client": "Demo Processor Cluj (demo)",
+  "subject": "Comanda Demo Processor Cluj",
+  "text": "Va rog 4200 m din 300004289, livrare miercuri 4 noiembrie.",
+  "expected": {
+   "stage": "Waiting on client",
+   "exception": "4,200 m does not fill whole 500 m rolls. Proposed 9 rolls (4,500 m) and asked the client to confirm."
+  }
+ },
+ {
+  "id": "ORD-1009",
+  "channel": "email",
+  "from": "radu@brasov.example.com",
+  "client": "Demo Processor Brasov (demo)",
+  "subject": "Comanda Demo Processor Brasov",
+  "text": "Buna, ne trebuie F45 natur 1500 m si C45 2130 m, joi 5.11. Radu",
+  "expected": {
+   "stage": "Needs staff",
+   "exception": "Client code F45 has no match yet. Closest item by type, calibre and colour: 300004289 (fibrous, cal 45). Staff to confirm the match once; later orders with F45 will match on their own."
+  }
+ },
+ {
+  "id": "ORD-1010",
+  "channel": "whatsapp",
+  "from": "+40700000003",
+  "client": "Demo Processor Sibiu (demo)",
+  "text": "COL20 1524 m, luni daca se poate",
+  "expected": {
+   "stage": "Needs staff",
+   "exception": "Client is overdue on payment. Order held and finance alerted."
+  }
+ },
+ {
+  "id": "ORD-1011",
+  "channel": "email",
+  "from": "ana@alba.example.com",
+  "client": "Demo Processor Alba (demo)",
+  "subject": "Comanda Demo Processor Alba",
+  "text": "Buna ziua,\nPentru marti 3.11:\nMB52-T 2000 m\nMB42-M 1200 m\nMultumim, Ana",
+  "expected": {
+   "stage": "Duplicate",
+   "exception": "Same order as ORD-1007, sent twice. Linked to ORD-1007 and not entered again."
+  }
+ },
+ {
+  "id": "ORD-1012",
+  "channel": "email",
+  "from": "mihai@cluj.example.com",
+  "client": "Demo Processor Cluj (demo)",
+  "subject": "Comanda Demo Processor Cluj",
+  "text": "Buna ziua, 1200 m 300004214 si 800 m 500042787. Vineri 6.11. Mihai",
+  "expected": {
+   "stage": "Needs staff",
+   "exception": "500042787 is not on this client's negotiated list. Left it out of the order and opened a quote request."
+  }
+ }
+]

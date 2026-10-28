@@ -1,0 +1,134 @@
+{
+ "clients": [
+  {
+   "key": "alba",
+   "name": "Demo Processor Alba (demo)",
+   "domain": "alba.example.com",
+   "city": "Alba Iulia",
+   "payment_status": "current",
+   "negotiated_skus": ["500045289", "500030513", "500059316", "500041355"],
+   "contact": {"firstname": "Ana", "lastname": "Demo Alba", "email": "ana@alba.example.com", "mobilephone": "+40700000001"}
+  },
+  {
+   "key": "cluj",
+   "name": "Demo Processor Cluj (demo)",
+   "domain": "cluj.example.com",
+   "city": "Cluj-Napoca",
+   "payment_status": "current",
+   "negotiated_skus": ["300004214", "300004289", "300005331"],
+   "contact": {"firstname": "Mihai", "lastname": "Demo Cluj", "email": "mihai@cluj.example.com", "mobilephone": "+40700000002"}
+  },
+  {
+   "key": "sibiu",
+   "name": "Demo Processor Sibiu (demo)",
+   "domain": "sibiu.example.com",
+   "city": "Sibiu",
+   "payment_status": "overdue",
+   "negotiated_skus": ["500052051", "500063406"],
+   "contact": {"firstname": "Elena", "lastname": "Demo Sibiu", "email": "elena@sibiu.example.com", "mobilephone": "+40700000003"}
+  },
+  {
+   "key": "brasov",
+   "name": "Demo Processor Brasov (demo)",
+   "domain": "brasov.example.com",
+   "city": "Brasov",
+   "payment_status": "current",
+   "negotiated_skus": ["300004214", "701099508", "500042787", "300004289"],
+   "contact": {"firstname": "Radu", "lastname": "Demo Brasov", "email": "radu@brasov.example.com", "mobilephone": "+40700000004"}
+  }
+ ],
+ "orders": [
+  {
+   "id": "ORD-1001", "client": "alba", "channel": "email", "received": "2026-10-19", "delivery_date": "2026-10-22", "stage": "Confirmed",
+   "raw_order_text": "Buna ziua,\nVa rog sa ne trimiteti:\nMB52-T - 4500 m\nMB42-M - 2400 m\nLivrare joi 22.10.\nMultumesc, Ana",
+   "lines": [
+    {"sku": "500045289", "client_code": "MB52-T", "metres": 4500, "confidence": 0.97},
+    {"sku": "500030513", "client_code": "MB42-M", "metres": 2400, "confidence": 0.95}
+   ]
+  },
+  {
+   "id": "ORD-1002", "client": "alba", "channel": "whatsapp", "received": "2026-10-20", "delivery_date": "2026-10-23", "stage": "Confirmed",
+   "raw_order_text": "Salut! MB58-T 3000m pt vineri pls",
+   "lines": [
+    {"sku": "500059316", "client_code": "MB58-T", "metres": 3000, "confidence": 0.93}
+   ]
+  },
+  {
+   "id": "ORD-1003", "client": "cluj", "channel": "pdf", "received": "2026-10-20", "delivery_date": "2026-10-27", "stage": "Confirmed",
+   "raw_order_text": "COMANDA NR. 4512 / 20.10.2026\n1. 300004214 - 2400 ml\n2. 300004289 - 1500 ml\nTermen livrare: 27.10.2026",
+   "lines": [
+    {"sku": "300004214", "client_code": null, "metres": 2400, "confidence": 0.99},
+    {"sku": "300004289", "client_code": null, "metres": 1500, "confidence": 0.99}
+   ]
+  },
+  {
+   "id": "ORD-1004", "client": "cluj", "channel": "email", "received": "2026-10-22", "delivery_date": "2026-10-29", "stage": "Confirmed",
+   "raw_order_text": "Buna ziua, avem nevoie de 1000 m din 300005331 pana pe 29. Mersi, Mihai",
+   "lines": [
+    {"sku": "300005331", "client_code": null, "metres": 1000, "confidence": 0.98}
+   ]
+  },
+  {
+   "id": "ORD-1005", "client": "brasov", "channel": "email", "received": "2026-10-22", "delivery_date": "2026-10-30", "stage": "Confirmed",
+   "raw_order_text": "Comanda saptamana viitoare:\nF40 transparent 3600 m\nC45 4260 m\nLivrare vineri 30.10\nRadu",
+   "lines": [
+    {"sku": "300004214", "client_code": "F40", "metres": 3600, "confidence": 0.94},
+    {"sku": "701099508", "client_code": "C45", "metres": 4260, "confidence": 0.92}
+   ]
+  },
+  {
+   "id": "ORD-1006", "client": "sibiu", "channel": "whatsapp", "received": "2026-10-23", "delivery_date": "2026-10-28", "stage": "Confirmed",
+   "raw_order_text": "Buna, COL21 7620 metri pt miercuri. Elena",
+   "lines": [
+    {"sku": "500052051", "client_code": "COL21", "metres": 7620, "confidence": 0.95}
+   ]
+  },
+  {
+   "id": "ORD-1007", "client": "alba", "channel": "email", "received": "2026-10-28", "delivery_date": "2026-11-03", "stage": "Ready to confirm",
+   "raw_order_text": "Buna ziua,\nPentru marti 3.11:\nMB52-T 2000 m\nMB42-M 1200 m\nMultumim, Ana",
+   "lines": [
+    {"sku": "500045289", "client_code": "MB52-T", "metres": 2000, "confidence": 0.98},
+    {"sku": "500030513", "client_code": "MB42-M", "metres": 1200, "confidence": 0.97}
+   ]
+  },
+  {
+   "id": "ORD-1008", "client": "cluj", "channel": "email", "received": "2026-10-28", "delivery_date": "2026-11-04", "stage": "Waiting on client",
+   "exception_reason": "4,200 m does not fill whole 500 m rolls. Proposed 9 rolls (4,500 m) and asked the client to confirm.",
+   "raw_order_text": "Va rog 4200 m din 300004289, livrare miercuri 4 noiembrie.",
+   "lines": [
+    {"sku": "300004289", "client_code": null, "metres": 4200, "confidence": 0.96}
+   ]
+  },
+  {
+   "id": "ORD-1009", "client": "brasov", "channel": "email", "received": "2026-10-28", "delivery_date": "2026-11-05", "stage": "Needs staff",
+   "exception_reason": "Client code F45 has no match yet. Closest item by type, calibre and colour: 300004289 (fibrous, cal 45). Staff to confirm the match once; later orders with F45 will match on their own.",
+   "raw_order_text": "Buna, ne trebuie F45 natur 1500 m si C45 2130 m, joi 5.11. Radu",
+   "lines": [
+    {"sku": null, "client_code": "F45", "metres": 1500, "confidence": 0.61, "suggested_sku": "300004289"},
+    {"sku": "701099508", "client_code": "C45", "metres": 2130, "confidence": 0.95}
+   ]
+  },
+  {
+   "id": "ORD-1010", "client": "sibiu", "channel": "whatsapp", "received": "2026-10-28", "delivery_date": "2026-11-02", "stage": "Needs staff",
+   "exception_reason": "Client is overdue on payment. Order held and finance alerted.",
+   "raw_order_text": "COL20 1524 m, luni daca se poate",
+   "lines": [
+    {"sku": "500063406", "client_code": "COL20", "metres": 1524, "confidence": 0.94}
+   ]
+  },
+  {
+   "id": "ORD-1011", "client": "alba", "channel": "email", "received": "2026-10-28", "delivery_date": "2026-11-03", "stage": "Duplicate",
+   "exception_reason": "Same order as ORD-1007, sent twice. Linked to ORD-1007 and not entered again.",
+   "raw_order_text": "Buna ziua,\nPentru marti 3.11:\nMB52-T 2000 m\nMB42-M 1200 m\nMultumim, Ana",
+   "lines": []
+  },
+  {
+   "id": "ORD-1012", "client": "cluj", "channel": "email", "received": "2026-10-28", "delivery_date": "2026-11-06", "stage": "Needs staff",
+   "exception_reason": "500042787 is not on this client's negotiated list. Left it out of the order and opened a quote request.",
+   "raw_order_text": "Buna ziua, 1200 m 300004214 si 800 m 500042787. Vineri 6.11. Mihai",
+   "lines": [
+    {"sku": "300004214", "client_code": null, "metres": 1200, "confidence": 0.98}
+   ]
+  }
+ ]
+}
