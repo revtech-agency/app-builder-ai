@@ -15,6 +15,13 @@
       "when": 1793207023283,
       "tag": "0001_add_ap_reviewer_role",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793211820484,
+      "tag": "0002_add_client_admin_role",
+      "breakpoints": true
     }
   ]
 }

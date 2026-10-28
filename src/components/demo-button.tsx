@@ -4,12 +4,14 @@ import { useState } from "react";
 import type { ComponentProps } from "react";
 import { toast } from "sonner";
 
+import { supabase } from "@/integrations/supabase/client";
+import { getApDemoSignIn, getDemoSignIn } from "@/lib/admin";
+
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/auth";
 
 // Signs in to the shared casings demo account (no admin rights) and opens the app.
+// Kept independent of the auth context so the button renders anywhere, provider or not.
 export function DemoButton(props: Omit<ComponentProps<typeof Button>, "onClick">) {
-  const { signInDemo } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
 
@@ -21,7 +23,12 @@ export function DemoButton(props: Omit<ComponentProps<typeof Button>, "onClick">
       onClick={async () => {
         setBusy(true);
         try {
-          await signInDemo();
+          const { tokenHash } = await getDemoSignIn();
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: "magiclink",
+          });
+          if (error) throw error;
           navigate({ to: "/app" });
         } catch (err) {
           toast.error(err instanceof Error ? err.message : "Couldn't open the demo.");
@@ -42,7 +49,6 @@ export function ApDemoButton({
   children = "Try the invoice desk",
   ...props
 }: Omit<ComponentProps<typeof Button>, "onClick">) {
-  const { signInApDemo } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
 
@@ -54,7 +60,12 @@ export function ApDemoButton({
       onClick={async () => {
         setBusy(true);
         try {
-          await signInApDemo();
+          const { tokenHash } = await getApDemoSignIn();
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: "magiclink",
+          });
+          if (error) throw error;
           navigate({ to: "/app/overview" });
         } catch (err) {
           toast.error(err instanceof Error ? err.message : "Couldn't open the invoice desk demo.");
