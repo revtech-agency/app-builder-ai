@@ -22,7 +22,12 @@ export async function isAdmin(userId: string): Promise<boolean> {
     .eq("user_id", userId)
     .eq("role", "admin")
     .maybeSingle();
-  if (error) throw new Error(`Could not check roles: ${error.message}`);
+  if (error) {
+    // Roles table not created yet (PostgREST PGRST205): nobody is an admin, but
+    // customer and demo sign-ins keep working.
+    if (error.code === "PGRST205") return false;
+    throw new Error(`Could not check roles: ${error.message}`);
+  }
   return Boolean(data);
 }
 
