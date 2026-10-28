@@ -3,7 +3,6 @@ import {
   ArrowRight,
   BadgeCheck,
   ClipboardList,
-  FileText,
   Plug,
   Receipt,
   ShieldCheck,
@@ -12,7 +11,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-import aiWorkersImage from "@/assets/ai-workers-paper-processes.jpg";
+import aiWorkersImage from "@/assets/ai-workers-robots-conveyor.jpg";
 import heroImage from "@/assets/hero-robotic-document-workflow.jpg";
 import { BackToTop } from "@/components/back-to-top";
 import { ContactForm } from "@/components/contact-form";
@@ -26,12 +25,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "AI workers that enter orders, send quotes and place purchases for SMEs, priced per piece of work, with a person approving every sensitive step.",
+          "AI workers that take SME purchasing and orders off the phone and the inbox, priced per piece of work, with a person approving every sensitive step.",
       },
       { property: "og:title", content: "AppBuilder.ai — AI workers for SME back-office work" },
       {
         property: "og:description",
-        content: "Orders entered, quotes sent, purchases placed. Priced per piece of work done.",
+        content:
+          "AI workers that take SME purchasing and orders off the phone and the inbox. Priced per piece of work done.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -40,18 +40,19 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const STATS = [
+  { value: "5%", text: "of Romanian enterprises use AI (EU: 20%), Eurostat 2025" },
+  { value: "12 min", text: "to retype one order by hand" },
+];
+
 const PROBLEMS = [
   {
-    title: "Orders retyped",
-    text: "Orders arrive by email, WhatsApp, PDF and phone, and someone keys each one into the ERP or a spreadsheet.",
-  },
-  {
-    title: "Quotes take days",
-    text: "The owner prices every request by hand from drawings, emails and old spreadsheets, and slow quotes cost jobs.",
+    title: "Orders and quotes retyped",
+    text: "Orders arrive by email, WhatsApp, PDF and phone. Someone keys each one into the ERP, prices the quote by hand and confirms it.",
   },
   {
     title: "Purchasing by phone",
-    text: "Supplier offers are compared in spreadsheets, and late deliveries are chased one call at a time.",
+    text: "Supplier invoices are checked line by line against orders and deliveries, and suppliers are chased one call at a time.",
   },
   {
     title: "No IT, real risk",
@@ -62,39 +63,31 @@ const PROBLEMS = [
 const WORKERS = [
   {
     icon: ClipboardList,
-    name: "Order worker",
-    text: "Reads orders from email, WhatsApp and PDF, maps each client's codes to your items, then enters and confirms them.",
-  },
-  {
-    icon: FileText,
-    name: "Quote worker",
-    text: "Prices each request from your rules and past jobs, sends the offer and follows up.",
+    side: "Selling side",
+    name: "Quote & order worker",
+    text: "Customer order by email, live chat or WhatsApp → quote → confirmed order. Maps each client's codes to your items and converts quantities into packs.",
   },
   {
     icon: ShoppingCart,
+    side: "Buying side",
     name: "Purchasing worker",
-    text: "Compares supplier offers, raises the PO after approval and chases late deliveries.",
-  },
-  {
-    icon: Sparkles,
-    name: "The next worker",
-    text: "Invoice matching, delivery scheduling, payment reminders: any repeatable flow, built on the same modules.",
+    text: "Supplier invoice → matched three ways to the purchase order and the delivery note → approved for payment. Catches changed IBANs, duplicates, split purchases and overbilling.",
   },
 ];
 
 const STEPS = [
-  { name: "Read", text: "Sorts each message: order, change or request." },
-  { name: "Extract", text: "Pulls out items, quantities and dates, with a confidence score." },
-  { name: "Check", text: "Matches codes, item lists, pack sizes and minimums." },
-  { name: "Decide", text: "Clean: one-click confirm. Fixable: asks the client. Risky: to staff." },
-  { name: "Act", text: "Updates the CRM or ERP and replies to the client." },
+  { name: "Read", text: "Sorts each email and attachment." },
+  { name: "Extract", text: "Pulls every field, with a confidence score." },
+  { name: "Check", text: "Against POs, catalogue and history." },
+  { name: "Decide", text: "Clear: one click. Fixable: asks a question. Risky: to a person." },
+  { name: "Act", text: "Updates the system, replies and logs every step." },
 ];
 
 const PRINCIPLES = [
   {
     icon: Receipt,
     title: "Priced on work done",
-    text: "You pay per order, quote or PO handled, not per seat.",
+    text: "You pay per order or purchasing document handled, not per seat.",
   },
   {
     icon: UserCheck,
@@ -104,7 +97,7 @@ const PRINCIPLES = [
   {
     icon: ShieldCheck,
     title: "Hosted in the EU",
-    text: "Your data stays in the EU, with permissions and an audit trail on every action.",
+    text: "Production runs in the EU, with permissions and an audit trail on every action.",
   },
   {
     icon: Plug,
@@ -151,12 +144,12 @@ function Index() {
                 AI workers for SME back-office work
               </p>
               <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
-                Orders entered, quotes sent, purchases placed.
+                AI workers that take SME purchasing and orders off the phone and the inbox.
               </h1>
               <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-                AppBuilder.ai runs the repeatable work your team retypes, chases and compares every
-                day. Each worker handles the clean cases on its own and flags only the exceptions,
-                with a person approving every sensitive step.
+                Two workers today: quote &amp; order, and purchasing. Each handles the clean cases
+                on its own and flags only the exceptions, with a person approving every sensitive
+                step.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <OpenAppButton size="lg" />
@@ -172,9 +165,17 @@ function Index() {
         <section className="border-y bg-muted/40">
           <div className="mx-auto w-full max-w-6xl px-4 py-16">
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              SMEs pay people to retype, chase and compare
+              SMEs still run purchasing and orders by phone and email
             </h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <dl className="mt-8 grid gap-6 sm:grid-cols-2">
+              {STATS.map((s) => (
+                <div key={s.value}>
+                  <dt className="text-5xl font-semibold tracking-tight md:text-6xl">{s.value}</dt>
+                  <dd className="mt-2 text-sm text-muted-foreground">{s.text}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {PROBLEMS.map((p) => (
                 <div key={p.title} className="rounded-xl border bg-card p-5">
                   <h3 className="font-semibold">{p.title}</h3>
@@ -200,12 +201,19 @@ function Index() {
                   <w.icon className="size-5" />
                 </span>
                 <div>
+                  <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                    {w.side}
+                  </p>
                   <h3 className="font-semibold">{w.name}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{w.text}</p>
                 </div>
               </div>
             ))}
           </div>
+          <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <Sparkles className="size-4 shrink-0 text-foreground" />
+            Payment reminders, delivery scheduling: the next worker runs on the same modules.
+          </p>
         </section>
 
         <section className="border-y bg-muted/40">
@@ -224,6 +232,9 @@ function Index() {
                 </li>
               ))}
             </ol>
+            <p className="mt-6 text-muted-foreground">
+              A person fixes a match once, and the worker gets it right the next time.
+            </p>
           </div>
         </section>
 
@@ -242,7 +253,7 @@ function Index() {
         <section className="mx-auto w-full max-w-6xl px-4 pb-20">
           <div className="rounded-2xl bg-primary px-6 py-12 text-center text-primary-foreground md:px-12">
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              See a worker handle real orders
+              See a worker handle real orders and invoices
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-primary-foreground/80">
               Sign in to the app to try it, or tell us which flow eats your team's week.
@@ -266,14 +277,14 @@ function Index() {
           <div>
             <h2 className="text-2xl font-semibold tracking-tight">Contact us</h2>
             <p className="mt-3 max-w-md text-muted-foreground">
-              Tell us who you are and we'll get back to you about running your order, quote or
+              Tell us who you are and we'll get back to you about running your quote &amp; order or
               purchasing flow on an AI worker.
             </p>
             <img
               src={aiWorkersImage}
-              alt="AI workers read, understand and act on paper business documents, taking a B2B order from processing to fulfilment without manual work."
-              width={900}
-              height={900}
+              alt="Three robot AI workers at a conveyor: one reads a stack of orders, one processes them on a laptop, one packs boxes for fulfilment."
+              width={1254}
+              height={395}
               loading="lazy"
               className="mt-6 w-full max-w-md rounded-lg border"
             />
