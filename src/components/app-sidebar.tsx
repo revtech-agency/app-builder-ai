@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Building2,
   FileInput,
+  History,
   Inbox,
   LogOut,
   MessageSquarePlus,
@@ -199,6 +200,18 @@ export function AppSidebar() {
                     >
                       <ShieldCheck />
                       <span>Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild className={activeMarker}>
+                    <Link
+                      to="/app/admin-old"
+                      activeProps={{ "data-active": "true" }}
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      <History />
+                      <span>Admin (old)</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

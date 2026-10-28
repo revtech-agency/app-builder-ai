@@ -1,92 +1,48 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { formatDistanceToNow } from "date-fns";
-import { toast } from "sonner";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
-import { StatusBadge } from "@/components/status-badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { listUsers, setAdmin } from "@/lib/admin";
 import { useAuth } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/admin")({
   head: () => ({ meta: [{ title: "Admin — AppBuilder.ai" }] }),
-  component: AdminPage,
+  component: AdminLayout,
 });
 
-function AdminPage() {
-  const { user, isAdmin } = useAuth();
-  const queryClient = useQueryClient();
-  const users = useQuery({
-    queryKey: ["admin-users"],
-    queryFn: () => listUsers(),
-    enabled: isAdmin,
-  });
-  const toggle = useMutation({
-    mutationFn: (data: { userId: string; admin: boolean }) => setAdmin({ data }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
-    onError: (err) => toast.error(err.message),
-  });
+const tabs = [
+  { to: "/app/admin/purchase-orders", label: "Purchase orders" },
+  { to: "/app/admin/suppliers", label: "Suppliers" },
+  { to: "/app/admin/users", label: "Users & roles" },
+  { to: "/app/admin/rules", label: "Approval rules" },
+] as const;
 
+function AdminLayout() {
+  const { isAdmin } = useAuth();
   if (!isAdmin) {
     return <p className="p-6 text-sm text-muted-foreground">This page is for admins only.</p>;
   }
-
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
-      <h1 className="text-2xl font-semibold">Admin</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Users</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {users.isLoading && <p className="text-sm text-muted-foreground">Loading users…</p>}
-          {users.isError && <p className="text-sm text-destructive">{users.error.message}</p>}
-          {users.data && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.data.map((u) => (
-                  <TableRow key={u.id}>
-                    <TableCell className="font-medium">{u.email}</TableCell>
-                    <TableCell className="whitespace-nowrap text-muted-foreground">
-                      {formatDistanceToNow(new Date(u.createdAt), { addSuffix: true })}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={u.isAdmin ? "admin" : "user"} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={toggle.isPending || (u.isAdmin && u.id === user?.id)}
-                        onClick={() => toggle.mutate({ userId: u.id, admin: !u.isAdmin })}
-                      >
-                        {u.isAdmin ? "Remove admin" : "Make admin"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+    <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Admin</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Purchase orders, suppliers and the rules the invoice worker checks against.
+        </p>
+      </div>
+      <nav className="-mx-4 flex gap-1 overflow-x-auto border-b px-4 md:mx-0 md:px-0">
+        {tabs.map((t) => (
+          <Link
+            key={t.to}
+            to={t.to}
+            className={cn(
+              "-mb-px whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-sm text-muted-foreground hover:text-foreground",
+            )}
+            activeProps={{ className: "border-primary font-semibold text-foreground" }}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </nav>
+      <Outlet />
     </div>
   );
 }

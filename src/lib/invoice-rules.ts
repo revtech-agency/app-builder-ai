@@ -23,6 +23,17 @@ export const PO_STAGES: Record<string, { key: string; label: string }> = {
   "6318169337": { key: "po_closed", label: "PO closed" },
 };
 
+export const poStageIdFor = (key: string) =>
+  Object.entries(PO_STAGES).find(([, s]) => s.key === key)?.[0] ?? null;
+
+// A PO's stage follows its delivery notes; only closing it is a manual step.
+export function poStageFor(lines: { quantity: number; receivedQuantity: number }[], closed: boolean) {
+  if (closed) return "po_closed";
+  const received = lines.filter((l) => l.receivedQuantity > 0);
+  if (received.length === 0) return "po_open";
+  return lines.every((l) => l.receivedQuantity >= l.quantity) ? "po_fully_received" : "po_partly_received";
+}
+
 export const stageIdFor = (key: string) =>
   Object.entries(INVOICE_STAGES).find(([, s]) => s.key === key)?.[0] ?? null;
 

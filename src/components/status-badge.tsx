@@ -80,11 +80,13 @@ const statusTone: Record<string, Tone> = {
   qty_off: "danger",
   // supplier status
   on_hold: "warning",
+  pending_onboarding: "warning",
   // payment
   current: "success",
   overdue: "danger",
   // roles
   admin: "info",
+  ap_reviewer: "info",
   user: "muted",
   low: "muted",
 };

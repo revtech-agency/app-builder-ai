@@ -81,6 +81,7 @@ export type PurchaseOrder = {
   amount: number;
   stage: string;
   stageLabel: string;
+  supplierId: string | null;
   supplierName: string | null;
   lines: PoLine[];
 };
@@ -284,7 +285,7 @@ function toPoLine(o: HsObject): PoLine {
 
 async function buildPurchaseOrders(deals: HsObject[]): Promise<PurchaseOrder[]> {
   const ids = deals.map((d) => d.id);
-  const [{ byDeal }, lineAssoc] = await Promise.all([
+  const [{ byDeal, assoc }, lineAssoc] = await Promise.all([
     supplierNames(ids),
     readAssoc("deals", "line_items", ids),
   ]);
@@ -300,6 +301,7 @@ async function buildPurchaseOrders(deals: HsObject[]): Promise<PurchaseOrder[]> 
       amount: num(p["amount"]) ?? 0,
       stage: stage?.key ?? "po_open",
       stageLabel: stage?.label ?? "Unknown",
+      supplierId: assoc.get(d.id)?.[0] ?? null,
       supplierName: byDeal.get(d.id) ?? null,
       lines: (lineAssoc.get(d.id) ?? [])
         .map((id) => lines.get(id))

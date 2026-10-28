@@ -6,7 +6,7 @@ const N8N_BASE = "https://revtech-agency.app.n8n.cloud/webhook";
 
 export async function hubspot<T>(
   path: string,
-  init: { method?: "GET" | "POST" | "PATCH"; body?: unknown } = {},
+  init: { method?: "GET" | "POST" | "PATCH" | "PUT"; body?: unknown } = {},
 ): Promise<T> {
   const token = process.env["HUBSPOT_ACCESS_TOKEN"];
   if (!token) throw new Error("HubSpot isn't configured yet (missing HUBSPOT_ACCESS_TOKEN).");
