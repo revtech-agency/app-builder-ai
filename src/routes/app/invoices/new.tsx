@@ -116,6 +116,10 @@ function SubmitPage() {
           Paste a supplier email or attach a PDF invoice. The worker reads it, runs the three-way
           match and files it.
         </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Use a sample, or your own invoice: it's checked against the sample suppliers and purchase
+          orders, so an invoice from a supplier or PO that isn't in the demo lands in Needs review.
+        </p>
       </div>
 
       <Card>

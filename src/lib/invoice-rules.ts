@@ -150,3 +150,20 @@ export function invoiceChecks(i: CheckInput): Check[] {
     { label: "Confidence ≥ 0.8", passed: !flags.has("low_confidence") },
   ];
 }
+
+// The demo's sample history (loaded by scripts/hubspot/setup-invoices.ts): each invoice's
+// source_message_id with the stage and approver it starts in. "Reset demo" restores these and
+// archives every other invoice.
+export const DEMO_HISTORY: Record<string, { stage: string; approvedBy: string | null }> = {
+  "demo-INV-H1": { stage: "approved_for_payment", approvedBy: "daniel@appbuilder.ai" },
+  "demo-INV-H2": { stage: "approved_for_payment", approvedBy: "daniel@appbuilder.ai" },
+  "demo-INV-H3": { stage: "ready_to_approve", approvedBy: null },
+  "demo-INV-H4": { stage: "ready_to_approve", approvedBy: null },
+  "demo-INV-H5": { stage: "approved_for_payment", approvedBy: "daniel@appbuilder.ai" },
+  "demo-INV-H6": { stage: "needs_review", approvedBy: null },
+};
+
+// The audit note the setup script wrote on each history invoice; every other note on them
+// (reviewer decisions made during a demo) is removed by "Reset demo".
+export const isHistoryAuditNote = (body: string | null | undefined) =>
+  (body ?? "").includes("AppBuilder.ai invoice worker · INV-H");

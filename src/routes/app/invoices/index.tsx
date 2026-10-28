@@ -1,10 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { RotateCcw, Search } from "lucide-react";
+import { toast } from "sonner";
 import { useMemo, useState } from "react";
 
 import { AnomalyChips, approvalShort } from "@/components/invoice-bits";
 import { StatusBadge } from "@/components/status-badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,7 +31,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate, formatMoney } from "@/lib/format";
-import { listInvoices } from "@/lib/invoices";
+import { listInvoices, resetDemo } from "@/lib/invoices";
 import type { InvoiceSummary } from "@/lib/invoices";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +71,17 @@ function QueuePage() {
   const [tab, setTab] = useState<string>("needs_review");
   const [q, setQ] = useState("");
   const invoices = useQuery({ queryKey: ["invoices"], queryFn: () => listInvoices() });
+  const qc = useQueryClient();
+  const reset = useMutation({
+    mutationFn: () => resetDemo(),
+    onSuccess: async (r) => {
+      toast.success("Demo reset", {
+        description: `${r.archivedInvoices} added invoice(s) removed, ${r.restoredInvoices} sample invoice(s) restored.`,
+      });
+      await qc.invalidateQueries();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
   const all = invoices.data ?? [];
 
   const stats = useMemo(() => {
@@ -104,9 +127,32 @@ function QueuePage() {
             Supplier invoices checked by the AI worker, waiting for your decision.
           </p>
         </div>
-        <Button asChild>
-          <Link to="/app/invoices/new">Submit document</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" disabled={reset.isPending}>
+                <RotateCcw /> {reset.isPending ? "Resetting…" : "Reset demo"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset the demo?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Removes every invoice submitted during the demo and puts the six sample invoices
+                  back as they started, so the sample emails work again. Suppliers and purchase
+                  orders stay as they are.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => reset.mutate()}>Reset demo</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Button asChild>
+            <Link to="/app/invoices/new">Submit document</Link>
+          </Button>
+        </div>
       </div>
 
       {invoices.isLoading ? (
