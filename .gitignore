@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local secrets: keep keys in .env.local (.env is Lovable's tracked, public Supabase config)
+.env.*
+!.env.example

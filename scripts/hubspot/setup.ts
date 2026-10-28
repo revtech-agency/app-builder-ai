@@ -12,7 +12,7 @@
  *                                                # history) and writes the rest to
  *                                                # data/live-messages.json for the live run
  *
- * Needs HUBSPOT_API_KEY (a private app token) in .env.
+ * Needs HUBSPOT_API_KEY (a private app token) in .env.local, which git ignores.
  */
 import catalogue from "./data/catalogue.json";
 import demo from "./data/demo-orders.json";
@@ -23,7 +23,7 @@ const HISTORY_ONLY = process.argv.includes("--history-only");
 const BASE = "https://api.hubapi.com";
 const GROUP = "appbuilder_order_worker";
 
-if (!TOKEN) throw new Error("HUBSPOT_API_KEY is missing: copy .env.example to .env and add the token");
+if (!TOKEN) throw new Error("HUBSPOT_API_KEY is missing: copy .env.example to .env.local and add the token");
 
 type Product = (typeof catalogue)[number];
 type Order = (typeof demo.orders)[number];
