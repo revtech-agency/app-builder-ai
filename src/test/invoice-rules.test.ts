@@ -3,10 +3,13 @@ import { describe, expect, it } from "vitest";
 import {
   applyDemoReset,
   approvalLevelFor,
+  CHECK_REASONS,
   DEMO_HISTORY,
+  invoiceChecks,
   isHistoryAuditNote,
   poStageFor,
   stageIdFor,
+  suggestedComment,
 } from "@/lib/invoice-rules";
 
 describe("approvalLevelFor", () => {
@@ -74,4 +77,47 @@ describe("applyDemoReset", () => {
   it("leaves the queue alone when nothing changed", () => {
     expect(applyDemoReset(queue, { archivedIds: [], restored: [] })).toEqual(queue);
   });
+});
+
+describe("suggestedComment", () => {
+  const base = {
+    stageKey: "needs_review",
+    invoiceDate: "2026-10-27",
+    ibanOnInvoice: "RO00 OTHER",
+    anomalyFlags: ["iban_mismatch"],
+    supplier: {
+      status: "approved",
+      iban: "RO34DEMO0000000000001002",
+      ibanChangedOn: null,
+      certificateValidUntil: "2027-06-30",
+    },
+    poFound: true,
+    lineChecks: [["matched"]],
+  };
+
+  it("has a reason for every check the desk shows", () => {
+    for (const c of invoiceChecks(base)) expect(CHECK_REASONS[c.label]).toBeDefined();
+  });
+
+  it("starts a send-back comment from the failed checks", () =>
+    expect(suggestedComment("send_back", invoiceChecks(base))).toBe(
+      "Sent back because the IBAN on the invoice differs from the one on file. Please send a corrected invoice.",
+    ));
+
+  it("joins several reasons for a rejection", () =>
+    expect(
+      suggestedComment("reject", [
+        { label: "PO found", passed: false },
+        { label: "Prices within 2%", passed: false },
+        { label: "Supplier approved", passed: true },
+      ]),
+    ).toBe(
+      "Rejected because no matching purchase order was found; some prices differ from the PO by more than 2%.",
+    ));
+
+  it("leaves the comment empty when every check passed", () =>
+    expect(suggestedComment("send_back", [{ label: "PO found", passed: true }])).toBe(""));
+
+  it("has a fixed text for duplicates", () =>
+    expect(suggestedComment("duplicate", [])).toBe("Duplicate of an invoice we already received."));
 });

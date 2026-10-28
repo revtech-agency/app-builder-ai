@@ -41,7 +41,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate, formatMoney } from "@/lib/format";
 import { markDemoStep } from "@/lib/demo-guide";
-import { daysBetween, invoiceChecks, normIban } from "@/lib/invoice-rules";
+import { daysBetween, invoiceChecks, normIban, suggestedComment } from "@/lib/invoice-rules";
 import { askAssistant, decideInvoice, getInvoice } from "@/lib/invoices";
 import type { InvoiceDetail, InvoiceLine, PoLine } from "@/lib/invoices";
 import { cn } from "@/lib/utils";
@@ -361,6 +361,11 @@ function InvoicePage() {
     [d],
   );
 
+  const openDialog = (decision: Exclude<Decision, "approve">) => {
+    setComment(suggestedComment(decision, checks));
+    setDialog(decision);
+  };
+
   const closed = d ? ["approved_for_payment", "rejected", "duplicate"].includes(d.stage) : true;
 
   return (
@@ -538,14 +543,14 @@ function InvoicePage() {
               <Button
                 variant="outline"
                 disabled={closed || decide.isPending}
-                onClick={() => setDialog("send_back")}
+                onClick={() => openDialog("send_back")}
               >
                 Send back
               </Button>
               <Button
                 variant="outline"
                 disabled={closed || decide.isPending}
-                onClick={() => setDialog("duplicate")}
+                onClick={() => openDialog("duplicate")}
               >
                 Mark duplicate
               </Button>
@@ -553,7 +558,7 @@ function InvoicePage() {
                 variant="outline"
                 className="col-span-2 text-destructive md:col-span-1"
                 disabled={closed || decide.isPending}
-                onClick={() => setDialog("reject")}
+                onClick={() => openDialog("reject")}
               >
                 Reject
               </Button>
@@ -591,7 +596,8 @@ function InvoicePage() {
                   <DialogHeader>
                     <DialogTitle>{DECISION_TEXT[dialog].title}</DialogTitle>
                     <DialogDescription>
-                      Add a comment — it's saved to the invoice's activity.
+                      We've started a comment from the failed checks. Edit it, then save; it goes on
+                      the invoice's activity.
                     </DialogDescription>
                   </DialogHeader>
                   <Textarea

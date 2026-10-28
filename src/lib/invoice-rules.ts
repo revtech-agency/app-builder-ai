@@ -151,6 +151,35 @@ export function invoiceChecks(i: CheckInput): Check[] {
   ];
 }
 
+// Plain-English reason per failed check, used to start the reviewer's decision comment.
+// Keyed by the labels invoiceChecks returns; the test keeps the two in step.
+export const CHECK_REASONS: Record<string, string> = {
+  "Supplier approved": "the supplier isn't approved in the vendor list",
+  "IBAN matches file": "the IBAN on the invoice differs from the one on file",
+  "IBAN not recently changed":
+    "the supplier's IBAN changed in the last 30 days and needs a call-back check",
+  "Not a duplicate": "an invoice with this number was already received",
+  "PO found": "no matching purchase order was found",
+  "Prices within 2%": "some prices differ from the PO by more than 2%",
+  "Quantities delivered": "some quantities are higher than what was delivered",
+  "Tax certificate valid": "the supplier's tax certificate is missing or expired",
+  "Confidence ≥ 0.8": "parts of the document couldn't be read reliably",
+};
+
+// A starting comment for the decision dialog; the reviewer edits it before saving.
+export function suggestedComment(
+  decision: "send_back" | "reject" | "duplicate",
+  checks: Check[],
+): string {
+  if (decision === "duplicate") return "Duplicate of an invoice we already received.";
+  const reasons = checks.filter((c) => !c.passed).map((c) => CHECK_REASONS[c.label] ?? c.label);
+  if (reasons.length === 0) return "";
+  const list = reasons.join("; ");
+  return decision === "send_back"
+    ? `Sent back because ${list}. Please send a corrected invoice.`
+    : `Rejected because ${list}.`;
+}
+
 // The demo's sample history (loaded by scripts/hubspot/setup-invoices.ts): each invoice's
 // source_message_id with the stage and approver it starts in. "Reset demo" restores these and
 // archives every other invoice.
