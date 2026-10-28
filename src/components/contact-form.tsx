@@ -15,10 +15,11 @@ const CustomerDetails = z.object({
   firstname: z.string().trim().min(1, "Enter your first name."),
   lastname: z.string().trim().min(1, "Enter your last name."),
   email: z.string().trim().email("Enter a valid email address."),
+  // Required: the order desk calls clients back about their orders.
   phone: z
     .string()
     .trim()
-    .refine((v) => v === "" || /^\+?[\d\s().-]{7,20}$/.test(v), "Enter a valid phone number."),
+    .regex(/^\+?[\d\s().-]{7,20}$/, "Enter a valid phone number."),
   jobtitle: z.string().trim(),
   company: z.string().trim().min(1, "Enter your company name."),
 });
@@ -36,7 +37,7 @@ const FIELDS: {
   { key: "firstname", label: "First name", autoComplete: "given-name" },
   { key: "lastname", label: "Last name", autoComplete: "family-name" },
   { key: "email", label: "Email", type: "email", autoComplete: "email" },
-  { key: "phone", label: "Phone", type: "tel", autoComplete: "tel", optional: true },
+  { key: "phone", label: "Phone", type: "tel", autoComplete: "tel" },
   { key: "jobtitle", label: "Job title", autoComplete: "organization-title", optional: true },
   { key: "company", label: "Company name", autoComplete: "organization" },
 ];
@@ -57,7 +58,7 @@ async function submitToHubSpot(data: CustomerDetails) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        // Optional fields left blank are omitted so HubSpot doesn't validate an empty phone.
+        // Optional fields left blank (job title) are omitted rather than sent empty.
         fields: Object.entries(data)
           .filter(([, value]) => value !== "")
           .map(([name, value]) => ({ objectTypeId: "0-1", name, value })),
