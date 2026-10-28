@@ -22,6 +22,7 @@ describe("App routing", () => {
     ["/app/co_lumen/new-order", "/app/$companyId/new-order"],
     ["/app/co_lumen/inventory", "/app/$companyId/inventory"],
     ["/app/dashboard", "/app/dashboard"],
+    ["/app/overview", "/app/overview"],
     ["/app/admin", "/app/admin/"],
     ["/app/admin/overview", "/app/admin/overview"],
     ["/app/admin/purchase-orders", "/app/admin/purchase-orders"],

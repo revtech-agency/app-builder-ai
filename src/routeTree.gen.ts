@@ -18,6 +18,7 @@ import { Route as AppCompanyIdRouteImport } from './routes/app/$companyId'
 import { Route as AppAdminRouteImport } from './routes/app/admin'
 import { Route as AppAdminOldRouteImport } from './routes/app/admin-old'
 import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
+import { Route as AppOverviewRouteImport } from './routes/app/overview'
 import { Route as AppPurchaseOrdersRouteImport } from './routes/app/purchase-orders'
 import { Route as AppSuppliersRouteImport } from './routes/app/suppliers'
 import { Route as AppCompanyIdInventoryRouteImport } from './routes/app/$companyId/inventory'
@@ -76,6 +77,11 @@ const AppAdminOldRoute = AppAdminOldRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOverviewRoute = AppOverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPurchaseOrdersRoute = AppPurchaseOrdersRouteImport.update({
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/admin-old': typeof AppAdminOldRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/overview': typeof AppOverviewRoute
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
   '/app/suppliers': typeof AppSuppliersRoute
   '/app/': typeof AppIndexRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin-old': typeof AppAdminOldRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/overview': typeof AppOverviewRoute
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
   '/app/suppliers': typeof AppSuppliersRoute
   '/app': typeof AppIndexRoute
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/admin-old': typeof AppAdminOldRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/overview': typeof AppOverviewRoute
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
   '/app/suppliers': typeof AppSuppliersRoute
   '/app/': typeof AppIndexRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/admin-old'
     | '/app/dashboard'
+    | '/app/overview'
     | '/app/purchase-orders'
     | '/app/suppliers'
     | '/app/'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/app/$companyId'
     | '/app/admin-old'
     | '/app/dashboard'
+    | '/app/overview'
     | '/app/purchase-orders'
     | '/app/suppliers'
     | '/app'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/admin-old'
     | '/app/dashboard'
+    | '/app/overview'
     | '/app/purchase-orders'
     | '/app/suppliers'
     | '/app/'
@@ -369,6 +381,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/app/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/overview': {
+      id: '/app/overview'
+      path: '/overview'
+      fullPath: '/app/overview'
+      preLoaderRoute: typeof AppOverviewRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/purchase-orders': {
@@ -515,6 +534,7 @@ interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppAdminOldRoute: typeof AppAdminOldRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppOverviewRoute: typeof AppOverviewRoute
   AppPurchaseOrdersRoute: typeof AppPurchaseOrdersRoute
   AppSuppliersRoute: typeof AppSuppliersRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -528,6 +548,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRouteWithChildren,
   AppAdminOldRoute: AppAdminOldRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppOverviewRoute: AppOverviewRoute,
   AppPurchaseOrdersRoute: AppPurchaseOrdersRoute,
   AppSuppliersRoute: AppSuppliersRoute,
   AppIndexRoute: AppIndexRoute,

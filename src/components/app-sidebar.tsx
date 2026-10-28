@@ -7,6 +7,7 @@ import {
   FileInput,
   History,
   Inbox,
+  LayoutDashboard,
   LogOut,
   MessageSquarePlus,
   Package,
@@ -48,6 +49,7 @@ export function AppSidebar() {
 
   const hasCompanies = (companies.data?.length ?? 0) > 0;
   const deskNav = [
+    { to: "/app/overview", label: "Overview", icon: LayoutDashboard },
     { to: "/app/invoices/new", label: "Submit document", icon: FileInput },
     { to: "/app/invoices", label: "Queue", icon: Inbox },
     { to: "/app/purchase-orders", label: "Purchase orders", icon: ClipboardList },
