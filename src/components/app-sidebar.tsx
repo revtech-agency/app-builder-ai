@@ -22,6 +22,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
   SidebarMenuButton,
@@ -66,6 +67,18 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      <SidebarHeader>
+        <Link
+          to="/app"
+          className="flex items-center gap-2 px-2 py-1.5 font-semibold"
+          onClick={() => setOpenMobile(false)}
+        >
+          <span className="flex size-7 items-center justify-center rounded-md bg-sidebar-primary text-sm text-sidebar-primary-foreground">
+            A
+          </span>
+          AppBuilder.ai
+        </Link>
+      </SidebarHeader>
       <SidebarContent>
         {hasCompanies && (
           <SidebarGroup>
