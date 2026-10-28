@@ -7,6 +7,7 @@ import {
   LogOut,
   MessageSquare,
   Rocket,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
 } from "lucide-react";
@@ -37,7 +38,7 @@ import { useAuth } from "@/lib/auth";
 export function AppSidebar() {
   const { companyId } = useParams({ strict: false });
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const { setOpenMobile } = useSidebar();
 
   const companies = useQuery({ queryKey: ["companies"], queryFn: getCompanies });
@@ -119,6 +120,20 @@ export function AppSidebar() {
                     {item.badge > 0 && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
                   </SidebarMenuItem>
                 ))}
+              {isAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to="/app/admin"
+                      activeProps={{ "data-active": "true" }}
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      <ShieldCheck />
+                      <span>Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppAdminRouteImport } from './routes/app/admin'
 import { Route as AppCompanyIdChatRouteImport } from './routes/app/$companyId/chat'
 import { Route as AppCompanyIdDeploysRouteImport } from './routes/app/$companyId/deploys'
 import { Route as AppCompanyIdGrowthRouteImport } from './routes/app/$companyId/growth'
@@ -37,6 +38,11 @@ const LoginRoute = LoginRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCompanyIdChatRoute = AppCompanyIdChatRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/': typeof AppIndexRoute
   '/app/$companyId/chat': typeof AppCompanyIdChatRoute
   '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/app/admin': typeof AppAdminRoute
   '/app': typeof AppIndexRoute
   '/app/$companyId/chat': typeof AppCompanyIdChatRoute
   '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/': typeof AppIndexRoute
   '/app/$companyId/chat': typeof AppCompanyIdChatRoute
   '/app/$companyId/deploys': typeof AppCompanyIdDeploysRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/login'
+    | '/app/admin'
     | '/app/'
     | '/app/$companyId/chat'
     | '/app/$companyId/deploys'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/app/admin'
     | '/app'
     | '/app/$companyId/chat'
     | '/app/$companyId/deploys'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/login'
+    | '/app/admin'
     | '/app/'
     | '/app/$companyId/chat'
     | '/app/$companyId/deploys'
@@ -170,6 +182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/$companyId/chat': {
       id: '/app/$companyId/chat'
       path: '/$companyId/chat'
@@ -209,6 +228,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
   AppIndexRoute: typeof AppIndexRoute
   AppCompanyIdChatRoute: typeof AppCompanyIdChatRoute
   AppCompanyIdDeploysRoute: typeof AppCompanyIdDeploysRoute
@@ -218,6 +238,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
   AppIndexRoute: AppIndexRoute,
   AppCompanyIdChatRoute: AppCompanyIdChatRoute,
   AppCompanyIdDeploysRoute: AppCompanyIdDeploysRoute,

@@ -53,6 +53,9 @@ const statusTone: Record<string, Tone> = {
   high: "danger",
   normal: "info",
   medium: "warning",
+  // roles
+  admin: "info",
+  user: "muted",
   low: "muted",
 };
 

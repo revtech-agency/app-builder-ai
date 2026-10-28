@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/lib/auth";
 import { runSalesAnalysis } from "@/lib/sales-analysis";
 import type { SalesAnalysis, SalesRequest } from "@/lib/sales-analysis";
 
@@ -31,6 +32,7 @@ const CONTACT_FIELDS: { key: keyof SalesRequest["contact"]; label: string; type?
 ];
 
 function SalesAnalysisPage() {
+  const { isAdmin } = useAuth();
   const [form, setForm] = useState<SalesRequest>(EMPTY);
   const analysis = useMutation({ mutationFn: (data: SalesRequest) => runSalesAnalysis({ data }) });
 
@@ -84,7 +86,12 @@ function SalesAnalysisPage() {
             {analysis.isError && (
               <p className="text-sm text-destructive">{analysis.error.message}</p>
             )}
-            <Button type="submit" disabled={analysis.isPending}>
+            {!isAdmin && (
+              <p className="text-sm text-muted-foreground">
+                Running an analysis creates real HubSpot records, so it's limited to admins.
+              </p>
+            )}
+            <Button type="submit" disabled={!isAdmin || analysis.isPending}>
               {analysis.isPending && <Loader2 className="size-4 animate-spin" />}
               {analysis.isPending ? "Analysing (up to a minute)…" : "Run analysis"}
             </Button>

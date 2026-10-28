@@ -1,10 +1,10 @@
 // Calls the n8n "AI Sales Proposal" workflow (POST /webhook/sales-analysis) from the server,
-// so the webhook URL stays out of the browser and only signed-in founders can trigger it.
+// so the webhook URL stays out of the browser and only admins can trigger it.
 // Each run creates a Google Slides deck and a HubSpot contact, deal and task.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAdmin } from "@/lib/admin";
 
 const DEFAULT_WEBHOOK_URL = "https://revtech-agency.app.n8n.cloud/webhook/sales-analysis";
 
@@ -61,7 +61,7 @@ export type SalesAnalysis = {
 };
 
 export const runSalesAnalysis = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator((input: SalesRequest) => SalesRequest.parse(input))
   .handler(async ({ data }): Promise<SalesAnalysis> => {
     const url = process.env["N8N_SALES_ANALYSIS_URL"] || DEFAULT_WEBHOOK_URL;

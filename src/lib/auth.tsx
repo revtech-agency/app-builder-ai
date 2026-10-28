@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { getDemoSignIn, getMyRole } from "@/lib/admin";
 
 type AuthUser = { id: string; name: string; email: string };
 
@@ -11,7 +12,9 @@ type AuthContextValue = {
   user: AuthUser | null;
   // False until the stored session has been read on the client, so SSR and first render match.
   ready: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signInDemo: () => Promise<void>;
   // Resolves to true when Supabase wants the founder to confirm their email first.
   signUp: (email: string, password: string, name: string) => Promise<boolean>;
   signOut: () => Promise<void>;
@@ -23,7 +26,8 @@ function toUser(session: Session | null): AuthUser | null {
   const u = session?.user;
   if (!u) return null;
   const email = u.email ?? "";
-  const name = (u.user_metadata?.["name"] as string | undefined) || email.split("@")[0] || "Founder";
+  const name =
+    (u.user_metadata?.["name"] as string | undefined) || email.split("@")[0] || "Founder";
   return { id: u.id, name, email };
 }
 
@@ -44,8 +48,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const userId = session?.user.id;
+  useEffect(() => {
+    setIsAdmin(false);
+    if (!userId) return;
+    let current = true;
+    getMyRole()
+      .then((role) => current && setIsAdmin(role.isAdmin))
+      .catch(() => current && setIsAdmin(false));
+    return () => {
+      current = false;
+    };
+  }, [userId]);
+
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }, []);
+
+  const signInDemo = useCallback(async () => {
+    const { tokenHash } = await getDemoSignIn();
+    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
     if (error) throw error;
   }, []);
 
@@ -64,8 +88,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user: toUser(session), ready, signIn, signUp, signOut }),
-    [session, ready, signIn, signUp, signOut],
+    () => ({ user: toUser(session), ready, isAdmin, signIn, signInDemo, signUp, signOut }),
+    [session, ready, isAdmin, signIn, signInDemo, signUp, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

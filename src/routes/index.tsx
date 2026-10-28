@@ -12,6 +12,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
+import { DemoButton } from "@/components/demo-button";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -149,7 +150,8 @@ function Index() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <OpenAppButton size="lg" />
-            <Button asChild size="lg" variant="outline">
+            <DemoButton size="lg" variant="outline" />
+            <Button asChild size="lg" variant="ghost">
               <a href="mailto:daniel@appbuilder.ai">Talk to us</a>
             </Button>
           </div>
