@@ -103,8 +103,8 @@ function LoginPage() {
               {isSignUp ? "Create account" : "Sign in"}
             </Button>
           </form>
-          {!isSignUp && <DemoButton variant="outline" className="mt-3 w-full" />}
-          {!isSignUp && <ApDemoButton variant="outline" className="mt-2 w-full" />}
+          {!isSignUp && <ApDemoButton variant="secondary" className="mt-3 w-full" />}
+          {!isSignUp && <DemoButton variant="outline" className="mt-2 w-full" />}
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {isSignUp ? "Already have an account?" : "New to AppBuilder.ai?"}{" "}
             <button

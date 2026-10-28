@@ -132,10 +132,6 @@ export const getDemoSignIn = createServerFn({ method: "POST" }).handler(async ()
 // Invoice desk demo: same one-time token flow, for the AP reviewer demo account.
 const apDemoEmail = () => process.env["DEMO_AP_EMAIL"] || "ap-demo@appbuilder.ai";
 
-export const getApDemoAvailable = createServerFn({ method: "GET" }).handler(async () => ({
-  available: Boolean(apDemoEmail()),
-}));
-
 export const getApDemoSignIn = createServerFn({ method: "POST" }).handler(async () => {
   const db = await adminClient();
   const { data, error } = await db.auth.admin.generateLink({

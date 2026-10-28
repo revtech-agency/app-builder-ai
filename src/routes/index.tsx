@@ -15,7 +15,7 @@ import aiWorkersImage from "@/assets/ai-workers-paper-processes.jpg";
 import heroImage from "@/assets/hero-robotic-document-workflow.jpg";
 import { BackToTop } from "@/components/back-to-top";
 import { ContactForm } from "@/components/contact-form";
-import { DemoButton } from "@/components/demo-button";
+import { ApDemoButton } from "@/components/demo-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -151,7 +151,7 @@ function Index() {
           </span>
           <div className="flex items-center gap-4">
             <OpenAppLink className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline-flex" />
-            <DemoButton />
+            <ApDemoButton>Try the demo</ApDemoButton>
           </div>
         </div>
       </header>
@@ -177,7 +177,7 @@ function Index() {
                 step.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <DemoButton size="lg" />
+                <ApDemoButton size="lg">Try the demo</ApDemoButton>
                 <Button asChild size="lg" variant="outline">
                   <a href="#contact">Talk to us</a>
                 </Button>
@@ -302,7 +302,9 @@ function Index() {
               Try the demo, or tell us which flow eats your team's week.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              <DemoButton size="lg" variant="secondary" />
+              <ApDemoButton size="lg" variant="secondary">
+                Try the demo
+              </ApDemoButton>
               <OpenAppLink className="text-sm text-primary-foreground/80 hover:text-primary-foreground" />
             </div>
           </div>
