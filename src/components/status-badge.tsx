@@ -60,6 +60,21 @@ const statusTone: Record<string, Tone> = {
   ready_to_confirm: "info",
   confirmed: "success",
   duplicate: "muted",
+  // invoice stages (approved, duplicate and rejected are shared with the groups above)
+  waiting_on_supplier: "warning",
+  needs_review: "danger",
+  ready_to_approve: "info",
+  // invoice match results and line checks
+  full_match: "success",
+  within_tolerance: "info",
+  mismatch: "danger",
+  no_po: "warning",
+  matched: "success",
+  price_off: "danger",
+  qty_off: "warning",
+  not_on_po: "danger",
+  // supplier status
+  pending_onboarding: "warning",
   // payment
   current: "success",
   overdue: "danger",
