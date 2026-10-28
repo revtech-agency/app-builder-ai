@@ -53,10 +53,27 @@ export const Route = createFileRoute("/app/invoices/$invoiceId")({
 
 type Decision = "approve" | "send_back" | "reject" | "duplicate";
 
-const DECISION_TEXT: Record<Exclude<Decision, "approve">, { title: string; action: string }> = {
-  send_back: { title: "Send back to supplier", action: "Send back" },
-  duplicate: { title: "Mark as duplicate", action: "Mark duplicate" },
-  reject: { title: "Reject invoice", action: "Reject" },
+// effect: what the decision does. Send back only moves the stage and saves a note; nothing
+// is emailed to the supplier, so the dialog says so.
+const DECISION_TEXT: Record<
+  Exclude<Decision, "approve">,
+  { title: string; action: string; effect: string }
+> = {
+  send_back: {
+    title: "Send back to supplier",
+    action: "Send back",
+    effect: "The invoice moves to Waiting on supplier. This doesn't email the supplier.",
+  },
+  duplicate: {
+    title: "Mark as duplicate",
+    action: "Mark duplicate",
+    effect: "The invoice moves to Duplicate. This is a final decision.",
+  },
+  reject: {
+    title: "Reject invoice",
+    action: "Reject",
+    effect: "The invoice moves to Rejected. This is a final decision.",
+  },
 };
 
 const sentences = (text: string) =>
@@ -596,8 +613,13 @@ function InvoicePage() {
                   <DialogHeader>
                     <DialogTitle>{DECISION_TEXT[dialog].title}</DialogTitle>
                     <DialogDescription>
-                      We've started a comment from the failed checks. Edit it, then save; it goes on
-                      the invoice's activity.
+                      {DECISION_TEXT[dialog].effect}{" "}
+                      {dialog === "duplicate"
+                        ? "We've filled in a standard comment; edit it if you need to."
+                        : suggestedComment(dialog, checks)
+                          ? "We've started a comment from the failed checks; edit it before you save."
+                          : "Add a comment explaining your decision."}{" "}
+                      It's saved on the invoice's activity.
                     </DialogDescription>
                   </DialogHeader>
                   <Textarea

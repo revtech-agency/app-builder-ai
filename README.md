@@ -1,6 +1,24 @@
-# App Builder AI
+# AppBuilder.ai
 
-Just create an empty project for now, called AppBuilder.AI
+AI workers for back-office work, built for the NEXXT AI hackathon (Raiffeisen challenge). Live at
+[nexxt.appbuilder.ai](https://nexxt.appbuilder.ai). HubSpot (portal 149650024, synthetic demo data) stands in
+for the bank's systems, and the AI workers run in n8n.
+
+The app (TanStack Start, React, Tailwind, shadcn/ui, Supabase auth) has two areas:
+
+- **Invoice desk** (the banking scenario): the accounts-payable team's view of the supplier invoice worker.
+  - `/app/invoices`: the queue.
+  - Invoice page: the three-way match, every check passed or failed, the supplier, the audit trail, and an
+    "Ask the worker" chat. Reviewers approve, send back, reject or mark a duplicate there.
+  - `/app/invoices/new`: submit a document as text or PDF.
+  - Desk admins manage suppliers, purchase orders and the team. Everyone on the desk can see the
+    approval rules (read-only).
+  - The demo account gets a step-by-step guide and a Reset demo action.
+- **Platform area** for AppBuilder.ai staff: clients, users and roles, and a revenue dashboard. The earlier
+  casings order portal (`/app/$companyId`) is still there for its demo clients.
+
+The invoice rules the reviewer sees (approval limits, price tolerance, the checks) are in
+`src/lib/invoice-rules.ts`, with tests in `src/test/`. The worker applies the same rules in n8n (see below).
 
 This project was built with [Lovable](https://lovable.dev).
 
@@ -28,15 +46,19 @@ and routes each one to the right HubSpot stage:
 
 The workflows are imported and live in n8n. See the
 [folder README](n8n/invoice-worker/README.md) for import steps, the rules, how this differs from the
-original brief, and what still needs checking.
+original brief, and what still needs checking. Latest test run: 12 of 12 cases correct
+([`evidence/invoice-worker-run-2026-10-29.md`](evidence/invoice-worker-run-2026-10-29.md)).
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+The repo uses [bun](https://bun.sh) (`bun.lock`). Copy `.env.example` to `.env.local` and fill it in;
+`docs/DOCUMENTATION.md` lists every variable.
 
 ```sh
 git clone <this-repository-url>
 cd <repository-name>
-npm i
-npm run dev
+bun install
+bun run dev
+bun run test                          # unit tests (rules, billing, routing)
+bun scripts/hubspot/check-ids.ts      # reads only: hardcoded HubSpot stage IDs still match the portal
 ```

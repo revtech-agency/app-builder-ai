@@ -101,7 +101,7 @@ describe("suggestedComment", () => {
 
   it("starts a send-back comment from the failed checks", () =>
     expect(suggestedComment("send_back", invoiceChecks(base))).toBe(
-      "Sent back because the IBAN on the invoice differs from the one on file. Please send a corrected invoice.",
+      "Sent back because the IBAN on the invoice differs from the one on file. The supplier needs to send a corrected invoice.",
     ));
 
   it("joins several reasons for a rejection", () =>
