@@ -51,13 +51,13 @@ export function AppSidebar() {
 
   const hasCompanies = (companies.data?.length ?? 0) > 0;
   const deskNav = [
-    { to: "/app/overview", label: "Overview", icon: LayoutDashboard },
     { to: "/app/invoices/new", label: "Submit document", icon: FileInput },
     { to: "/app/invoices", label: "Queue", icon: Inbox },
     { to: "/app/purchase-orders", label: "Purchase orders", icon: ClipboardList },
     { to: "/app/suppliers", label: "Suppliers", icon: Building2 },
     { to: "/app/rules", label: "Approval rules", icon: Scale },
     ...(canManageDesk ? [{ to: "/app/team", label: "Team", icon: Users } as const] : []),
+    { to: "/app/overview", label: "Overview", icon: LayoutDashboard },
   ] as const;
   const platformNav = [
     { to: "/app/platform/dashboard", label: "Dashboard", icon: ChartColumn },
