@@ -109,10 +109,10 @@ bun run build
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` | browser | da | în ciornă scria `VITE_SUPABASE_ANON_KEY` — greșit |
 | `VITE_SUPABASE_PROJECT_ID`, `SUPABASE_PROJECT_ID` | doar în `.env` | nu | informativ |
 | `SUPABASE_SERVICE_ROLE_KEY` | server (`client.server.ts`) | da (roluri, demo, listă useri) | **lipsește din `.env.example`** |
-| `HUBSPOT_ACCESS_TOKEN` | server (`hubspot.server.ts`) | da (orice comandă/inventar/dashboard) | **lipsește din `.env.example`** |
+| `HUBSPOT_ACCESS_TOKEN` | server (`hubspot.server.ts`), `scripts/hubspot/*.ts`, `n8n/invoice-worker/run-tests.mjs` | da (orice comandă/inventar/dashboard) | în `.env.example` din 2026-10-29 |
 | `N8N_APP_KEY` | server | da pentru chat și email ofertă | **lipsește din `.env.example`** |
 | `DEMO_EMAIL` | server | nu (implicit `demo@appbuilder.ai`) | |
-| `HUBSPOT_API_KEY` | doar `scripts/hubspot/setup.ts` | pentru seed | e singura din `.env.example`; alt nume decât `HUBSPOT_ACCESS_TOKEN` pentru același tip de token |
+| `HUBSPOT_API_KEY` | `scripts/hubspot/*.ts`, `n8n/invoice-worker/run-tests.mjs` | nu | nume vechi pentru același token; citit doar dacă lipsește `HUBSPOT_ACCESS_TOKEN` |
 | `LOVABLE_DB_MIGRATION_URL` | `drizzle.config.ts` | nu | |
 | `LOVABLE_CRON_SECRET`(`_PREVIOUS`) | `cron-auth.ts` | nu | niciun job programat nu o folosește |
 

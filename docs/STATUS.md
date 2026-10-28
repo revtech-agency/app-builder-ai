@@ -60,7 +60,7 @@ Problema: avem 6+ unelte și nu e clar cine are acces unde, cine poate schimba c
 | **GitHub** | cod, migrări SQL, documentație | **tot codul și docs** | toată echipa (read) | toți, **doar prin PR** pe `main` |
 | **Lovable** | generare UI | nimic — e editor | Daniel + 1 | doar pe branch, sincronizat în GitHub |
 | **Supabase** | DB, auth | schema (prin migrări din repo) | Daniel + 1 backup | **`drizzle/migrations/` (decis 28 oct)**. Baza reală = `types.ts` de pe `main` = migrarea din `drizzle/`. Fișierul `supabase/migrations/…` din PR #1 nu se merge-uiește. Un singur tabel: `user_roles` |
-| **HubSpot** | „sistemul băncii” în demo + formular contact | date demo CRM (portal 149650024); schema proprietăților e în `scripts/hubspot/setup.ts` | ⚠️ | token în `HUBSPOT_ACCESS_TOKEN` (app) și `HUBSPOT_API_KEY` (script) |
+| **HubSpot** | „sistemul băncii” în demo + formular contact | date demo CRM (portal 149650024); schema proprietăților e în `scripts/hubspot/setup.ts` | ⚠️ | token în `HUBSPOT_ACCESS_TOKEN` (app și scripturi; `HUBSPOT_API_KEY` doar ca nume vechi de rezervă) |
 | **n8n** | lipici între sisteme + toți agenții/LLM-ul | fluxuri (`revtech-agency.app.n8n.cloud`) | ⚠️ | **niciun export în repo azi**; webhook-urile cer header `x-appbuilder-key` |
 | **Claude / Gemini** | asistență | nimic | toți | — |
 

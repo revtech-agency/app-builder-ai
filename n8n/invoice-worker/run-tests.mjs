@@ -6,8 +6,9 @@
 //   ... --keep    # leave the test invoices in HubSpot (default: archive them afterwards)
 //
 // Each run creates real deals in HubSpot; they're archived at the end (HubSpot's recycle bin
-// keeps them 90 days) unless --keep. Archiving needs HUBSPOT_API_KEY. A repeated source_id
-// returns the existing deal (idempotent), so use --suffix to run kept invoices again.
+// keeps them 90 days) unless --keep. Archiving needs HUBSPOT_ACCESS_TOKEN (HUBSPOT_API_KEY, the
+// old name, also works). A repeated source_id returns the existing deal (idempotent), so use
+// --suffix to run kept invoices again.
 import { readFileSync } from "node:fs";
 
 const base = process.env.N8N_BASE_URL || "https://revtech-agency.app.n8n.cloud";
@@ -20,9 +21,9 @@ const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
 const value = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined);
 const keep = flag("--keep");
-const hsToken = process.env.HUBSPOT_API_KEY;
+const hsToken = process.env.HUBSPOT_ACCESS_TOKEN ?? process.env.HUBSPOT_API_KEY;
 if (!keep && !hsToken) {
-  console.error("Set HUBSPOT_API_KEY so the test invoices can be archived afterwards, or pass --keep.");
+  console.error("Set HUBSPOT_ACCESS_TOKEN so the test invoices can be archived afterwards, or pass --keep.");
   process.exit(1);
 }
 
