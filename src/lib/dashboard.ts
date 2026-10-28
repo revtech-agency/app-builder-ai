@@ -1,11 +1,10 @@
-// Admin revenue dashboard backed by HubSpot (portal 149650024): client companies, their
-// AppBuilder plan properties and their order deals. Read-only.
+// Admin revenue dashboard backed by HubSpot (portal 149650024): client companies, invoice_worker
+// clients, their AppBuilder plan properties and the supplier documents they bill for. Read-only.
 import { createServerFn } from "@tanstack/react-start";
 
 import { requireAdmin } from "@/lib/admin";
 import { computeClientBilling, computeTotals, CURRENCY, dashboardMonths } from "@/lib/billing";
 import type { DashboardTotals, MonthBilling } from "@/lib/billing";
-import { PIPELINE_ID } from "@/lib/order-rules";
 
 export type DashboardClient = {
   id: string;
@@ -32,17 +31,16 @@ export type PlatformDashboard = {
 type Props = Record<string, string | null | undefined>;
 type HsObject = { id: string; properties: Props };
 
-const PLAN_LABELS: Record<string, string> = { order_worker: "Order worker" };
+const PLAN_LABELS: Record<string, string> = { invoice_worker: "Invoice worker" };
+
+// Supplier invoice worker: documents live in the "default" deal pipeline.
+const INVOICE_PIPELINE_ID = "default";
+// Duplicate and Rejected documents are not billable.
+const INVOICE_NON_BILLABLE_STAGES = ["6318170303", "6318170304"] as const;
 
 const num = (v: string | null | undefined) => {
   const n = Number(v);
   return v != null && v !== "" && Number.isFinite(n) ? n : null;
-};
-
-const chunk = <T>(items: T[], size: number) => {
-  const out: T[][] = [];
-  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
-  return out;
 };
 
 export const getPlatformDashboard = createServerFn({ method: "GET" })
@@ -52,10 +50,13 @@ export const getPlatformDashboard = createServerFn({ method: "GET" })
 
     const res = await hubspot<{ results: HsObject[] }>("/crm/v3/objects/companies/search", {
       body: {
-        filterGroups: [{ filters: [{ propertyName: "payment_status", operator: "HAS_PROPERTY" }] }],
+        filterGroups: [
+          {
+            filters: [{ propertyName: "appbuilder_plan", operator: "EQ", value: "invoice_worker" }],
+          },
+        ],
         properties: [
           "name",
-          "payment_status",
           "appbuilder_plan",
           "appbuilder_monthly_fee",
           "appbuilder_fee_per_order",
@@ -66,39 +67,32 @@ export const getPlatformDashboard = createServerFn({ method: "GET" })
       },
     });
 
-    type AssocPage = {
-      results: { toObjectId: number | string }[];
-      paging?: { next?: { after?: string } };
-    };
-    const ordersOf = async (companyId: string) => {
-      const dealIds: string[] = [];
-      let after: string | undefined;
-      do {
-        const page: AssocPage = await hubspot(
-          `/crm/v4/objects/companies/${companyId}/associations/deals?limit=500${after ? `&after=${after}` : ""}`,
-        );
-        dealIds.push(...page.results.map((r) => String(r.toObjectId)));
-        after = page.paging?.next?.after;
-      } while (after);
-      const batches = await Promise.all(
-        chunk(dealIds, 100).map((ids) =>
-          hubspot<{ results: HsObject[] }>("/crm/v3/objects/deals/batch/read", {
-            body: {
-              properties: ["pipeline", "createdate", "dealstage", "amount"],
-              inputs: ids.map((id) => ({ id })),
-            },
-          }),
-        ),
-      );
-      return batches
-        .flatMap((b) => b.results)
-        .filter((d) => d.properties["pipeline"] === PIPELINE_ID)
-        .map((d) => ({
+    // All supplier documents (not purchase orders) in the invoice pipeline. They're linked to
+    // suppliers, not the bank, so they're counted for the invoice_worker client directly.
+    type SearchPage = { results: HsObject[]; paging?: { next?: { after?: string } } };
+    const documents: { createdAt: string; stage: string; amount: number }[] = [];
+    let after: string | undefined;
+    do {
+      const page: SearchPage = await hubspot("/crm/v3/objects/deals/search", {
+        body: {
+          filterGroups: [
+            { filters: [{ propertyName: "pipeline", operator: "EQ", value: INVOICE_PIPELINE_ID }] },
+          ],
+          properties: ["createdate", "dealstage", "amount", "document_type"],
+          limit: 200,
+          ...(after ? { after } : {}),
+        },
+      });
+      for (const d of page.results) {
+        if ((d.properties["document_type"] ?? "").trim() === "purchase_order") continue;
+        documents.push({
           createdAt: d.properties["createdate"] ?? "",
           stage: d.properties["dealstage"] ?? "",
           amount: num(d.properties["amount"]) ?? 0,
-        }));
-    };
+        });
+      }
+      after = page.paging?.next?.after;
+    } while (after);
 
     const raw = res.results.map((o) => {
       const p = o.properties;
@@ -108,9 +102,10 @@ export const getPlatformDashboard = createServerFn({ method: "GET" })
         name: p["name"] ?? "Unnamed company",
         plan: planKey ? (PLAN_LABELS[planKey] ?? planKey) : null,
         monthlyFee: num(p["appbuilder_monthly_fee"]),
+        // Fee per processed document.
         feePerOrder: num(p["appbuilder_fee_per_order"]),
         start: (p["appbuilder_subscription_start"] ?? "").slice(0, 10) || null,
-        paymentStatus: (p["payment_status"] ?? "").trim().toLowerCase(),
+        paymentStatus: "",
       };
     });
 
@@ -119,13 +114,11 @@ export const getPlatformDashboard = createServerFn({ method: "GET" })
       raw.map((c) => c.start),
       now,
     );
-    const orders = await Promise.all(raw.map((c) => ordersOf(c.id)));
 
-    const computed = raw.map((c, i) => {
-      const billing = computeClientBilling(c, orders[i] ?? [], months, now);
+    const computed = raw.map((c) => {
+      const billing = computeClientBilling(c, documents, months, INVOICE_NON_BILLABLE_STAGES, now);
       return { c, billing };
     });
-
     return {
       currency: CURRENCY,
       months,

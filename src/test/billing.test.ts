@@ -10,7 +10,9 @@ import {
 
 const NOW = new Date("2026-10-28T12:00:00Z");
 const plan = { monthlyFee: 99, feePerOrder: 0.6, start: "2026-08-01" };
-const order = (createdAt: string, stage = "6315918553", amount = 100) => ({
+// Invoice pipeline: Duplicate and Rejected are not billable.
+const NON_BILLABLE = ["6318170303", "6318170304"];
+const order = (createdAt: string, stage = "6318170298", amount = 100) => ({
   createdAt,
   stage,
   amount,
@@ -45,10 +47,11 @@ describe("computeClientBilling", () => {
         order("2026-09-02T10:00:00Z"),
         order("2026-10-01T00:00:00Z"),
         order("2026-10-05T10:00:00Z"),
-        order("2026-10-06T10:00:00Z", "6315918558"), // duplicate
-        order("2026-10-07T10:00:00Z", "6315918559"), // rejected
+        order("2026-10-06T10:00:00Z", "6318170303"), // duplicate
+        order("2026-10-07T10:00:00Z", "6318170304"), // rejected
       ],
       months,
+      NON_BILLABLE,
       NOW,
     );
     expect(b.monthly.map((m) => m.revenue)).toEqual([99, 99.6, 100.2]);
@@ -65,6 +68,7 @@ describe("computeClientBilling", () => {
       { ...plan, start: "2026-10-01" },
       [order("2026-09-10T10:00:00Z")],
       months,
+      NON_BILLABLE,
       NOW,
     );
     expect(b.monthly.map((m) => m.revenue)).toEqual([0, 0, 99]);
@@ -72,7 +76,7 @@ describe("computeClientBilling", () => {
   });
 
   it("treats a future start as not active", () => {
-    const b = computeClientBilling({ ...plan, start: "2026-12-01" }, [], months, NOW);
+    const b = computeClientBilling({ ...plan, start: "2026-12-01" }, [], months, NON_BILLABLE, NOW);
     expect(b.active).toBe(false);
     expect(b.revenueToDate).toBe(0);
   });
@@ -82,6 +86,7 @@ describe("computeClientBilling", () => {
       { monthlyFee: null, feePerOrder: null, start: null },
       [order("2026-10-05T10:00:00Z")],
       months,
+      NON_BILLABLE,
       NOW,
     );
     expect(b.hasPlan).toBe(false);
@@ -91,11 +96,37 @@ describe("computeClientBilling", () => {
   });
 });
 
+describe("invoice worker billing", () => {
+  it("bills €499/month plus €0.40 per document, excluding Duplicate and Rejected", () => {
+    const b = computeClientBilling(
+      { monthlyFee: 499, feePerOrder: 0.4, start: "2026-10-01" },
+      [
+        order("2026-10-02T10:00:00Z"),
+        order("2026-10-03T10:00:00Z"),
+        order("2026-10-04T10:00:00Z", "6318170303"),
+        order("2026-10-05T10:00:00Z", "6318170304"),
+      ],
+      ["2026-10"],
+      NON_BILLABLE,
+      NOW,
+    );
+    expect(b.ordersThisMonth).toBe(2);
+    expect(b.revenueThisMonth).toBe(499.8);
+    expect(b.orderValueToDate).toBe(200);
+  });
+});
+
 describe("computeTotals", () => {
   it("sums clients; MRR counts only started subscriptions", () => {
     const months = ["2026-09", "2026-10"];
-    const a = computeClientBilling(plan, [order("2026-10-05T10:00:00Z")], months, NOW);
-    const b = computeClientBilling({ ...plan, start: "2026-12-01" }, [], months, NOW);
+    const a = computeClientBilling(
+      plan,
+      [order("2026-10-05T10:00:00Z")],
+      months,
+      NON_BILLABLE,
+      NOW,
+    );
+    const b = computeClientBilling({ ...plan, start: "2026-12-01" }, [], months, NON_BILLABLE, NOW);
     const t = computeTotals([
       { monthlyFee: 99, billing: a },
       { monthlyFee: 99, billing: b },

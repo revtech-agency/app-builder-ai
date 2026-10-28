@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
   ChartColumn,
-  ChevronsUpDown,
   ClipboardList,
   Building2,
   FileInput,
@@ -17,19 +16,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
   SidebarMenuButton,
@@ -53,15 +45,13 @@ export function AppSidebar() {
   const companies = useQuery({ queryKey: ["my-companies"], queryFn: () => getMyCompanies() });
   const cartCount = useCartCount(companyId);
 
-  const company = companies.data?.find((c) => c.id === companyId);
   const hasCompanies = (companies.data?.length ?? 0) > 0;
   const deskNav = [
-    { to: "/app/invoices", label: "Queue", icon: Inbox },
     { to: "/app/invoices/new", label: "Submit document", icon: FileInput },
-    { to: "/app/suppliers", label: "Suppliers", icon: Building2 },
+    { to: "/app/invoices", label: "Queue", icon: Inbox },
     { to: "/app/purchase-orders", label: "Purchase orders", icon: ClipboardList },
+    { to: "/app/suppliers", label: "Suppliers", icon: Building2 },
   ] as const;
-  const canSwitch = isAdmin && (companies.data?.length ?? 0) > 1;
 
   const nav = [
     { to: "/app/$companyId/orders", label: "Orders", icon: ReceiptText, badge: 0 },
@@ -74,55 +64,8 @@ export function AppSidebar() {
     { to: "/app/$companyId/inventory", label: "Inventory", icon: Package, badge: 0 },
   ] as const;
 
-  const companyLabel = (
-    <span className="flex min-w-0 items-center gap-2">
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
-        {company?.name.charAt(0) ?? "?"}
-      </span>
-      <span className="truncate text-sm font-semibold">{company?.name ?? "Select company"}</span>
-    </span>
-  );
-
   return (
     <Sidebar>
-      {hasCompanies && (
-        <SidebarHeader>
-          {canSwitch ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="h-auto w-full justify-between border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                >
-                  {companyLabel}
-                  <ChevronsUpDown className="size-4 shrink-0 text-sidebar-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="w-[--radix-dropdown-menu-trigger-width]"
-              >
-                {companies.data?.map((c) => (
-                  <DropdownMenuItem
-                    key={c.id}
-                    onSelect={() => {
-                      setOpenMobile(false);
-                      navigate({ to: "/app/$companyId/orders", params: { companyId: c.id } });
-                    }}
-                  >
-                    {c.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <div className="rounded-md border border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground">
-              {companyLabel}
-            </div>
-          )}
-        </SidebarHeader>
-      )}
-
       <SidebarContent>
         {hasCompanies && (
           <SidebarGroup>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { StatusBadge } from "@/components/status-badge";
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from "@/lib/auth";
 import { getPlatformDashboard } from "@/lib/dashboard";
-import { formatDate, formatEur, formatMoney } from "@/lib/format";
+import { formatDate, formatEur } from "@/lib/format";
 
 export const Route = createFileRoute("/app/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — AppBuilder.ai" }] }),
@@ -95,7 +95,7 @@ function DashboardPage() {
               note={changeNote(d.totals.revenueThisMonth, d.totals.revenueLastMonth)}
             />
             <Stat
-              label="Billable orders this month"
+              label="Documents processed this month"
               value={String(d.totals.billableOrdersThisMonth)}
             />
             <Stat label="Active clients" value={String(d.totals.activeClients)} />
@@ -105,8 +105,8 @@ function DashboardPage() {
             <CardHeader>
               <CardTitle className="text-base">Revenue by month</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Revenue to date {formatEur(d.totals.revenueToDate)}. Order value handled for
-                clients: {formatMoney(d.totals.orderValueToDate)} (their sales, not AppBuilder.ai
+                Revenue to date {formatEur(d.totals.revenueToDate)}. Invoice value processed:{" "}
+                {formatEur(d.totals.orderValueToDate)} (supplier invoices, not AppBuilder.ai
                 revenue).
               </p>
             </CardHeader>
@@ -156,9 +156,9 @@ function DashboardPage() {
                     <TableHead>Client</TableHead>
                     <TableHead>Plan</TableHead>
                     <TableHead className="text-right">Per month</TableHead>
-                    <TableHead className="text-right">Per order</TableHead>
+                    <TableHead className="text-right">Per document</TableHead>
                     <TableHead>Since</TableHead>
-                    <TableHead className="text-right">Orders this month</TableHead>
+                    <TableHead className="text-right">Documents this month</TableHead>
                     <TableHead className="text-right">Revenue this month</TableHead>
                     <TableHead className="text-right">Revenue to date</TableHead>
                     <TableHead>Payment</TableHead>
@@ -167,15 +167,7 @@ function DashboardPage() {
                 <TableBody>
                   {d.clients.map((c) => (
                     <TableRow key={c.id}>
-                      <TableCell className="whitespace-nowrap font-medium">
-                        <Link
-                          to="/app/$companyId/orders"
-                          params={{ companyId: c.id }}
-                          className="hover:underline"
-                        >
-                          {c.name}
-                        </Link>
-                      </TableCell>
+                      <TableCell className="whitespace-nowrap font-medium">{c.name}</TableCell>
                       <TableCell className="whitespace-nowrap">{c.plan ?? "No plan"}</TableCell>
                       <TableCell className="whitespace-nowrap text-right">
                         {c.monthlyFee === null ? "—" : formatEur(c.monthlyFee)}
