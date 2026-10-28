@@ -119,7 +119,13 @@ describe("invoice worker billing", () => {
 describe("computeTotals", () => {
   it("sums clients; MRR counts only started subscriptions", () => {
     const months = ["2026-09", "2026-10"];
-    const a = computeClientBilling(plan, [order("2026-10-05T10:00:00Z")], months, NON_BILLABLE, NOW);
+    const a = computeClientBilling(
+      plan,
+      [order("2026-10-05T10:00:00Z")],
+      months,
+      NON_BILLABLE,
+      NOW,
+    );
     const b = computeClientBilling({ ...plan, start: "2026-12-01" }, [], months, NON_BILLABLE, NOW);
     const t = computeTotals([
       { monthlyFee: 99, billing: a },

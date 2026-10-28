@@ -167,9 +167,7 @@ function DashboardPage() {
                 <TableBody>
                   {d.clients.map((c) => (
                     <TableRow key={c.id}>
-                      <TableCell className="whitespace-nowrap font-medium">
-                        {c.name}
-                      </TableCell>
+                      <TableCell className="whitespace-nowrap font-medium">{c.name}</TableCell>
                       <TableCell className="whitespace-nowrap">{c.plan ?? "No plan"}</TableCell>
                       <TableCell className="whitespace-nowrap text-right">
                         {c.monthlyFee === null ? "—" : formatEur(c.monthlyFee)}

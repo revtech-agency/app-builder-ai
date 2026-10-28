@@ -51,7 +51,9 @@ export const getPlatformDashboard = createServerFn({ method: "GET" })
     const res = await hubspot<{ results: HsObject[] }>("/crm/v3/objects/companies/search", {
       body: {
         filterGroups: [
-          { filters: [{ propertyName: "appbuilder_plan", operator: "EQ", value: "invoice_worker" }] },
+          {
+            filters: [{ propertyName: "appbuilder_plan", operator: "EQ", value: "invoice_worker" }],
+          },
         ],
         properties: [
           "name",
