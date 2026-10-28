@@ -18,6 +18,14 @@ To run without HubSpot or n8n, add this to `.env.local` and the app uses built-i
 INVOICE_DATA_SOURCE=mock
 ```
 
+To look at the screens without signing in, add these too and open `/app`. It only works in a local dev
+build, only with the sample data, and is switched off in production builds:
+
+```sh
+INVOICE_PREVIEW_NO_LOGIN=1
+VITE_DEV_PREVIEW=1
+```
+
 Run the tests with `bun run test`.
 
 This project was built with [Lovable](https://lovable.dev).

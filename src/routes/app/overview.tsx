@@ -22,13 +22,26 @@ const chartConfig = {
   count: { label: "Invoices", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
-const STAGE_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-];
+// Colour carries meaning: red = a person must look, amber = waiting on the supplier, green = done.
+const STAGE_COLORS: Record<string, string> = {
+  received: "var(--chart-5)",
+  waiting_on_supplier: "var(--warning)",
+  needs_review: "var(--destructive)",
+  ready_to_approve: "var(--chart-1)",
+  approved: "var(--success)",
+  duplicate: "var(--chart-3)",
+  rejected: "var(--chart-4)",
+};
+
+const STAGE_SHORT: Record<string, string> = {
+  received: "Received",
+  waiting_on_supplier: "Waiting",
+  needs_review: "Review",
+  ready_to_approve: "Ready",
+  approved: "Approved",
+  duplicate: "Duplicate",
+  rejected: "Rejected",
+};
 
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
@@ -104,17 +117,27 @@ function OverviewPage() {
                   <BarChart data={o.byStage}>
                     <CartesianGrid vertical={false} />
                     <XAxis
-                      dataKey="label"
+                      dataKey="stage"
+                      tickFormatter={(v: string) => STAGE_SHORT[v] ?? v}
                       tickLine={false}
                       axisLine={false}
                       interval={0}
                       fontSize={11}
                     />
                     <YAxis width={32} allowDecimals={false} tickLine={false} axisLine={false} />
-                    <ChartTooltip content={<ChartTooltipContent hideLabel={false} />} />
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          hideLabel={false}
+                          labelFormatter={(_, payload) =>
+                            (payload?.[0]?.payload as { label?: string } | undefined)?.label ?? ""
+                          }
+                        />
+                      }
+                    />
                     <Bar dataKey="count" radius={4}>
-                      {o.byStage.map((s, i) => (
-                        <Cell key={s.stage} fill={STAGE_COLORS[i % STAGE_COLORS.length]} />
+                      {o.byStage.map((s) => (
+                        <Cell key={s.stage} fill={STAGE_COLORS[s.stage] ?? "var(--chart-5)"} />
                       ))}
                     </Bar>
                   </BarChart>

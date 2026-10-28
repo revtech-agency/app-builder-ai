@@ -12,16 +12,20 @@ export const Route = createFileRoute("/app")({
   component: AppLayout,
 });
 
+// Local preview without a login: only in a dev build (never in production) with
+// VITE_DEV_PREVIEW=1. The server side has its own switch (INVOICE_PREVIEW_NO_LOGIN, mock data only).
+const devPreview = import.meta.env.DEV && import.meta.env["VITE_DEV_PREVIEW"] === "1";
+
 function AppLayout() {
   const { user, ready } = useAuth();
   const navigate = useNavigate();
 
   // Client-side guard: auth state only exists in the browser, so SSR renders nothing here.
   useEffect(() => {
-    if (ready && !user) navigate({ to: "/login", replace: true });
+    if (!devPreview && ready && !user) navigate({ to: "/login", replace: true });
   }, [ready, user, navigate]);
 
-  if (!ready || !user) return null;
+  if (!devPreview && (!ready || !user)) return null;
 
   return (
     <SidebarProvider>

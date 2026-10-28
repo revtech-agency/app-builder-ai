@@ -47,8 +47,28 @@ async function checkStaff(caller: Caller): Promise<{ isAdmin: boolean; isDemo: b
   return { isAdmin: admin, isDemo: demo };
 }
 
+// Local preview without a login. Active only when ALL of these hold: a non-production build,
+// INVOICE_DATA_SOURCE=mock and INVOICE_PREVIEW_NO_LOGIN=1. It serves the built-in sample data only.
+const previewNoLogin =
+  typeof process !== "undefined" &&
+  process.env["NODE_ENV"] !== "production" &&
+  process.env["INVOICE_DATA_SOURCE"] === "mock" &&
+  process.env["INVOICE_PREVIEW_NO_LOGIN"] === "1";
+
+const previewAuth = createMiddleware({ type: "function" }).server(async ({ next }) =>
+  next({
+    context: {
+      supabase: null as never,
+      userId: "dev-preview",
+      claims: { sub: "dev-preview", email: "preview@localhost" } as Record<string, unknown>,
+    },
+  }),
+);
+
+const authMiddleware = (previewNoLogin ? previewAuth : requireSupabaseAuth) as typeof requireSupabaseAuth;
+
 const requireInvoiceStaff = createMiddleware({ type: "function" })
-  .middleware([requireSupabaseAuth])
+  .middleware([authMiddleware])
   .server(async ({ next, context }) => {
     await checkStaff(callerOf(context));
     return next();
