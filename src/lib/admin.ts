@@ -88,17 +88,39 @@ export const requireAdmin = createMiddleware({ type: "function" })
     return next();
   });
 
+// New accounts have no role. On their first sign-in they become invoice desk reviewers, unless
+// the order portal already knows them as a casings client (those keep landing on their orders).
+async function ensureDefaultRole(userId: string, email: string) {
+  const db = await adminClient();
+  const { data, error } = await db.from("user_roles").select("id").eq("user_id", userId).limit(1);
+  if (error || (data && data.length > 0)) return;
+  const casingsDemo = (process.env["DEMO_EMAIL"] || "demo@appbuilder.ai").toLowerCase();
+  if (!email || email.toLowerCase() === casingsDemo) return;
+  const { hasClientCompany } = await import("@/lib/orders");
+  if (await hasClientCompany({ userId, email })) return;
+  const { error: insertError } = await db
+    .from("user_roles")
+    .upsert(
+      { user_id: userId, role: "ap_reviewer" },
+      { onConflict: "user_id,role", ignoreDuplicates: true },
+    );
+  if (insertError) throw new Error(`Could not set up your access: ${insertError.message}`);
+}
+
 export const getMyRole = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => ({
-    isAdmin: await isAdmin(context.userId),
-    canUseInvoiceDesk: await canUseInvoiceDesk(context.userId),
-    canManageDesk: await canManageDesk(context.userId),
-    // The shared invoice desk demo account sees the step-by-step demo guide.
-    isDemo:
-      ((context.claims as { email?: string }).email ?? "").toLowerCase() ===
-      apDemoEmail().toLowerCase(),
-  }));
+  .handler(async ({ context }) => {
+    await ensureDefaultRole(context.userId, (context.claims as { email?: string }).email ?? "");
+    return {
+      isAdmin: await isAdmin(context.userId),
+      canUseInvoiceDesk: await canUseInvoiceDesk(context.userId),
+      canManageDesk: await canManageDesk(context.userId),
+      // The shared invoice desk demo account sees the step-by-step demo guide.
+      isDemo:
+        ((context.claims as { email?: string }).email ?? "").toLowerCase() ===
+        apDemoEmail().toLowerCase(),
+    };
+  });
 
 // One-click demo: a one-time sign-in token for the shared demo account, redeemed in the
 // browser with verifyOtp. No password is stored or sent anywhere.
