@@ -1,182 +1,182 @@
-# AppBuilder.ai — Documentație
+# AppBuilder.ai — Documentation
 
-> Acest fișier devine `README.md` în repo înainte de depunere (README-ul actual e un placeholder Lovable). Juriul îl citește ca să verifice **Architecture & reproducibility (15%)** și **Functional completeness & testability (20%)**.
-> Completat din cod pe `main` @ `a6508fc` (28 oct). ⚠️ = nu se poate afla din repo, trebuie completat de cine deține componenta.
+> This file becomes `README.md` in the repo before submission (the current README is a Lovable placeholder). The jury reads it to check **Architecture & reproducibility (15%)** and **Functional completeness & testability (20%)**.
+> Filled in from the code on `main` @ `a6508fc` (28 Oct). ⚠️ = can't be found from the repo, must be filled in by whoever owns the component.
 
 ---
 
-## 1. Ce face
+## 1. What it does
 
-AppBuilder.ai este un „order worker": preia comenzi ale clienților unui distribuitor (în datele demo: **membrane/învelișuri pentru mezeluri, vândute la metru**), le convertește în pachete întregi, aplică reguli de business și le scrie ca *deals* într-un pipeline HubSpot. Ce nu e clar trimite la om (stadiile „Waiting on client" / „Needs staff"). Clienții comandă din aplicație (chat + inventar + coș); comenzile din email/WhatsApp sunt procesate de un flux n8n.
+AppBuilder.ai is an "order worker": it takes orders from the clients of a distributor (in the demo data: **casings for cured meats, sold by the metre**), converts them into whole packs, applies business rules and writes them as *deals* in a HubSpot pipeline. Whatever isn't clear goes to a person (the "Waiting on client" / "Needs staff" stages). Clients order from the app (chat + inventory + cart); orders from email/WhatsApp are processed by an n8n flow.
 
-**Scenariul pentru Raiffeisen:** ⚠️ DE CONFIRMAT după D2. `prompts/` (scrise de Daniel) descrie un pivot propus spre *procesarea facturilor furnizor (AP, three-way match PO → aviz → factură)* cu un „invoice desk" nou; **nimic din el nu e implementat încă** (nici cod, nici HubSpot, nici date). Atenție: tot ce există în cod azi este scenariul *comenzi de la IMM-uri*, nu un proces bancar (vezi IMPROVEMENTS I-10).
+**The scenario for Raiffeisen:** ⚠️ TO BE CONFIRMED after D2. `prompts/` (written by Daniel) describes a proposed pivot to *supplier invoice processing (AP, three-way match PO → delivery note → invoice)* with a new "invoice desk"; **none of it is implemented yet** (no code, no HubSpot, no data). Note: everything in the code today is the *SME orders* scenario, not a banking process (see IMPROVEMENTS I-10).
 
-Fluxul real, așa cum e în cod:
+The real flow, as it is in the code:
 
 ```
-Client (browser, login Supabase)
+Client (browser, Supabase login)
    │
-   ├─ Chat "Order assistant" ──► server fn sendChat ──► n8n webhook /order-assistant  (LLM, în afara repo-ului)
-   │                                   └─ întoarce {reply, delivery_date, cart[]}
-   ├─ Inventar (listInventory ◄── HubSpot products) ──► adaugă în coș (sessionStorage)
+   ├─ "Order assistant" chat ──► server fn sendChat ──► n8n webhook /order-assistant  (LLM, outside the repo)
+   │                                   └─ returns {reply, delivery_date, cart[]}
+   ├─ Inventory (listInventory ◄── HubSpot products) ──► add to cart (sessionStorage)
    │
    ▼
-Coș ──► server fn placeOrder
-          1. requireCompany: userul are voie pe compania asta?
-          2. re-citește produsele din HubSpot (prețul/stocul NU vin din browser)
-          3. src/lib/order-rules.ts (COD, fără LLM): pachete întregi, min. pachete,
-             stoc, dată livrare lipsă, plată restantă, listă negociată
-          4. creează deal + line items în HubSpot, stadiul = cel mai prost stadiu al liniilor
-          5. dacă stadiul e ready/waiting → n8n webhook /app-order-offer (email cu oferta)
-             dacă e "staff" (ex. client restant) → fără email, rămâne la om
+Cart ──► server fn placeOrder
+          1. requireCompany: is the user allowed on this company?
+          2. re-reads the products from HubSpot (price/stock do NOT come from the browser)
+          3. src/lib/order-rules.ts (CODE, no LLM): whole packs, min. packs,
+             stock, missing delivery date, overdue payment, negotiated list
+          4. creates deal + line items in HubSpot, stage = the worst stage of the lines
+          5. if the stage is ready/waiting → n8n webhook /app-order-offer (email with the offer)
+             if it's "staff" (e.g. client in arrears) → no email, it stays with a person
 
-Admin: /app/dashboard (MRR, venit/lună, comenzi facturabile din HubSpot) · /app/admin (roluri)
-Landing: / (demo, formular de contact → HubSpot Forms API)
+Admin: /app/dashboard (MRR, revenue/month, billable orders from HubSpot) · /app/admin (roles)
+Landing: / (demo, contact form → HubSpot Forms API)
 ```
 
-Principiul „LLM propune, regulile decid" **este respectat în `placeOrder`** (reguli deterministe în TypeScript, testate). Ce face LLM-ul în n8n nu poate fi verificat din repo.
+The principle "the LLM proposes, the rules decide" **is respected in `placeOrder`** (deterministic rules in TypeScript, tested). What the LLM does in n8n can't be verified from the repo.
 
-## 2. Arhitectură
+## 2. Architecture
 
-| Strat | Tehnologie (din cod) | Rol |
+| Layer | Technology (from the code) | Role |
 |---|---|---|
-| Framework | **TanStack Start** (React 19, TanStack Router file-based, server functions) pe **Vite 8**; build cu `@lovable.dev/vite-tanstack-config` + Nitro (țintă implicită Cloudflare) | SSR + RPC server |
+| Framework | **TanStack Start** (React 19, file-based TanStack Router, server functions) on **Vite 8**; build with `@lovable.dev/vite-tanstack-config` + Nitro (default target Cloudflare) | SSR + server RPC |
 | UI | Tailwind 4, shadcn/ui (Radix), lucide, sonner, recharts | landing, app, dashboard |
-| Date client | `@tanstack/react-query`, `zod` pentru validarea inputului server fn | |
-| Auth | **Supabase Auth** (email+parolă; demo prin magic-link token generat server-side cu service role) | login, demo |
-| DB Supabase | un singur tabel: `public.user_roles` (+ enum `app_role`, funcția `has_role`) | doar roluri admin |
-| „Sistemul băncii" / datele de business | **HubSpot** (portal 149650024): products, companies, contacts, deals (pipeline „Orders"), line items, notes | sursa de adevăr pentru catalog, clienți, comenzi |
-| Orchestrare / agenți | **n8n cloud** (`revtech-agency.app.n8n.cloud`), 2 webhook-uri: `order-assistant`, `app-order-offer` | ⚠️ fluxurile NU sunt în repo |
-| LLM | **Niciun apel LLM în repo.** Chatul și parsarea email/WhatsApp rulează în n8n. `prompts/n8n/n8n-prompt.md` specifică Claude `claude-sonnet-5-5` (credențial n8n „RTA Anthropic API"); ⚠️ de confirmat pe fluxurile live (D3) | |
-| Mock bancar | nu există | |
-| Teste | Vitest + jsdom + Testing Library: `order-rules`, `billing`, routing | |
-| CI | nu există (`.github/` lipsește) | |
+| Client data | `@tanstack/react-query`, `zod` for validating server fn input | |
+| Auth | **Supabase Auth** (email+password; demo through a magic-link token generated server-side with the service role) | login, demo |
+| Supabase DB | a single table: `public.user_roles` (+ enum `app_role`, the `has_role` function) | admin roles only |
+| "The bank's system" / the business data | **HubSpot** (portal 149650024): products, companies, contacts, deals ("Orders" pipeline), line items, notes | source of truth for the catalogue, clients, orders |
+| Orchestration / agents | **n8n cloud** (`revtech-agency.app.n8n.cloud`), 2 webhooks: `order-assistant`, `app-order-offer` | ⚠️ the flows are NOT in the repo |
+| LLM | **No LLM call in the repo.** The chat and the email/WhatsApp parsing run in n8n. `prompts/n8n/n8n-prompt.md` specifies Claude `claude-sonnet-5-5` (n8n credential "RTA Anthropic API"); ⚠️ to confirm on the live flows (D3) | |
+| Banking mock | doesn't exist | |
+| Tests | Vitest + jsdom + Testing Library: `order-rules`, `billing`, routing | |
+| CI | doesn't exist (`.github/` is missing) | |
 
-### Structura repo (reală)
+### Repo structure (actual)
 
 ```
 src/
-  routes/            fișier = rută (TanStack). /, /login, /customer-form,
+  routes/            file = route (TanStack). /, /login, /customer-form,
                      /app (layout), /app/dashboard, /app/admin,
                      /app/$companyId/{orders,new-order,inventory}
   lib/
-    order-rules.ts   regulile de comandă (pur, testat) + ID-uri pipeline/stadii HubSpot
+    order-rules.ts   the order rules (pure, tested) + HubSpot pipeline/stage IDs
     orders.ts        server fns: getMyCompanies, listOrders, listInventory, sendChat, placeOrder
-    billing.ts       model de venit (abonament + taxă/comandă), pur, testat
+    billing.ts       revenue model (subscription + fee/order), pure, tested
     dashboard.ts     server fn getPlatformDashboard (admin)
-    admin.ts         roluri, requireAdmin, getDemoSignIn
-    hubspot.server.ts  clienți HTTP HubSpot + n8n (doar server)
+    admin.ts         roles, requireAdmin, getDemoSignIn
+    hubspot.server.ts  HubSpot + n8n HTTP clients (server only)
     auth.tsx, cart.tsx, format.ts, error-*.ts
-  integrations/supabase/   fișiere generate de Lovable (client, client.server, auth-middleware, types)
+  integrations/supabase/   files generated by Lovable (client, client.server, auth-middleware, types)
   components/        UI (ui/ = shadcn)
-  test/              3 fișiere de test
+  test/              3 test files
 scripts/hubspot/     setup.ts (bun) + data/{catalogue,demo-orders,live-messages}.json
-drizzle/             migrations/0000_create_user_roles.sql (schema.ts e gol)
-supabase/config.toml doar project_id
+drizzle/             migrations/0000_create_user_roles.sql (schema.ts is empty)
+supabase/config.toml project_id only
 ```
 
-Nu există (față de „structura țintă" din ciornă): `/agents`, `/rules`, `/prompts`, `/n8n`, `/data/synthetic`, `/evidence`, `supabase/migrations/` (pe `main`).
+These don't exist (compared with the "target structure" in the draft): `/agents`, `/rules`, `/prompts`, `/n8n`, `/data/synthetic`, `/evidence`, `supabase/migrations/` (on `main`).
 
-### Contracte între componente
+### Contracts between components
 
-Nu există tipul `Case` din ciornă. Contractele reale:
+The `Case` type from the draft doesn't exist. The real contracts:
 
 - **App → n8n `order-assistant`** (`sendChat`): `{session_id, client_name, negotiated_skus[], message, cart[]}` → `{reply, delivery_date?, cart: ChatCartLine[]}`; header `x-appbuilder-key`.
 - **App → n8n `app-order-offer`** (`placeOrder`): `{deal_id, token, to, client_name, order_ref, delivery_date, intro, line_item_ids[], lines[]}`.
-- **Pipeline HubSpot „Orders"**: Received → Waiting on client → Needs staff → Ready to confirm → Confirmed; Duplicate, Rejected. Proprietăți custom în grupul `appbuilder_order_worker` (definite în `scripts/hubspot/setup.ts`): `delivery_date`, `order_channel` (email/whatsapp/pdf/app), `source_message_id`, `raw_order_text`, `exception_reason`, `min_field_confidence`; pe line items `client_code_as_written`, `rounding_note`, `field_confidence`; pe companii `payment_status`, `negotiated_skus`, `appbuilder_*`; pe produse `pack_type`, `units_per_pack`, `min_sale_packs`, `stock_packs`.
+- **HubSpot "Orders" pipeline**: Received → Waiting on client → Needs staff → Ready to confirm → Confirmed; Duplicate, Rejected. Custom properties in the group `appbuilder_order_worker` (defined in `scripts/hubspot/setup.ts`): `delivery_date`, `order_channel` (email/whatsapp/pdf/app), `source_message_id`, `raw_order_text`, `exception_reason`, `min_field_confidence`; on line items `client_code_as_written`, `rounding_note`, `field_confidence`; on companies `payment_status`, `negotiated_skus`, `appbuilder_*`; on products `pack_type`, `units_per_pack`, `min_sale_packs`, `stock_packs`.
 
-## 3. Instalare locală
+## 3. Local install
 
-⚠️ Nerulat pe o mașină curată (nu am instalat dependențele; `node_modules` lipsește local).
+⚠️ Not run on a clean machine (we didn't install the dependencies; `node_modules` is missing locally).
 
 ```bash
 git clone https://github.com/revtech-agency/app-builder-ai
 cd app-builder-ai
-bun install                  # repo-ul are bun.lock; README-ul vechi zicea npm
-cp .env.example .env.local   # completează (vezi mai jos)
+bun install                  # the repo has bun.lock; the old README said npm
+cp .env.example .env.local   # fill it in (see below)
 bun run dev
 bun run test
 bun run build
 ```
 
-`scripts/hubspot/setup.ts` cere **Bun** (folosește `Bun.sleep`, `import.meta.dir`).
+`scripts/hubspot/setup.ts` requires **Bun** (it uses `Bun.sleep`, `import.meta.dir`).
 
-### Variabile de mediu (doar nume)
+### Environment variables (names only)
 
-| Variabilă | Unde se citește | Obligatorie | Note |
+| Variable | Where it's read | Required | Notes |
 |---|---|---|---|
-| `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` | server (middleware, SSR) | da | |
-| `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` | browser | da | în ciornă scria `VITE_SUPABASE_ANON_KEY` — greșit |
-| `VITE_SUPABASE_PROJECT_ID`, `SUPABASE_PROJECT_ID` | doar în `.env` | nu | informativ |
-| `SUPABASE_SERVICE_ROLE_KEY` | server (`client.server.ts`) | da (roluri, demo, listă useri) | **lipsește din `.env.example`** |
-| `HUBSPOT_ACCESS_TOKEN` | server (`hubspot.server.ts`), `scripts/hubspot/*.ts`, `n8n/invoice-worker/run-tests.mjs` | da (orice comandă/inventar/dashboard) | în `.env.example` din 2026-10-29 |
-| `N8N_APP_KEY` | server | da pentru chat și email ofertă | **lipsește din `.env.example`** |
-| `DEMO_EMAIL` | server | nu (implicit `demo@appbuilder.ai`) | |
-| `HUBSPOT_API_KEY` | `scripts/hubspot/*.ts`, `n8n/invoice-worker/run-tests.mjs` | nu | nume vechi pentru același token; citit doar dacă lipsește `HUBSPOT_ACCESS_TOKEN` |
-| `LOVABLE_DB_MIGRATION_URL` | `drizzle.config.ts` | nu | |
-| `LOVABLE_CRON_SECRET`(`_PREVIOUS`) | `cron-auth.ts` | nu | niciun job programat nu o folosește |
+| `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` | server (middleware, SSR) | yes | |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` | browser | yes | the draft said `VITE_SUPABASE_ANON_KEY` — wrong |
+| `VITE_SUPABASE_PROJECT_ID`, `SUPABASE_PROJECT_ID` | only in `.env` | no | informational |
+| `SUPABASE_SERVICE_ROLE_KEY` | server (`client.server.ts`) | yes (roles, demo, user list) | **missing from `.env.example`** |
+| `HUBSPOT_ACCESS_TOKEN` | server (`hubspot.server.ts`), `scripts/hubspot/*.ts`, `n8n/invoice-worker/run-tests.mjs` | yes (any order/inventory/dashboard) | in `.env.example` since 2026-10-29 |
+| `N8N_APP_KEY` | server | yes for the chat and the offer email | **missing from `.env.example`** |
+| `DEMO_EMAIL` | server | no (default `demo@appbuilder.ai`) | |
+| `HUBSPOT_API_KEY` | `scripts/hubspot/*.ts`, `n8n/invoice-worker/run-tests.mjs` | no | old name for the same token; read only if `HUBSPOT_ACCESS_TOKEN` is missing |
+| `LOVABLE_DB_MIGRATION_URL` | `drizzle.config.ts` | no | |
+| `LOVABLE_CRON_SECRET`(`_PREVIOUS`) | `cron-auth.ts` | no | no scheduled job uses it |
 
-Nu există `LLM_API_KEY`/`MODEL` în cod. `VITE_HUBSPOT_PORTAL_ID`/`VITE_HUBSPOT_FORM_GUID` din ciornă **nu există**: ID-urile formularului sunt constante în `src/components/contact-form.tsx` (publice).
+There's no `LLM_API_KEY`/`MODEL` in the code. `VITE_HUBSPOT_PORTAL_ID`/`VITE_HUBSPOT_FORM_GUID` from the draft **don't exist**: the form IDs are constants in `src/components/contact-form.tsx` (public).
 
-### Baza de date și HubSpot
-
-```bash
-bun scripts/hubspot/setup.ts --dry-run        # doar citire
-bun scripts/hubspot/setup.ts                   # proprietăți, pipeline, 180 produse, 4 clienți demo, 12 comenzi
-bun scripts/hubspot/setup.ts --history-only    # 6 comenzi confirmate; restul în data/live-messages.json pentru demo live
-```
-Portalul trebuie să aibă moneda EUR. Scriptul e idempotent.
-
-Supabase: **singura sursă a schemei este `drizzle/migrations/`** (acum `0000_create_user_roles.sql`: enum `app_role`, tabelul `user_roles` cu RLS, funcția `has_role`). Se modifică prin prompturi Lovable pentru baza de date, care adaugă o migrare nouă aici; `src/integrations/supabase/types.ts` se regenerează din baza reală și nu se editează de mână. `drizzle/schema.ts` e gol intenționat. `supabase db push` din ciornă nu se folosește: nu există `supabase/migrations/` pe `main` și nu trebuie creat (varianta din branch-ul `landing-cta-hubspot` e depășită, vezi BUGS B-07).
-
-⚠️ ID-urile pipeline/stadii și compania demo (`458454559952`) sunt hardcodate pentru portalul 149650024; pe alt portal trebuie înlocuite (`order-rules.ts`, `orders.ts`).
-
-## 4. Cum testezi
+### The database and HubSpot
 
 ```bash
-bun run test        # vitest: order-rules (10), billing (7), routing (8 rute)
+bun scripts/hubspot/setup.ts --dry-run        # reads only
+bun scripts/hubspot/setup.ts                   # properties, pipeline, 180 products, 4 demo clients, 12 orders
+bun scripts/hubspot/setup.ts --history-only    # 6 confirmed orders; the rest in data/live-messages.json for the live demo
 ```
-⚠️ Neexecutat de mine (dependențe neinstalate). Nu există script `eval` și nici teste pentru `placeOrder`, `visibleCompanies`, n8n sau agenți. Setul „X din N" nu există încă.
+The portal must have EUR as its currency. The script is idempotent.
 
-### Scenariul de demo (din cod)
+Supabase: **the only source of the schema is `drizzle/migrations/`** (now `0000_create_user_roles.sql`: the `app_role` enum, the `user_roles` table with RLS, the `has_role` function). It's changed through Lovable database prompts, which add a new migration here; `src/integrations/supabase/types.ts` is regenerated from the real database and isn't edited by hand. `drizzle/schema.ts` is empty on purpose. The `supabase db push` from the draft isn't used: there's no `supabase/migrations/` on `main` and it must not be created (the version on the `landing-cta-hubspot` branch is outdated, see BUGS B-07).
 
-1. Deschide landing-ul ⚠️ (URL).
-2. Click **Try the demo** → login ca `DEMO_EMAIL` (non-admin) → vede doar compania demo `458454559952`.
-3. **New order** → scrie „MB52-T 3000 m, livrare joi" → n8n întoarce coșul → **Place order**.
-4. Vezi în **Orders** dealul cu stadiul și `exception_reason`; în HubSpot apare deal + line items; dacă stadiul e ready/waiting pleacă emailul de ofertă.
-5. Ca admin: **/app/dashboard** arată MRR și venit.
+⚠️ The pipeline/stage IDs and the demo company (`458454559952`) are hardcoded for portal 149650024; on another portal they have to be replaced (`order-rules.ts`, `orders.ts`).
 
-### Cazuri de test existente (date, nu automatizate)
+## 4. How to test
 
-`scripts/hubspot/data/demo-orders.json` / `live-messages.json` conțin 12 comenzi cu rezultatul așteptat (stadiu + excepție), ex.: cantitate care nu umple pachete (ORD-1008 → Waiting on client), cod client necunoscut F45 (ORD-1009 → Needs staff, cu cel mai apropiat produs), client restant (ORD-1010 → Needs staff). Lipsește rularea automată și compararea cu rezultatul real.
+```bash
+bun run test        # vitest: order-rules (10), billing (7), routing (8 routes)
+```
+⚠️ Not run by me (dependencies not installed). There's no `eval` script and no tests for `placeOrder`, `visibleCompanies`, n8n or the agents. The "X out of N" set doesn't exist yet.
 
-## 5. Reguli de business
+### The demo scenario (from the code)
 
-Implementate în cod (`src/lib/order-rules.ts`, testate):
+1. Open the landing page ⚠️ (URL).
+2. Click **Try the demo** → login as `DEMO_EMAIL` (non-admin) → sees only the demo company `458454559952`.
+3. **New order** → write "MB52-T 3000 m, delivery Thursday" → n8n returns the cart → **Place order**.
+4. In **Orders**, see the deal with its stage and `exception_reason`; in HubSpot the deal + line items appear; if the stage is ready/waiting, the offer email goes out.
+5. As admin: **/app/dashboard** shows MRR and revenue.
 
-| ID | Condiție | Acțiune |
+### Existing test cases (data, not automated)
+
+`scripts/hubspot/data/demo-orders.json` / `live-messages.json` contain 12 orders with the expected result (stage + exception), e.g.: a quantity that doesn't fill packs (ORD-1008 → Waiting on client), unknown client code F45 (ORD-1009 → Needs staff, with the closest product), client in arrears (ORD-1010 → Needs staff). What's missing is the automated run and the comparison with the actual result.
+
+## 5. Business rules
+
+Implemented in code (`src/lib/order-rules.ts`, tested):
+
+| ID | Condition | Action |
 |---|---|---|
-| R-01 | cantitate în metri nu se împarte exact la pachet | rotunjire în sus la pachete întregi + `rounding_note`; stadiu ≥ Waiting on client |
-| R-02 | pachete < `min_sale_packs` | se ridică la minim; Waiting on client |
-| R-03 | `stock_packs` < pachete cerute | notă „only N in stock"; Waiting on client |
-| R-04 | fără dată de livrare | Waiting on client |
-| R-05 | `payment_status = overdue` | Needs staff; fără email ofertă |
-| R-06 | SKU în afara `negotiated_skus` (dacă lista nu e goală) | comandă respinsă cu eroare |
-| R-07 | produs fără `units_per_pack` | eroare |
-| R-08 | stadiul comenzii = cel mai prost stadiu dintre linii/condiții (ready < waiting < staff) | |
+| R-01 | the quantity in metres doesn't divide exactly into packs | round up to whole packs + `rounding_note`; stage ≥ Waiting on client |
+| R-02 | packs < `min_sale_packs` | raised to the minimum; Waiting on client |
+| R-03 | `stock_packs` < packs requested | note "only N in stock"; Waiting on client |
+| R-04 | no delivery date | Waiting on client |
+| R-05 | `payment_status = overdue` | Needs staff; no offer email |
+| R-06 | SKU outside `negotiated_skus` (if the list isn't empty) | order rejected with an error |
+| R-07 | product without `units_per_pack` | error |
+| R-08 | the order's stage = the worst stage among the lines/conditions (ready < waiting < staff) | |
 
-Doar în datele demo / n8n, **neverificabile în cod** (⚠️ confirmați că există în flux): potrivire pe harta de coduri a clientului, cel mai apropiat produs după familie+calibru+culoare, detecție duplicat pe `source_message_id`, alertă finance la client restant, încredere minimă pe câmp.
+Only in the demo data / n8n, **not verifiable in the code** (⚠️ confirm they exist in the flow): matching on the client's code map, the closest product by family+calibre+colour, duplicate detection on `source_message_id`, finance alert for a client in arrears, minimum confidence per field.
 
-Facturare (`src/lib/billing.ts`): abonament lunar de la luna de start + taxă per comandă facturabilă (orice stadiu în afară de Duplicate/Rejected); demo: 99 EUR + 0,60 EUR/comandă.
+Billing (`src/lib/billing.ts`): monthly subscription from the start month + a fee per billable order (any stage except Duplicate/Rejected); demo: 99 EUR + 0.60 EUR/order.
 
-## 6. Limitări cunoscute
+## 6. Known limitations
 
-- Agenții/LLM-ul din n8n nu sunt în repo → nereproductibil din GitHub.
-- Stocul nu se scade la plasarea comenzii.
-- Date 100% sintetice (clienți „(demo)", `example.com`, prețuri/stoc inventate).
-- Scenariul e comenzi IMM, nu proces bancar.
-- Detalii: BUGS.md.
+- The agents/the LLM in n8n aren't in the repo → not reproducible from GitHub.
+- Stock isn't decreased when an order is placed.
+- 100% synthetic data (clients "(demo)", `example.com`, made-up prices/stock).
+- The scenario is SME orders, not a banking process.
+- Details: BUGS.md.
 
-## 7. Echipa
+## 7. The team
 
-⚠️ nume · rol · contact (vezi STATUS.md).
+⚠️ name · role · contact (see STATUS.md).

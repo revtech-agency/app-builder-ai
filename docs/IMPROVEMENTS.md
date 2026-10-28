@@ -1,55 +1,55 @@
 # IMPROVEMENTS — AppBuilder.ai
 
-> Diferența față de FEATURES: aici e ce **există deja** și trebuie făcut mai bun.
-> Sortat după **impact la juriu / efort**. Cifra din dreapta = puncte de jurizare atacate.
+> The difference from FEATURES: this is what **already exists** and needs to get better.
+> Sorted by **jury impact / effort**. The number on the right = the judging points it targets.
 
-## Prioritate 1 — câștig mare, efort mic
+## Priority 1 — big win, small effort
 
-| ID | Îmbunătățire | Criteriu | Efort | Owner | Stare |
+| ID | Improvement | Criterion | Effort | Owner | Status |
 |---|---|---|---|---|---|
-| I-01 | **Spargem agentul monolit în agenți cu roluri clare** (intake, potrivire, risc, financiar) + un orchestrator. Fiecare agent = fișier separat cu input/output tipizat | AGENT 25%, ARCH 15% | M | ⚠️ | 🔴 |
-| I-02 | **Regulile scoase din prompt în cod/config** (`rules.yaml` sau `rules.ts`). LLM-ul extrage, regulile decid | AGENT, DOM, ARCH | S | Lip (propus) | 🔴 |
-| I-03 | **Mesaje de excepție explicite**: nu „eroare”, ci „Cod client necunoscut: XYZ-12. Cel mai apropiat: XYZ-21 (scor 0.82). Propun: confirmare umană” | AGENT, FUNC | S | ⚠️ | 🔴 |
-| I-04 | **Promptul și versiunea modelului în repo** (`/prompts`, `MODEL=` în `.env.example`) | ARCH | S | ⚠️ | 🔴 |
-| I-05 | **Fluxurile n8n exportate în repo** (`/n8n/*.json`) | ARCH | S | ⚠️ | 🔴 |
+| I-01 | **Split the monolithic agent into agents with clear roles** (intake, matching, risk, finance) + an orchestrator. Each agent = a separate file with typed input/output | AGENT 25%, ARCH 15% | M | ⚠️ | 🔴 |
+| I-02 | **Rules taken out of the prompt into code/config** (`rules.yaml` or `rules.ts`). The LLM extracts, the rules decide | AGENT, DOM, ARCH | S | Lip (proposed) | 🔴 |
+| I-03 | **Explicit exception messages**: not "error", but "Unknown client code: XYZ-12. Closest: XYZ-21 (score 0.82). Proposal: human confirmation" | AGENT, FUNC | S | ⚠️ | 🔴 |
+| I-04 | **The prompt and the model version in the repo** (`/prompts`, `MODEL=` in `.env.example`) | ARCH | S | ⚠️ | 🔴 |
+| I-05 | **The n8n flows exported into the repo** (`/n8n/*.json`) | ARCH | S | ⚠️ | 🔴 |
 
-## Prioritate 1b — găsite din cod (28 oct)
+## Priority 1b — found from the code (28 Oct)
 
-| ID | Îmbunătățire | Criteriu | Efort | Owner | Stare |
+| ID | Improvement | Criterion | Effort | Owner | Status |
 |---|---|---|---|---|---|
-| I-06 | **O singură sursă de schemă**: `drizzle/migrations/` (decis 28 oct); varianta din PR #1 nu se merge-uiește. Schema HubSpot (proprietăți/pipeline) rămâne în `setup.ts`; scoateți ID-urile hardcodate din `order-rules.ts` într-un config | ARCH 15% | S | Daniel | 🟡 schema decisă; ID-urile hardcodate rămân (BUGS B-07, B-19) |
-| I-07 | **Secrete și config**: `.env.example` complet (toate numele din DOCUMENTATION §3), un singur nume pentru tokenul HubSpot, `.env` scos din git. Nu s-au găsit secrete reale în cod/istoric — verificați și n8n (`x-appbuilder-key`) | ARCH | S | ⚠️ | 🔴 (B-08) |
-| I-08 | **Teste unde sunt banii și accesul**: `placeOrder` (cu HubSpot mock), `visibleCompanies` (admin / demo / domeniu / email neconfirmat), un test de paritate între regulile din TS și cele din n8n; CI cu `bun run test` + `lint` + `build` | ARCH, FUNC | M | ⚠️ | 🔴 (B-14) |
-| I-09 | **Reguli ca date, partajate**: fișier unic de reguli (praguri, toleranțe, limite de aprobare) citit și de app, și de n8n (prin endpoint al app-ului), în loc de copii în Code node + TS | AGENT, ARCH, DOM | M | Lip | 🔴 (B-10) |
-| I-10b | **Evidence runner**: script care trimite cele 12 mesaje din `live-messages.json` (și, la pivot, cele 12 documente de facturi) la webhook și scrie `evidence/results.md` cu așteptat vs obținut | FUNC 20% | M | ⚠️ | 🔴 (F-08) |
-| I-11b | **Idempotență + rollback + rezervare stoc** în `placeOrder` | FUNC, DOM | S | ⚠️ | 🔴 (B-09) |
-| I-12b | **Decizia de scenariu înainte de Lovable prompt 2**: dacă se alege AP/facturi, prompt 1 (rol `ap_reviewer`) merge doar după B-07; dacă nu, nu trimiteți prompturile (ar adăuga ~5 pagini și 6 server fn fără teste în afara testului de limite) | AGENT, ORIG | — | echipa | 🔴 (D2) |
+| I-06 | **A single schema source**: `drizzle/migrations/` (decided 28 Oct); the version from PR #1 isn't merged. The HubSpot schema (properties/pipeline) stays in `setup.ts`; take the hardcoded IDs out of `order-rules.ts` into a config | ARCH 15% | S | Daniel | 🟡 schema decided; the hardcoded IDs remain (BUGS B-07, B-19) |
+| I-07 | **Secrets and config**: complete `.env.example` (all the names in DOCUMENTATION §3), a single name for the HubSpot token, `.env` taken out of git. No real secrets were found in the code/history — check n8n too (`x-appbuilder-key`) | ARCH | S | ⚠️ | 🔴 (B-08) |
+| I-08 | **Tests where the money and the access are**: `placeOrder` (with a HubSpot mock), `visibleCompanies` (admin / demo / domain / unconfirmed email), a parity test between the rules in TS and those in n8n; CI with `bun run test` + `lint` + `build` | ARCH, FUNC | M | ⚠️ | 🔴 (B-14) |
+| I-09 | **Rules as shared data**: a single rules file (thresholds, tolerances, approval limits) read by both the app and n8n (through an app endpoint), instead of copies in the Code node + TS | AGENT, ARCH, DOM | M | Lip | 🔴 (B-10) |
+| I-10b | **Evidence runner**: a script that sends the 12 messages in `live-messages.json` (and, after the pivot, the 12 invoice documents) to the webhook and writes `evidence/results.md` with expected vs actual | FUNC 20% | M | ⚠️ | 🔴 (F-08) |
+| I-11b | **Idempotency + rollback + stock reservation** in `placeOrder` | FUNC, DOM | S | ⚠️ | 🔴 (B-09) |
+| I-12b | **The scenario decision before Lovable prompt 2**: if AP/invoices is chosen, prompt 1 (`ap_reviewer` role) goes only after B-07; if not, don't send the prompts (they'd add ~5 pages and 6 server fns with no tests besides the limits test) | AGENT, ORIG | — | the team | 🔴 (D2) |
 
-## Prioritate 2 — câștig mare, efort mare
+## Priority 2 — big win, big effort
 
-| ID | Îmbunătățire | Criteriu | Efort | Owner | Stare |
+| ID | Improvement | Criterion | Effort | Owner | Status |
 |---|---|---|---|---|---|
-| I-10 | Mutarea scenariului de pe „comenzi pentru furnizor de mezeluri” pe un proces al băncii (vezi D2 în STATUS) | DOM, ORIG, BIZ | L | echipa | 🔴 |
-| I-11 | Retry + fallback la erori de tool (API bancar picat, LLM timeout, JSON invalid) | AGENT („unexpected situations”) | M | ⚠️ | 🔴 |
-| I-12 | Pagină de trace per caz (timeline cu pașii agentului) | FUNC, AGENT | M | ⚠️ | 🔴 |
+| I-10 | Moving the scenario from "orders for a cured-meats supplier" to a bank process (see D2 in STATUS) | DOM, ORIG, BIZ | L | the team | 🔴 |
+| I-11 | Retry + fallback on tool errors (banking API down, LLM timeout, invalid JSON) | AGENT ("unexpected situations") | M | ⚠️ | 🔴 |
+| I-12 | Trace page per case (timeline with the agent's steps) | FUNC, AGENT | M | ⚠️ | 🔴 |
 
-## Prioritate 3 — landing page (impact mic la juriu)
+## Priority 3 — landing page (small jury impact)
 
-> Landing-ul intră doar indirect la BIZ (10%). Nu mai investim aici după ce merge demo-ul.
+> The landing page counts only indirectly towards BIZ (10%). We don't invest here any more once the demo works.
 
-| ID | Îmbunătățire | Stare |
+| ID | Improvement | Status |
 |---|---|---|
-| I-20 | „Try the demo” devine CTA primar în hero | 🟡 PR #1 |
-| I-21 | „Open the app” → „Sign in”, doar în header | 🟡 PR #1 |
-| I-22 | CTA pe fiecare card din „We sell the worker, not the tool” | 🟡 PR #1 |
-| I-23 | Formular de contact în pagină (`#contact`) | 🟡 PR #1 |
+| I-20 | "Try the demo" becomes the primary CTA in the hero | 🟡 PR #1 |
+| I-21 | "Open the app" → "Sign in", only in the header | 🟡 PR #1 |
+| I-22 | CTA on every card in "We sell the worker, not the tool" | 🟡 PR #1 |
+| I-23 | Contact form on the page (`#contact`) | 🟡 PR #1 |
 
 ## Deck
 
-| ID | Îmbunătățire | Stare |
+| ID | Improvement | Status |
 |---|---|---|
-| I-30 | Slide-urile de problemă rescrise cu unghi bancar | 🔴 |
-| I-31 | Slide „Arhitectura agenților” (diagrama orchestrator + agenți + tools) | 🔴 |
-| I-32 | Slide cu rezultatul testelor: **X din N cazuri corecte**, câte excepții prinse | 🔴 |
-| I-33 | Business case refăcut pe costul procesului din bancă (cifrele vechi €1,37/comandă și piața de €730M nu mai sunt relevante) | 🔴 |
-| I-34 | Inconsecvențe numerice: „~40% din costul muncii” vs 23% la oferte; €560 vs €349/lună | 🔴 |
+| I-30 | The problem slides rewritten with a banking angle | 🔴 |
+| I-31 | "Agent architecture" slide (diagram of orchestrator + agents + tools) | 🔴 |
+| I-32 | Slide with the test results: **X out of N cases correct**, how many exceptions caught | 🔴 |
+| I-33 | Business case redone on the cost of the bank's process (the old figures, €1.37/order and the €730M market, are no longer relevant) | 🔴 |
+| I-34 | Numerical inconsistencies: "~40% of labour cost" vs 23% on offers; €560 vs €349/month | 🔴 |

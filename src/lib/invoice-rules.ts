@@ -176,7 +176,7 @@ export function suggestedComment(
   if (reasons.length === 0) return "";
   const list = reasons.join("; ");
   return decision === "send_back"
-    ? `Sent back because ${list}. Please send a corrected invoice.`
+    ? `Sent back because ${list}. The supplier needs to send a corrected invoice.`
     : `Rejected because ${list}.`;
 }
 

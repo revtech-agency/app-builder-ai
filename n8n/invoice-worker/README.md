@@ -90,7 +90,7 @@ in the HubSpot portal now, each with its expected stage and flags. `run-tests.mj
 `/webhook/invoice-intake` and prints a pass/fail table:
 
 ```sh
-INVOICE_APP_KEY=<the AppBuilder app key value> HUBSPOT_API_KEY=<private app token> node n8n/invoice-worker/run-tests.mjs
+INVOICE_APP_KEY=<the AppBuilder app key value> HUBSPOT_ACCESS_TOKEN=<private app token> node n8n/invoice-worker/run-tests.mjs
 ```
 
 Add `--test` for n8n's test webhook, `--only 05-duplicate` for one case, or `--suffix -2` to rerun under
