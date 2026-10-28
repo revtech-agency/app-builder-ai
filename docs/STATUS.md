@@ -1,82 +1,83 @@
 # STATUS — AppBuilder.ai @ NEXXT AI Hackathon (Raiffeisen)
 
-> Actualizat: joi, 29 oct 2026, 00:20 · Owner document: Lip
-> Verificat cu codul de pe `main` @ `cce32e0`, cu portalul HubSpot 149650024 și cu site-ul live (29 oct). Ce nu se vede în cod rămâne ⚠️.
-> Autori: `prompts/` (n8n + Lovable) = Daniel. Cele 5 documente = Lip, revizuite din cod cu Claude.
-> Regulă: fiecare membru își actualizează rândul **la fiecare 2 ore** sau când se blochează. Nu se discută status pe Discord fără să fie trecut aici.
+> Updated: Thursday, 29 Oct 2026, 00:20 · Document owner: Lip
+> Checked against the code on `main` @ `cce32e0`, the HubSpot portal 149650024 and the live site (29 Oct). Anything that can't be seen in the code stays ⚠️.
+> Authors: `prompts/` (n8n + Lovable) = Daniel. The 5 documents = Lip, reviewed against the code with Claude.
+> Rule: every member updates their row **every 2 hours** or when they get blocked. Don't discuss status on Discord without it being recorded here.
 
-## Termene
+## Deadlines
 
-| Ce | Când |
+| What | When |
 |---|---|
-| Depunere cod + evidence | **joi, 29 oct, 10:30** |
-| Prezentare live | ⚠️ DE CONFIRMAT |
-| Code freeze intern (doar bugfix după) | joi, 29 oct, 08:00 |
-| Video backup al demo-ului înregistrat | joi, 29 oct, 09:00 |
+| Code + evidence submission | **Thursday, 29 Oct, 10:30** |
+| Live presentation | ⚠️ TO BE CONFIRMED |
+| Internal code freeze (bugfixes only after) | Thursday, 29 Oct, 08:00 |
+| Backup video of the demo recorded | Thursday, 29 Oct, 09:00 |
 
-## Decizii deschise (blochează restul)
+## Open decisions (they block everything else)
 
-| # | Decizie | Opțiuni | Cine decide | Până când |
+| # | Decision | Options | Who decides | By when |
 |---|---|---|---|---|
-| D1 | Pe ce track suntem înscriși | Operational Efficiency / Provocare Deschisă | întrebare la organizatori | ACUM |
-| D2 | Scenariul bancar | Order-to-cash / Validare dosar credit / **Facturi furnizor, three-way match (AP)** / rămânem pe comenzi. Varianta AP este **propunerea lui Daniel**: prompturile din `prompts/` (n8n + Lovable) sunt scrise de el, nu e o decizie de echipă. **Pe `main` (29 oct) varianta AP e construită și live:** invoice desk în app + invoice worker în n8n, 12/12 cazuri de test corecte (`evidence/invoice-worker-run-2026-10-29.md`). ⚠️ Decizia de echipă trebuie totuși confirmată | echipa + 1 mentor Raiffeisen | azi |
-| D3 | LLM-ul folosit în demo | `prompts/n8n/n8n-prompt.md` cere Claude `claude-sonnet-5-5`, credențial n8n „RTA Anthropic API". **Propunere: D3 = Claude**; ⚠️ de confirmat în n8n live ce model rulează fluxurile de comenzi. Fluxurile de facturi exportate în `n8n/invoice-worker/` folosesc Claude `claude-sonnet-5-5` (Information Extractor la procesare, agentul din chatul reviewerului); aplicația nu cheamă LLM-ul direct | Daniel | azi |
+| D1 | Which track we're entered in | Operational Efficiency / Open Challenge | question for the organisers | NOW |
+| D2 | The banking scenario | Order-to-cash / Credit file validation / **Supplier invoices, three-way match (AP)** / stay on orders. The AP option is **Daniel's proposal**: the prompts in `prompts/` (n8n + Lovable) were written by him, it isn't a team decision. **On `main` (29 Oct) the AP option is built and live:** invoice desk in the app + invoice worker in n8n, 12/12 test cases correct (`evidence/invoice-worker-run-2026-10-29.md`). ⚠️ The team decision still needs confirming | the team + 1 Raiffeisen mentor | today |
+| D3 | The LLM used in the demo | `prompts/n8n/n8n-prompt.md` asks for Claude `claude-sonnet-5-5`, n8n credential "RTA Anthropic API". **Proposal: D3 = Claude**; ⚠️ to confirm in live n8n which model the order flows run. The invoice flows exported in `n8n/invoice-worker/` use Claude `claude-sonnet-5-5` (Information Extractor for processing, the agent in the reviewer's chat); the app doesn't call the LLM directly | Daniel | today |
 
-## Stare pe componente
+## Status by component
 
-| Componentă | Stare | Owner | Blocaj |
+| Component | Status | Owner | Blocker |
 |---|---|---|---|
-| Landing page (nexxt.appbuilder.ai) | 🟢 CTA demo, formular HubSpot și `Talk to us → #contact`. Site-ul live rulează build-ul de pe `main` (verificat 29 oct: bundle-ul live conține ultimele texte din pagina de factură) | Daniel | — |
-| PR #1 (branch `landing-cta-hubspot`) | 🟡 NEMERGE-UIT, a divergat de `main` (parte din conținut e refăcut pe `main` cu alte commit-uri). Aduce `supabase/migrations/…user_roles.sql`, care **nu trebuie merge-uit** (vezi BUGS B-07: schema rămâne în `drizzle/migrations/`). Merge doar dacă scoți acel fișier și `types.ts`/`drizzle` din diff | Daniel | decide: merge sau închide |
-| Agentul de comenzi (order worker) | 🟡 rulează în n8n (6 workflow-uri citate în prompt), **nu e în repo**; app-ul îl cheamă prin 2 webhook-uri (`order-assistant`, `app-order-offer`). Regulile de comandă sunt în cod (`order-rules.ts`, testate) | Daniel | export JSON + prompt în repo |
-| Invoice worker (n8n, scenariu bancar AP) | 🟢 live în n8n: `Kxhmr00uS4MBXTSO` procesează facturile (Gmail `demo+invoices@appbuilder.ai` sau webhook `invoice-intake` → deal în Procure-to-pay, linii, notă de audit), `HI8tvI2HG70NlgPo` e chatul reviewerului (doar citire), `rc72KPALhtJhwLZm` caută PO-ul. Export JSON în `n8n/invoice-worker/`. ⚠️ Exportul e mai vechi decât versiunea live `030f7e0f…`: regula split purchase numără în export facturile furnizorului, live doar pe cele de pe același PO | Daniel | re-export din n8n |
-| Invoice desk (app: coadă, detaliu, submit) | 🟢 pe `main`: coada (`/app/invoices`), pagina facturii (three-way match, fiecare verificare trecută/picată, furnizor, activitate, chat „Ask the worker”), decizii (aprobare, trimis înapoi, duplicat, respins; comentariul pornește din verificările picate), `Submit document` (text sau PDF), furnizori, PO-uri, echipă, reguli de aprobare, Reset demo, ghid pas cu pas pentru contul demo | Daniel | — |
-| Setup HubSpot facturi (pipeline, PO, furnizori, 12 documente sintetice) | 🟢 `scripts/hubspot/setup-invoices.ts` (rerulabil, `--dry-run`) + `scripts/hubspot/data/invoices/`: 6 furnizori, 10 PO-uri, 6 facturi istorice, 10 documente live cu stadiul așteptat. `scripts/hubspot/check-ids.ts` verifică ID-urile de stadii hardcodate. ⚠️ `HUBSPOT.md` și `lovable-prompt-roles.md` sunt în folderul de lucru al lui Daniel, nu în repo | Daniel | — |
-| Agenți separați + orchestrator | 🟡 facturi: 3 fluxuri separate (procesare, chat cu 6 tool-uri, căutare PO ca sub-flux); LLM-ul doar extrage datele, regulile fixe din *Code node* `Apply Rules` decid. Nu există un orchestrator separat | ⚠️ | — |
-| Mock API bancar | 🔴 neînceput | ⚠️ | D2 |
-| Date sintetice de test | 🟢 facturi: 12 cazuri cu stadiu și flaguri așteptate în `n8n/invoice-worker/test-cases.json`. Comenzi: 12 cazuri în `scripts/hubspot/data/` | Lip (propus) | — |
-| Evidence pack (rulări X/N, log-uri) | 🟢 facturi: `evidence/invoice-worker-run-2026-10-29.md`, 12/12 corecte pe 4 rulări la rând; `run-tests.mjs` arhivează facturile de test după fiecare rulare. Comenzi: fără runner | Daniel | — |
-| README / setup | 🟡 `README.md` descrie aplicația, workerul de facturi și comenzile de dezvoltare/test (29 oct); variabilele de mediu sunt în `docs/DOCUMENTATION.md` | Daniel | — |
-| Deck | 🟡 v1 există, nu răspunde brief-ului | ⚠️ | D2 |
+| Landing page (nexxt.appbuilder.ai) | 🟢 demo CTA, HubSpot form and `Talk to us → #contact`. The live site runs the build from `main` (checked 29 Oct: the live bundle contains the latest texts from the invoice page) | Daniel | — |
+| PR #1 (branch `landing-cta-hubspot`) | 🟡 NOT MERGED, has diverged from `main` (part of its content was redone on `main` in other commits). It brings `supabase/migrations/…user_roles.sql`, which **must not be merged** (see BUGS B-07: the schema stays in `drizzle/migrations/`). Merge only if you remove that file and `types.ts`/`drizzle` from the diff | Daniel | decide: merge or close |
+| Order agent (order worker) | 🟡 runs in n8n (6 workflows cited in the prompt), **not in the repo**; the app calls it through 2 webhooks (`order-assistant`, `app-order-offer`). The order rules are in code (`order-rules.ts`, tested) | Daniel | JSON export + prompt in the repo |
+| Invoice worker (n8n, AP banking scenario) | 🟢 live in n8n: `Kxhmr00uS4MBXTSO` processes invoices (Gmail `demo+invoices@appbuilder.ai` or webhook `invoice-intake` → deal in Procure-to-pay, line items, audit note), `HI8tvI2HG70NlgPo` is the reviewer's chat (read-only), `rc72KPALhtJhwLZm` looks up the PO. JSON export in `n8n/invoice-worker/`. ⚠️ The export is older than the live version `030f7e0f…`: the split purchase rule counts the supplier's invoices in the export, only those on the same PO live | Daniel | re-export from n8n |
+| Invoice desk (app: queue, detail, submit) | 🟢 on `main`: the queue (`/app/invoices`), the invoice page (three-way match, every check passed/failed, supplier, activity, "Ask the worker" chat), decisions (approve, send back, duplicate, reject; the comment starts from the failed checks), `Submit document` (text or PDF), suppliers, POs, team, approval rules, Reset demo, step-by-step guide for the demo account | Daniel | — |
+| HubSpot invoice setup (pipeline, POs, suppliers, 12 synthetic documents) | 🟢 `scripts/hubspot/setup-invoices.ts` (rerunnable, `--dry-run`) + `scripts/hubspot/data/invoices/`: 6 suppliers, 10 POs, 6 history invoices, 10 live documents with their expected stage. `scripts/hubspot/check-ids.ts` checks the hardcoded stage IDs. ⚠️ `HUBSPOT.md` and `lovable-prompt-roles.md` are in Daniel's working folder, not in the repo | Daniel | — |
+| Separate agents + orchestrator | 🟡 invoices: 3 separate flows (processing, chat with 6 tools, PO lookup as a sub-flow); the LLM only extracts the data, the fixed rules in the *Code node* `Apply Rules` decide. There is no separate orchestrator | ⚠️ | — |
+| Banking mock API | 🔴 not started | ⚠️ | D2 |
+| Synthetic test data | 🟢 invoices: 12 cases with expected stage and flags in `n8n/invoice-worker/test-cases.json`. Orders: 12 cases in `scripts/hubspot/data/` | Lip (proposed) | — |
+| Evidence pack (X/N runs, logs) | 🟢 invoices: `evidence/invoice-worker-run-2026-10-29.md`, 12/12 correct on 4 runs in a row; `run-tests.mjs` archives the test invoices after each run. Orders: no runner | Daniel | — |
+| README / setup | 🟡 `README.md` describes the app, the invoice worker and the development/test commands (29 Oct); the environment variables are in `docs/DOCUMENTATION.md` | Daniel | — |
+| Deck | 🟡 v1 exists, doesn't answer the brief | ⚠️ | D2 |
 
-Legendă: 🟢 gata · 🟡 în lucru / parțial · 🔴 neînceput sau blocat
+Legend: 🟢 done · 🟡 in progress / partial · 🔴 not started or blocked
 
-## Echipa și roluri
+## Team and roles
 
-| Membru | Rol | Ce deține |
+| Member | Role | Owns |
 |---|---|---|
 | Daniel (revtech) | Tech lead | repo, Lovable, Supabase, deploy |
-| Lip | Domeniu + reguli + date de test + documentație | ⚠️ DE CONFIRMAT |
-| ⚠️ | Agenți și orchestrare | |
-| ⚠️ | Integrări + UI | |
+| Lip | Domain + rules + test data + documentation | ⚠️ TO BE CONFIRMED |
+| ⚠️ | Agents and orchestration | |
+| ⚠️ | Integrations + UI | |
 | ⚠️ | Deck + pitch | |
 
-## Reguli de acces (propunere — de bătut în cuie azi)
+## Access rules (proposal — to be nailed down today)
 
-Problema: avem 6+ unelte și nu e clar cine are acces unde, cine poate schimba ce și unde stă adevărul.
+The problem: we have 6+ tools and it isn't clear who has access where, who can change what, and where the truth lives.
 
-| Unealtă | Pentru ce | Sursa de adevăr pentru | Cine are acces | Cine poate scrie |
+| Tool | What for | Source of truth for | Who has access | Who can write |
 |---|---|---|---|---|
-| **GitHub** | cod, migrări SQL, documentație | **tot codul și docs** | toată echipa (read) | toți, **doar prin PR** pe `main` |
-| **Lovable** | generare UI | nimic — e editor | Daniel + 1 | doar pe branch, sincronizat în GitHub |
-| **Supabase** | DB, auth | schema (prin migrări din repo) | Daniel + 1 backup | **`drizzle/migrations/` (decis 28 oct)**. Baza reală = `types.ts` de pe `main` = migrarea din `drizzle/`. Fișierul `supabase/migrations/…` din PR #1 nu se merge-uiește. Un singur tabel: `user_roles` |
-| **HubSpot** | „sistemul băncii” în demo + formular contact | date demo CRM (portal 149650024); schema proprietăților e în `scripts/hubspot/setup.ts` | ⚠️ | token în `HUBSPOT_ACCESS_TOKEN` (app și scripturi; `HUBSPOT_API_KEY` doar ca nume vechi de rezervă) |
-| **n8n** | lipici între sisteme + toți agenții/LLM-ul | fluxuri (`revtech-agency.app.n8n.cloud`) | ⚠️ | export în repo doar pentru fluxurile de facturi (`n8n/invoice-worker/`); fluxurile de comenzi nu sunt în repo. Webhook-urile cer header `x-appbuilder-key` |
-| **Claude / Gemini** | asistență | nimic | toți | — |
+| **GitHub** | code, SQL migrations, documentation | **all code and docs** | the whole team (read) | everyone, **only through PRs** on `main` |
+| **Lovable** | UI generation | nothing — it's an editor | Daniel + 1 | only on a branch, synced to GitHub |
+| **Supabase** | DB, auth | the schema (through migrations in the repo) | Daniel + 1 backup | **`drizzle/migrations/` (decided 28 Oct)**. The real database = `types.ts` on `main` = the migration in `drizzle/`. The `supabase/migrations/…` file from PR #1 is not merged. One table: `user_roles` |
+| **HubSpot** | "the bank's system" in the demo + contact form | CRM demo data (portal 149650024); the property schema is in `scripts/hubspot/setup.ts` | ⚠️ | token in `HUBSPOT_ACCESS_TOKEN` (app and scripts; `HUBSPOT_API_KEY` only as the old fallback name) |
+| **n8n** | glue between systems + all the agents/the LLM | flows (`revtech-agency.app.n8n.cloud`) | ⚠️ | export in the repo only for the invoice flows (`n8n/invoice-worker/`); the order flows aren't in the repo. The webhooks require the `x-appbuilder-key` header |
+| **Claude / Gemini** | assistance | nothing | everyone | — |
 
-Reguli de bază:
-1. **Un singur loc de adevăr: repo-ul.** Ce nu e în GitHub nu există pentru juriu.
-2. **Nicio schimbare direct în Supabase.** Singurul loc pentru schema DB este `drizzle/migrations/` (decis 28 oct, B-07). Îl scrie Lovable când îi dai un prompt de bază de date; fișierul SQL intră în repo prin PR. **Nu** se creează `supabase/migrations/`.
-3. **Minim 2 oameni cu acces admin** la fiecare unealtă (Daniel + un backup). Dacă Daniel doarme la 3 dimineața, nu ne oprim.
-4. **Secretele nu se pun în chat, Discord sau cod.** Doar în `.env` local și în setările de deploy. `.env.example` în repo, fără valori.
-5. **Un branch per feature**, nume `feat/…`, `fix/…`. Merge după un review de la oricine altcineva.
-6. **Promptul unui LLM care ajunge în produs se pune în repo** (`/prompts`), nu rămâne într-un chat.
+Ground rules:
+1. **One place of truth: the repo.** What isn't in GitHub doesn't exist for the jury.
+2. **No changes directly in Supabase.** The only place for the DB schema is `drizzle/migrations/` (decided 28 Oct, B-07). Lovable writes it when you give it a database prompt; the SQL file enters the repo through a PR. Do **not** create `supabase/migrations/`.
+3. **At least 2 people with admin access** to every tool (Daniel + a backup). If Daniel is asleep at 3 a.m., we don't stop.
+4. **Secrets don't go in chat, Discord or code.** Only in local `.env` and in the deploy settings. `.env.example` in the repo, without values.
+5. **One branch per feature**, named `feat/…`, `fix/…`. Merge after a review from anyone else.
+6. **An LLM prompt that ends up in the product goes in the repo** (`/prompts`), it doesn't stay in a chat.
 
-## Log de schimbări
+## Change log
 
-| Când | Cine | Ce |
+| When | Who | What |
 |---|---|---|
-| 28 oct | Lip | PR #1 deschis: fix `user_roles`, CTA-uri, formular HubSpot |
-| 28 oct | Lip | Documente de lucru create (acesta + FEATURES, BUGS, IMPROVEMENTS, DOCUMENTATION) |
-| 28 oct | Claude (revizie din cod) | Completat din cod pe branch `docs/project-docs` (nepublicat): stack, env, structură, reguli, bug-uri noi, corecturi |
-| 29 oct | Daniel + Claude | Scenariul AP construit și testat: invoice desk, invoice worker în n8n, 12/12 cazuri (`evidence/`). STATUS, FEATURES și README aduse la zi cu codul |
+| 28 Oct | Lip | PR #1 opened: `user_roles` fix, CTAs, HubSpot form |
+| 28 Oct | Lip | Working documents created (this one + FEATURES, BUGS, IMPROVEMENTS, DOCUMENTATION) |
+| 28 Oct | Claude (review against the code) | Filled in from the code on branch `docs/project-docs` (unpublished): stack, env, structure, rules, new bugs, corrections |
+| 29 Oct | Daniel + Claude | AP scenario built and tested: invoice desk, invoice worker in n8n, 12/12 cases (`evidence/`). STATUS, FEATURES and README brought up to date with the code |
+| 29 Oct | Daniel + Claude | The 5 documents in `docs/` translated from Romanian to English, content unchanged |
