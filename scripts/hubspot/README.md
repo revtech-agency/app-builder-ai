@@ -15,6 +15,7 @@ cp .env.example .env.local                # add a HubSpot private app token (nev
 bun scripts/hubspot/setup.ts --dry-run    # reads only
 bun scripts/hubspot/setup.ts              # writes
 bun scripts/hubspot/setup.ts --history-only   # live-demo setup (below)
+bun scripts/hubspot/check-ids.ts            # reads only: hardcoded stage IDs still match HubSpot
 ```
 
 **Live demo:** `--history-only` loads only the six confirmed orders, which build each client's code map. The other six go to `data/live-messages.json` as raw messages (channel, sender, text) to send during the live run. Each message also lists the stage and exception the order worker should reach, for scoring the run. Without the flag, all twelve load already processed, as a backup dataset if the live run fails.
