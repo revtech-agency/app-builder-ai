@@ -167,3 +167,22 @@ export const DEMO_HISTORY: Record<string, { stage: string; approvedBy: string | 
 // (reviewer decisions made during a demo) is removed by "Reset demo".
 export const isHistoryAuditNote = (body: string | null | undefined) =>
   (body ?? "").includes("AppBuilder.ai invoice worker · INV-H");
+
+// Applies a "Reset demo" result to the queue the browser already has: drops the archived
+// invoices and puts restored samples back in their stage. HubSpot's search lags a few seconds
+// behind, so refetching straight away would still show the removed invoices.
+export function applyDemoReset<
+  T extends { id: string; stage: string; stageId: string; stageLabel: string },
+>(list: T[], reset: { archivedIds: string[]; restored: { id: string; stage: string }[] }): T[] {
+  const removed = new Set(reset.archivedIds);
+  const restored = new Map(reset.restored.map((r) => [r.id, r.stage]));
+  return list
+    .filter((i) => !removed.has(i.id))
+    .map((i) => {
+      const key = restored.get(i.id);
+      const stageId = key ? stageIdFor(key) : null;
+      return key && stageId
+        ? { ...i, stage: key, stageId, stageLabel: INVOICE_STAGES[stageId]?.label ?? i.stageLabel }
+        : i;
+    });
+}

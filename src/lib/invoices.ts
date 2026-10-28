@@ -604,6 +604,9 @@ export type ResetResult = {
   archivedInvoices: number;
   restoredInvoices: number;
   removedNotes: number;
+  // Ids, so the queue can update itself before HubSpot's search catches up.
+  archivedIds: string[];
+  restored: { id: string; stage: string }[];
 };
 
 async function archive(type: string, ids: string[]) {
@@ -693,5 +696,10 @@ export const resetDemo = createServerFn({ method: "POST" })
       archivedInvoices: created.length,
       restoredInvoices: changed.length,
       removedNotes: createdNotes.length + decisionNotes.length,
+      archivedIds: created.map((d) => d.id),
+      restored: changed.map((d) => ({
+        id: d.id,
+        stage: DEMO_HISTORY[d.properties["source_message_id"] ?? ""]!.stage,
+      })),
     };
   });

@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate, formatMoney } from "@/lib/format";
+import { applyDemoReset } from "@/lib/invoice-rules";
 import { listInvoices, resetDemo } from "@/lib/invoices";
 import type { InvoiceSummary } from "@/lib/invoices";
 import { cn } from "@/lib/utils";
@@ -78,7 +79,9 @@ function QueuePage() {
       toast.success("Demo reset", {
         description: `${r.archivedInvoices} added invoice(s) removed, ${r.restoredInvoices} sample invoice(s) restored.`,
       });
-      await qc.invalidateQueries();
+      // Show the result now; refetch everything once HubSpot's search has caught up.
+      qc.setQueryData<InvoiceSummary[]>(["invoices"], (old) => old && applyDemoReset(old, r));
+      setTimeout(() => void qc.invalidateQueries(), 5000);
     },
     onError: (e) => toast.error((e as Error).message),
   });

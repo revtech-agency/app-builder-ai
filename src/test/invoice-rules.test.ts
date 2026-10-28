@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  applyDemoReset,
   approvalLevelFor,
   DEMO_HISTORY,
   isHistoryAuditNote,
@@ -40,5 +41,37 @@ describe("demo history", () => {
     ).toBe(true);
     expect(isHistoryAuditNote("Approved for payment by ap-demo@appbuilder.ai")).toBe(false);
     expect(isHistoryAuditNote(null)).toBe(false);
+  });
+});
+
+describe("applyDemoReset", () => {
+  const row = (id: string, stage: string, stageId: string, stageLabel: string) => ({
+    id,
+    stage,
+    stageId,
+    stageLabel,
+  });
+  const queue = [
+    row("1", "needs_review", "6318170300", "Needs review"),
+    row("2", "rejected", "6318170304", "Rejected"),
+    row("3", "ready_to_approve", "6318170301", "Ready to approve"),
+  ];
+
+  it("drops archived invoices and restores sample stages", () => {
+    const out = applyDemoReset(queue, {
+      archivedIds: ["1"],
+      restored: [{ id: "2", stage: "approved_for_payment" }],
+    });
+    expect(out.map((i) => i.id)).toEqual(["2", "3"]);
+    expect(out[0]).toMatchObject({
+      stage: "approved_for_payment",
+      stageId: "6318170302",
+      stageLabel: "Approved for payment",
+    });
+    expect(out[1]).toEqual(queue[2]);
+  });
+
+  it("leaves the queue alone when nothing changed", () => {
+    expect(applyDemoReset(queue, { archivedIds: [], restored: [] })).toEqual(queue);
   });
 });
