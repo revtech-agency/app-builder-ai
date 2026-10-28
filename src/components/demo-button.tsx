@@ -44,7 +44,10 @@ export function ApDemoButton(props: Omit<ComponentProps<typeof Button>, "onClick
   const { signInApDemo } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
-  const available = useQuery({ queryKey: ["ap-demo-available"], queryFn: () => getApDemoAvailable() });
+  const available = useQuery({
+    queryKey: ["ap-demo-available"],
+    queryFn: () => getApDemoAvailable(),
+  });
   if (!available.data?.available) return null;
 
   return (
