@@ -410,7 +410,7 @@ function InvoicePage() {
                         <p className="text-xs text-muted-foreground">{formatDate(n.timestamp)}</p>
                         {/* HubSpot note bodies may contain simple HTML; render them as text. */}
                         <div className="whitespace-pre-wrap break-words">
-                          {n.body.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "")}
+                          {n.body.replace(/<br\s*\/?>|<\/(p|div|li)>/gi, "\n").replace(/<[^>]+>/g, "")}
                         </div>
                       </li>
                     ))}
