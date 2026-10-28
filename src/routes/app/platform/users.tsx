@@ -15,16 +15,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAuth } from "@/lib/auth";
-import { listUsersWithRoles, setRole } from "@/lib/back-office";
+import { listUsersWithRoles, ROLES, setRole } from "@/lib/back-office";
 
-export const Route = createFileRoute("/app/admin/users")({
+export const Route = createFileRoute("/app/platform/users")({
   head: () => ({ meta: [{ title: "Users & roles — AppBuilder.ai" }] }),
   component: UsersPage,
 });
 
 const ROLE_COLUMNS = [
   { role: "ap_reviewer", label: "Invoice reviewer" },
-  { role: "admin", label: "Admin" },
+  { role: "client_admin", label: "Client admin" },
+  { role: "admin", label: "AppBuilder.ai admin" },
 ] as const;
 
 function UsersPage() {
@@ -32,7 +33,7 @@ function UsersPage() {
   const queryClient = useQueryClient();
   const users = useQuery({ queryKey: ["admin-role-users"], queryFn: () => listUsersWithRoles() });
   const toggle = useMutation({
-    mutationFn: (data: { userId: string; role: "admin" | "ap_reviewer"; enabled: boolean }) =>
+    mutationFn: (data: { userId: string; role: (typeof ROLES)[number]; enabled: boolean }) =>
       setRole({ data }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-role-users"] }),
     onError: (err) => toast.error(err.message),
@@ -41,8 +42,8 @@ function UsersPage() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Invoice reviewers work the invoice desk. Admins also manage purchase orders, suppliers and
-        users.
+        Every account. Invoice reviewers work the client's invoice desk; client admins also edit its
+        POs, suppliers and team. AppBuilder.ai admins run this platform area.
       </p>
       {users.isLoading && (
         <div className="space-y-2">

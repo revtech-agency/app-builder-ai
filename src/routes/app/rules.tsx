@@ -12,7 +12,7 @@ import {
 import { formatMoney } from "@/lib/format";
 import { ANOMALY_LABELS, APPROVAL_LIMITS, PRICE_TOLERANCE } from "@/lib/invoice-rules";
 
-export const Route = createFileRoute("/app/admin/rules")({
+export const Route = createFileRoute("/app/rules")({
   head: () => ({ meta: [{ title: "Approval rules — AppBuilder.ai" }] }),
   component: RulesPage,
 });
@@ -30,11 +30,14 @@ const ROUTING = [
 
 function RulesPage() {
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        The rules the invoice worker applies to every document. Read-only here; changing them means
-        changing the worker.
-      </p>
+    <div className="mx-auto w-full max-w-6xl space-y-4 p-4 md:p-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Approval rules</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          The rules the invoice worker applies to every document. Read-only here; changing them
+          means changing the worker.
+        </p>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Who approves</CardTitle>

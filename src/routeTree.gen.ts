@@ -16,23 +16,23 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppCompanyIdRouteImport } from './routes/app/$companyId'
 import { Route as AppAdminRouteImport } from './routes/app/admin'
-import { Route as AppAdminOldRouteImport } from './routes/app/admin-old'
 import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
 import { Route as AppOverviewRouteImport } from './routes/app/overview'
+import { Route as AppPlatformRouteImport } from './routes/app/platform'
 import { Route as AppPurchaseOrdersRouteImport } from './routes/app/purchase-orders'
+import { Route as AppRulesRouteImport } from './routes/app/rules'
 import { Route as AppSuppliersRouteImport } from './routes/app/suppliers'
+import { Route as AppTeamRouteImport } from './routes/app/team'
 import { Route as AppCompanyIdInventoryRouteImport } from './routes/app/$companyId/inventory'
 import { Route as AppCompanyIdNewOrderRouteImport } from './routes/app/$companyId/new-order'
 import { Route as AppCompanyIdOrdersRouteImport } from './routes/app/$companyId/orders'
-import { Route as AppAdminIndexRouteImport } from './routes/app/admin/index'
-import { Route as AppAdminOverviewRouteImport } from './routes/app/admin/overview'
-import { Route as AppAdminPurchaseOrdersRouteImport } from './routes/app/admin/purchase-orders'
-import { Route as AppAdminRulesRouteImport } from './routes/app/admin/rules'
-import { Route as AppAdminSuppliersRouteImport } from './routes/app/admin/suppliers'
-import { Route as AppAdminUsersRouteImport } from './routes/app/admin/users'
 import { Route as AppInvoicesIndexRouteImport } from './routes/app/invoices/index'
 import { Route as AppInvoicesInvoiceIdRouteImport } from './routes/app/invoices/$invoiceId'
 import { Route as AppInvoicesNewRouteImport } from './routes/app/invoices/new'
+import { Route as AppPlatformIndexRouteImport } from './routes/app/platform/index'
+import { Route as AppPlatformClientsRouteImport } from './routes/app/platform/clients'
+import { Route as AppPlatformDashboardRouteImport } from './routes/app/platform/dashboard'
+import { Route as AppPlatformUsersRouteImport } from './routes/app/platform/users'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -69,11 +69,6 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminOldRoute = AppAdminOldRouteImport.update({
-  id: '/admin-old',
-  path: '/admin-old',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -84,14 +79,29 @@ const AppOverviewRoute = AppOverviewRouteImport.update({
   path: '/overview',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPlatformRoute = AppPlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPurchaseOrdersRoute = AppPurchaseOrdersRouteImport.update({
   id: '/purchase-orders',
   path: '/purchase-orders',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRulesRoute = AppRulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSuppliersRoute = AppSuppliersRouteImport.update({
   id: '/suppliers',
   path: '/suppliers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTeamRoute = AppTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCompanyIdInventoryRoute = AppCompanyIdInventoryRouteImport.update({
@@ -109,36 +119,6 @@ const AppCompanyIdOrdersRoute = AppCompanyIdOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => AppCompanyIdRoute,
 } as any)
-const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppAdminRoute,
-} as any)
-const AppAdminOverviewRoute = AppAdminOverviewRouteImport.update({
-  id: '/overview',
-  path: '/overview',
-  getParentRoute: () => AppAdminRoute,
-} as any)
-const AppAdminPurchaseOrdersRoute = AppAdminPurchaseOrdersRouteImport.update({
-  id: '/purchase-orders',
-  path: '/purchase-orders',
-  getParentRoute: () => AppAdminRoute,
-} as any)
-const AppAdminRulesRoute = AppAdminRulesRouteImport.update({
-  id: '/rules',
-  path: '/rules',
-  getParentRoute: () => AppAdminRoute,
-} as any)
-const AppAdminSuppliersRoute = AppAdminSuppliersRouteImport.update({
-  id: '/suppliers',
-  path: '/suppliers',
-  getParentRoute: () => AppAdminRoute,
-} as any)
-const AppAdminUsersRoute = AppAdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AppAdminRoute,
-} as any)
 const AppInvoicesIndexRoute = AppInvoicesIndexRouteImport.update({
   id: '/invoices/',
   path: '/invoices/',
@@ -154,6 +134,26 @@ const AppInvoicesNewRoute = AppInvoicesNewRouteImport.update({
   path: '/invoices/new',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPlatformIndexRoute = AppPlatformIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppPlatformRoute,
+} as any)
+const AppPlatformClientsRoute = AppPlatformClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AppPlatformRoute,
+} as any)
+const AppPlatformDashboardRoute = AppPlatformDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppPlatformRoute,
+} as any)
+const AppPlatformUsersRoute = AppPlatformUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AppPlatformRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -161,49 +161,49 @@ export interface FileRoutesByFullPath {
   '/customer-form': typeof CustomerFormRoute
   '/login': typeof LoginRoute
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
-  '/app/admin': typeof AppAdminRouteWithChildren
-  '/app/admin-old': typeof AppAdminOldRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/overview': typeof AppOverviewRoute
+  '/app/platform': typeof AppPlatformRouteWithChildren
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
+  '/app/rules': typeof AppRulesRoute
   '/app/suppliers': typeof AppSuppliersRoute
+  '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
-  '/app/admin/overview': typeof AppAdminOverviewRoute
-  '/app/admin/purchase-orders': typeof AppAdminPurchaseOrdersRoute
-  '/app/admin/rules': typeof AppAdminRulesRoute
-  '/app/admin/suppliers': typeof AppAdminSuppliersRoute
-  '/app/admin/users': typeof AppAdminUsersRoute
   '/app/invoices/$invoiceId': typeof AppInvoicesInvoiceIdRoute
   '/app/invoices/new': typeof AppInvoicesNewRoute
-  '/app/admin/': typeof AppAdminIndexRoute
+  '/app/platform/clients': typeof AppPlatformClientsRoute
+  '/app/platform/dashboard': typeof AppPlatformDashboardRoute
+  '/app/platform/users': typeof AppPlatformUsersRoute
   '/app/invoices/': typeof AppInvoicesIndexRoute
+  '/app/platform/': typeof AppPlatformIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/customer-form': typeof CustomerFormRoute
   '/login': typeof LoginRoute
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
-  '/app/admin-old': typeof AppAdminOldRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/overview': typeof AppOverviewRoute
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
+  '/app/rules': typeof AppRulesRoute
   '/app/suppliers': typeof AppSuppliersRoute
+  '/app/team': typeof AppTeamRoute
   '/app': typeof AppIndexRoute
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
-  '/app/admin/overview': typeof AppAdminOverviewRoute
-  '/app/admin/purchase-orders': typeof AppAdminPurchaseOrdersRoute
-  '/app/admin/rules': typeof AppAdminRulesRoute
-  '/app/admin/suppliers': typeof AppAdminSuppliersRoute
-  '/app/admin/users': typeof AppAdminUsersRoute
   '/app/invoices/$invoiceId': typeof AppInvoicesInvoiceIdRoute
   '/app/invoices/new': typeof AppInvoicesNewRoute
-  '/app/admin': typeof AppAdminIndexRoute
+  '/app/platform/clients': typeof AppPlatformClientsRoute
+  '/app/platform/dashboard': typeof AppPlatformDashboardRoute
+  '/app/platform/users': typeof AppPlatformUsersRoute
   '/app/invoices': typeof AppInvoicesIndexRoute
+  '/app/platform': typeof AppPlatformIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -212,25 +212,25 @@ export interface FileRoutesById {
   '/customer-form': typeof CustomerFormRoute
   '/login': typeof LoginRoute
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
-  '/app/admin': typeof AppAdminRouteWithChildren
-  '/app/admin-old': typeof AppAdminOldRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/overview': typeof AppOverviewRoute
+  '/app/platform': typeof AppPlatformRouteWithChildren
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
+  '/app/rules': typeof AppRulesRoute
   '/app/suppliers': typeof AppSuppliersRoute
+  '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
-  '/app/admin/overview': typeof AppAdminOverviewRoute
-  '/app/admin/purchase-orders': typeof AppAdminPurchaseOrdersRoute
-  '/app/admin/rules': typeof AppAdminRulesRoute
-  '/app/admin/suppliers': typeof AppAdminSuppliersRoute
-  '/app/admin/users': typeof AppAdminUsersRoute
   '/app/invoices/$invoiceId': typeof AppInvoicesInvoiceIdRoute
   '/app/invoices/new': typeof AppInvoicesNewRoute
-  '/app/admin/': typeof AppAdminIndexRoute
+  '/app/platform/clients': typeof AppPlatformClientsRoute
+  '/app/platform/dashboard': typeof AppPlatformDashboardRoute
+  '/app/platform/users': typeof AppPlatformUsersRoute
   '/app/invoices/': typeof AppInvoicesIndexRoute
+  '/app/platform/': typeof AppPlatformIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -241,48 +241,48 @@ export interface FileRouteTypes {
     | '/login'
     | '/app/$companyId'
     | '/app/admin'
-    | '/app/admin-old'
     | '/app/dashboard'
     | '/app/overview'
+    | '/app/platform'
     | '/app/purchase-orders'
+    | '/app/rules'
     | '/app/suppliers'
+    | '/app/team'
     | '/app/'
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
-    | '/app/admin/overview'
-    | '/app/admin/purchase-orders'
-    | '/app/admin/rules'
-    | '/app/admin/suppliers'
-    | '/app/admin/users'
     | '/app/invoices/$invoiceId'
     | '/app/invoices/new'
-    | '/app/admin/'
+    | '/app/platform/clients'
+    | '/app/platform/dashboard'
+    | '/app/platform/users'
     | '/app/invoices/'
+    | '/app/platform/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/customer-form'
     | '/login'
     | '/app/$companyId'
-    | '/app/admin-old'
+    | '/app/admin'
     | '/app/dashboard'
     | '/app/overview'
     | '/app/purchase-orders'
+    | '/app/rules'
     | '/app/suppliers'
+    | '/app/team'
     | '/app'
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
-    | '/app/admin/overview'
-    | '/app/admin/purchase-orders'
-    | '/app/admin/rules'
-    | '/app/admin/suppliers'
-    | '/app/admin/users'
     | '/app/invoices/$invoiceId'
     | '/app/invoices/new'
-    | '/app/admin'
+    | '/app/platform/clients'
+    | '/app/platform/dashboard'
+    | '/app/platform/users'
     | '/app/invoices'
+    | '/app/platform'
   id:
     | '__root__'
     | '/'
@@ -291,24 +291,24 @@ export interface FileRouteTypes {
     | '/login'
     | '/app/$companyId'
     | '/app/admin'
-    | '/app/admin-old'
     | '/app/dashboard'
     | '/app/overview'
+    | '/app/platform'
     | '/app/purchase-orders'
+    | '/app/rules'
     | '/app/suppliers'
+    | '/app/team'
     | '/app/'
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
-    | '/app/admin/overview'
-    | '/app/admin/purchase-orders'
-    | '/app/admin/rules'
-    | '/app/admin/suppliers'
-    | '/app/admin/users'
     | '/app/invoices/$invoiceId'
     | '/app/invoices/new'
-    | '/app/admin/'
+    | '/app/platform/clients'
+    | '/app/platform/dashboard'
+    | '/app/platform/users'
     | '/app/invoices/'
+    | '/app/platform/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -369,13 +369,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/admin-old': {
-      id: '/app/admin-old'
-      path: '/admin-old'
-      fullPath: '/app/admin-old'
-      preLoaderRoute: typeof AppAdminOldRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/dashboard': {
       id: '/app/dashboard'
       path: '/dashboard'
@@ -390,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOverviewRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/platform': {
+      id: '/app/platform'
+      path: '/platform'
+      fullPath: '/app/platform'
+      preLoaderRoute: typeof AppPlatformRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/purchase-orders': {
       id: '/app/purchase-orders'
       path: '/purchase-orders'
@@ -397,11 +397,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPurchaseOrdersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/rules': {
+      id: '/app/rules'
+      path: '/rules'
+      fullPath: '/app/rules'
+      preLoaderRoute: typeof AppRulesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/suppliers': {
       id: '/app/suppliers'
       path: '/suppliers'
       fullPath: '/app/suppliers'
       preLoaderRoute: typeof AppSuppliersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/team': {
+      id: '/app/team'
+      path: '/team'
+      fullPath: '/app/team'
+      preLoaderRoute: typeof AppTeamRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/$companyId/inventory': {
@@ -425,48 +439,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCompanyIdOrdersRouteImport
       parentRoute: typeof AppCompanyIdRoute
     }
-    '/app/admin/': {
-      id: '/app/admin/'
-      path: '/'
-      fullPath: '/app/admin/'
-      preLoaderRoute: typeof AppAdminIndexRouteImport
-      parentRoute: typeof AppAdminRoute
-    }
-    '/app/admin/overview': {
-      id: '/app/admin/overview'
-      path: '/overview'
-      fullPath: '/app/admin/overview'
-      preLoaderRoute: typeof AppAdminOverviewRouteImport
-      parentRoute: typeof AppAdminRoute
-    }
-    '/app/admin/purchase-orders': {
-      id: '/app/admin/purchase-orders'
-      path: '/purchase-orders'
-      fullPath: '/app/admin/purchase-orders'
-      preLoaderRoute: typeof AppAdminPurchaseOrdersRouteImport
-      parentRoute: typeof AppAdminRoute
-    }
-    '/app/admin/rules': {
-      id: '/app/admin/rules'
-      path: '/rules'
-      fullPath: '/app/admin/rules'
-      preLoaderRoute: typeof AppAdminRulesRouteImport
-      parentRoute: typeof AppAdminRoute
-    }
-    '/app/admin/suppliers': {
-      id: '/app/admin/suppliers'
-      path: '/suppliers'
-      fullPath: '/app/admin/suppliers'
-      preLoaderRoute: typeof AppAdminSuppliersRouteImport
-      parentRoute: typeof AppAdminRoute
-    }
-    '/app/admin/users': {
-      id: '/app/admin/users'
-      path: '/users'
-      fullPath: '/app/admin/users'
-      preLoaderRoute: typeof AppAdminUsersRouteImport
-      parentRoute: typeof AppAdminRoute
-    }
     '/app/invoices/': {
       id: '/app/invoices/'
       path: '/invoices'
@@ -488,6 +460,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInvoicesNewRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/platform/': {
+      id: '/app/platform/'
+      path: '/'
+      fullPath: '/app/platform/'
+      preLoaderRoute: typeof AppPlatformIndexRouteImport
+      parentRoute: typeof AppPlatformRoute
+    }
+    '/app/platform/clients': {
+      id: '/app/platform/clients'
+      path: '/clients'
+      fullPath: '/app/platform/clients'
+      preLoaderRoute: typeof AppPlatformClientsRouteImport
+      parentRoute: typeof AppPlatformRoute
+    }
+    '/app/platform/dashboard': {
+      id: '/app/platform/dashboard'
+      path: '/dashboard'
+      fullPath: '/app/platform/dashboard'
+      preLoaderRoute: typeof AppPlatformDashboardRouteImport
+      parentRoute: typeof AppPlatformRoute
+    }
+    '/app/platform/users': {
+      id: '/app/platform/users'
+      path: '/users'
+      fullPath: '/app/platform/users'
+      preLoaderRoute: typeof AppPlatformUsersRouteImport
+      parentRoute: typeof AppPlatformRoute
+    }
   }
 }
 
@@ -507,36 +507,34 @@ const AppCompanyIdRouteWithChildren = AppCompanyIdRoute._addFileChildren(
   AppCompanyIdRouteChildren,
 )
 
-interface AppAdminRouteChildren {
-  AppAdminOverviewRoute: typeof AppAdminOverviewRoute
-  AppAdminPurchaseOrdersRoute: typeof AppAdminPurchaseOrdersRoute
-  AppAdminRulesRoute: typeof AppAdminRulesRoute
-  AppAdminSuppliersRoute: typeof AppAdminSuppliersRoute
-  AppAdminUsersRoute: typeof AppAdminUsersRoute
-  AppAdminIndexRoute: typeof AppAdminIndexRoute
+interface AppPlatformRouteChildren {
+  AppPlatformClientsRoute: typeof AppPlatformClientsRoute
+  AppPlatformDashboardRoute: typeof AppPlatformDashboardRoute
+  AppPlatformUsersRoute: typeof AppPlatformUsersRoute
+  AppPlatformIndexRoute: typeof AppPlatformIndexRoute
 }
 
-const AppAdminRouteChildren: AppAdminRouteChildren = {
-  AppAdminOverviewRoute: AppAdminOverviewRoute,
-  AppAdminPurchaseOrdersRoute: AppAdminPurchaseOrdersRoute,
-  AppAdminRulesRoute: AppAdminRulesRoute,
-  AppAdminSuppliersRoute: AppAdminSuppliersRoute,
-  AppAdminUsersRoute: AppAdminUsersRoute,
-  AppAdminIndexRoute: AppAdminIndexRoute,
+const AppPlatformRouteChildren: AppPlatformRouteChildren = {
+  AppPlatformClientsRoute: AppPlatformClientsRoute,
+  AppPlatformDashboardRoute: AppPlatformDashboardRoute,
+  AppPlatformUsersRoute: AppPlatformUsersRoute,
+  AppPlatformIndexRoute: AppPlatformIndexRoute,
 }
 
-const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
-  AppAdminRouteChildren,
+const AppPlatformRouteWithChildren = AppPlatformRoute._addFileChildren(
+  AppPlatformRouteChildren,
 )
 
 interface AppRouteChildren {
   AppCompanyIdRoute: typeof AppCompanyIdRouteWithChildren
-  AppAdminRoute: typeof AppAdminRouteWithChildren
-  AppAdminOldRoute: typeof AppAdminOldRoute
+  AppAdminRoute: typeof AppAdminRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppOverviewRoute: typeof AppOverviewRoute
+  AppPlatformRoute: typeof AppPlatformRouteWithChildren
   AppPurchaseOrdersRoute: typeof AppPurchaseOrdersRoute
+  AppRulesRoute: typeof AppRulesRoute
   AppSuppliersRoute: typeof AppSuppliersRoute
+  AppTeamRoute: typeof AppTeamRoute
   AppIndexRoute: typeof AppIndexRoute
   AppInvoicesInvoiceIdRoute: typeof AppInvoicesInvoiceIdRoute
   AppInvoicesNewRoute: typeof AppInvoicesNewRoute
@@ -545,12 +543,14 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCompanyIdRoute: AppCompanyIdRouteWithChildren,
-  AppAdminRoute: AppAdminRouteWithChildren,
-  AppAdminOldRoute: AppAdminOldRoute,
+  AppAdminRoute: AppAdminRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppOverviewRoute: AppOverviewRoute,
+  AppPlatformRoute: AppPlatformRouteWithChildren,
   AppPurchaseOrdersRoute: AppPurchaseOrdersRoute,
+  AppRulesRoute: AppRulesRoute,
   AppSuppliersRoute: AppSuppliersRoute,
+  AppTeamRoute: AppTeamRoute,
   AppIndexRoute: AppIndexRoute,
   AppInvoicesInvoiceIdRoute: AppInvoicesInvoiceIdRoute,
   AppInvoicesNewRoute: AppInvoicesNewRoute,

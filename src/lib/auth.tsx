@@ -14,6 +14,10 @@ type AuthContextValue = {
   ready: boolean;
   isAdmin: boolean;
   canUseInvoiceDesk: boolean;
+  // Client admin (or platform admin): may edit POs, suppliers and the client's team.
+  canManageDesk: boolean;
+  // True once the roles above are known for the signed-in user.
+  rolesReady: boolean;
   signInApDemo: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInDemo: () => Promise<void>;
@@ -52,10 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [canUseInvoiceDesk, setCanUseInvoiceDesk] = useState(false);
+  const [canManageDesk, setCanManageDesk] = useState(false);
+  const [rolesReady, setRolesReady] = useState(false);
   const userId = session?.user.id;
   useEffect(() => {
     setIsAdmin(false);
     setCanUseInvoiceDesk(false);
+    setCanManageDesk(false);
+    setRolesReady(false);
     if (!userId) return;
     let current = true;
     getMyRole()
@@ -63,8 +71,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!current) return;
         setIsAdmin(role.isAdmin);
         setCanUseInvoiceDesk(role.canUseInvoiceDesk);
+        setCanManageDesk(role.canManageDesk);
+        setRolesReady(true);
       })
-      .catch(() => current && setIsAdmin(false));
+      .catch(() => {
+        if (!current) return;
+        setIsAdmin(false);
+        setRolesReady(true);
+      });
     return () => {
       current = false;
     };
@@ -107,13 +121,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ready,
       isAdmin,
       canUseInvoiceDesk,
+      canManageDesk,
+      rolesReady,
       signIn,
       signInDemo,
       signInApDemo,
       signUp,
       signOut,
     }),
-    [session, ready, isAdmin, canUseInvoiceDesk, signIn, signInDemo, signInApDemo, signUp, signOut],
+    [
+      session,
+      ready,
+      isAdmin,
+      canUseInvoiceDesk,
+      canManageDesk,
+      rolesReady,
+      signIn,
+      signInDemo,
+      signInApDemo,
+      signUp,
+      signOut,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

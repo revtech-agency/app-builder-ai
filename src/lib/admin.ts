@@ -1,11 +1,8 @@
 // Roles live in public.user_roles (see lovable-prompt-roles.md); only the server writes them.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createMiddleware, createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-export type AdminUser = { id: string; email: string; createdAt: string; isAdmin: boolean };
 
 // Service-role client, loaded inside handlers so it never reaches the browser bundle.
 // Untyped until the generated Database types include user_roles.
@@ -40,16 +37,40 @@ export async function hasRole(userId: string, role: string): Promise<boolean> {
     .eq("role", role)
     .maybeSingle();
   if (error) {
-    if (error.code === "PGRST205") return false;
+    // PGRST205: roles table missing. 22P02: the role isn't in the app_role enum yet
+    // (client_admin before its migration), so nobody has it.
+    if (error.code === "PGRST205" || error.code === "22P02") return false;
     throw new Error(`Could not check roles: ${error.message}`);
   }
   return Boolean(data);
 }
 
-export async function canUseInvoiceDesk(userId: string): Promise<boolean> {
-  const [reviewer, admin] = await Promise.all([hasRole(userId, "ap_reviewer"), isAdmin(userId)]);
-  return reviewer || admin;
+// Client side (the bank): reviewers work the invoice desk; client admins also edit POs,
+// suppliers and their team. Platform admins (AppBuilder.ai staff) keep support access to both.
+export async function canManageDesk(userId: string): Promise<boolean> {
+  const [clientAdmin, admin] = await Promise.all([
+    hasRole(userId, "client_admin"),
+    isAdmin(userId),
+  ]);
+  return clientAdmin || admin;
 }
+
+export async function canUseInvoiceDesk(userId: string): Promise<boolean> {
+  const [reviewer, manager] = await Promise.all([
+    hasRole(userId, "ap_reviewer"),
+    canManageDesk(userId),
+  ]);
+  return reviewer || manager;
+}
+
+export const requireDeskAdmin = createMiddleware({ type: "function" })
+  .middleware([requireSupabaseAuth])
+  .server(async ({ next, context }) => {
+    if (!(await canManageDesk(context.userId))) {
+      throw new Error("Only the client's admins can do this.");
+    }
+    return next();
+  });
 
 export const requireInvoiceDesk = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
@@ -72,49 +93,8 @@ export const getMyRole = createServerFn({ method: "GET" })
   .handler(async ({ context }) => ({
     isAdmin: await isAdmin(context.userId),
     canUseInvoiceDesk: await canUseInvoiceDesk(context.userId),
+    canManageDesk: await canManageDesk(context.userId),
   }));
-
-export const listUsers = createServerFn({ method: "GET" })
-  .middleware([requireAdmin])
-  .handler(async (): Promise<AdminUser[]> => {
-    const db = await adminClient();
-    const [{ data: users, error }, { data: roles, error: rolesError }] = await Promise.all([
-      db.auth.admin.listUsers({ perPage: 200 }),
-      db.from("user_roles").select("user_id").eq("role", "admin"),
-    ]);
-    if (error) throw new Error(error.message);
-    if (rolesError) throw new Error(rolesError.message);
-    const admins = new Set((roles ?? []).map((r: { user_id: string }) => r.user_id));
-    return users.users
-      .map((u) => ({
-        id: u.id,
-        email: u.email ?? "",
-        createdAt: u.created_at,
-        isAdmin: admins.has(u.id),
-      }))
-      .sort((a, b) => a.email.localeCompare(b.email));
-  });
-
-export const setAdmin = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
-  .inputValidator((input: { userId: string; admin: boolean }) =>
-    z.object({ userId: z.string().uuid(), admin: z.boolean() }).parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    if (data.userId === context.userId && !data.admin) {
-      throw new Error("You can't remove your own admin role.");
-    }
-    const db = await adminClient();
-    const { error } = data.admin
-      ? await db
-          .from("user_roles")
-          .upsert(
-            { user_id: data.userId, role: "admin" },
-            { onConflict: "user_id,role", ignoreDuplicates: true },
-          )
-      : await db.from("user_roles").delete().eq("user_id", data.userId).eq("role", "admin");
-    if (error) throw new Error(error.message);
-  });
 
 // One-click demo: a one-time sign-in token for the shared demo account, redeemed in the
 // browser with verifyOtp. No password is stored or sent anywhere.

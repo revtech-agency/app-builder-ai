@@ -1,11 +1,11 @@
-// Back office for the bank's admins: edit purchase orders and suppliers in HubSpot
-// (portal 149650024) and manage app roles. Reads reuse listPurchaseOrders / listSuppliers
-// from invoices.ts; every function here requires an admin.
+// Back office. Client side (the bank's admins): edit purchase orders and suppliers in HubSpot
+// (portal 149650024) and manage the bank's team. Platform side (AppBuilder.ai admins): all
+// users and roles. Reads reuse listPurchaseOrders / listSuppliers from invoices.ts.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requireAdmin } from "@/lib/admin";
+import { isAdmin, requireAdmin, requireDeskAdmin } from "@/lib/admin";
 import {
   normIban,
   P2P_PIPELINE_ID,
@@ -17,7 +17,8 @@ import {
 type HsObject = { id: string; properties: Record<string, string | null | undefined> };
 
 export const SUPPLIER_STATUSES = ["approved", "pending_onboarding", "blocked"] as const;
-export const ROLES = ["admin", "ap_reviewer"] as const;
+export const ROLES = ["admin", "client_admin", "ap_reviewer"] as const;
+export const TEAM_ROLES = ["ap_reviewer", "client_admin"] as const;
 
 async function hs() {
   return (await import("@/lib/hubspot.server")).hubspot;
@@ -116,7 +117,7 @@ async function addLines(
 }
 
 export const createPurchaseOrder = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
+  .middleware([requireDeskAdmin])
   .inputValidator(
     (input: {
       supplierId: string;
@@ -168,7 +169,7 @@ export const createPurchaseOrder = createServerFn({ method: "POST" })
 // Saves header fields and lines (edited and new). The stage follows the received
 // quantities, unless the PO is closed.
 export const updatePurchaseOrder = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
+  .middleware([requireDeskAdmin])
   .inputValidator(
     (input: {
       dealId: string;
@@ -257,7 +258,7 @@ async function vatTaken(vatId: string, exceptId?: string) {
 }
 
 export const createSupplier = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
+  .middleware([requireDeskAdmin])
   .inputValidator((input: SupplierInput & { domain: string }) =>
     SupplierFields.extend({ domain: z.string().trim().max(120) }).parse(input),
   )
@@ -283,7 +284,7 @@ export const createSupplier = createServerFn({ method: "POST" })
 // An IBAN change keeps the old one and the date, which the invoice worker checks
 // (an invoice within 30 days of a change goes to Needs review).
 export const updateSupplier = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
+  .middleware([requireDeskAdmin])
   .inputValidator((input: SupplierInput & { companyId: string }) =>
     SupplierFields.extend({ companyId: DealId }).parse(input),
   )
@@ -321,29 +322,22 @@ async function adminClient(): Promise<SupabaseClient> {
   return supabaseAdmin as unknown as SupabaseClient;
 }
 
+async function writeRole(userId: string, role: string, enabled: boolean) {
+  const db = await adminClient();
+  const { error } = enabled
+    ? await db
+        .from("user_roles")
+        .upsert({ user_id: userId, role }, { onConflict: "user_id,role", ignoreDuplicates: true })
+    : await db.from("user_roles").delete().eq("user_id", userId).eq("role", role);
+  if (error?.code === "22P02") throw new Error(`The ${role} role needs its database update first.`);
+  if (error) throw new Error(error.message);
+}
+
 export const listUsersWithRoles = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
-  .handler(async (): Promise<RoleUser[]> => {
-    const db = await adminClient();
-    const [{ data: users, error }, { data: roles, error: rolesError }] = await Promise.all([
-      db.auth.admin.listUsers({ perPage: 200 }),
-      db.from("user_roles").select("user_id, role"),
-    ]);
-    if (error) throw new Error(error.message);
-    if (rolesError) throw new Error(rolesError.message);
-    const byUser = new Map<string, string[]>();
-    for (const r of (roles ?? []) as { user_id: string; role: string }[]) {
-      byUser.set(r.user_id, [...(byUser.get(r.user_id) ?? []), r.role]);
-    }
-    return users.users
-      .map((u) => ({
-        id: u.id,
-        email: u.email ?? "",
-        createdAt: u.created_at,
-        roles: byUser.get(u.id) ?? [],
-      }))
-      .sort((a, b) => a.email.localeCompare(b.email));
-  });
+  .handler(async (): Promise<RoleUser[]> =>
+    (await readUsersAndRoles()).sort((a, b) => a.email.localeCompare(b.email)),
+  );
 
 export const setRole = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
@@ -354,14 +348,69 @@ export const setRole = createServerFn({ method: "POST" })
     if (data.userId === context.userId && data.role === "admin" && !data.enabled) {
       throw new Error("You can't remove your own admin role.");
     }
-    const db = await adminClient();
-    const { error } = data.enabled
-      ? await db
-          .from("user_roles")
-          .upsert(
-            { user_id: data.userId, role: data.role },
-            { onConflict: "user_id,role", ignoreDuplicates: true },
-          )
-      : await db.from("user_roles").delete().eq("user_id", data.userId).eq("role", data.role);
-    if (error) throw new Error(error.message);
+    await writeRole(data.userId, data.role, data.enabled);
+  });
+
+// ---------- the client's own team (client admins) ----------
+
+async function readUsersAndRoles() {
+  const db = await adminClient();
+  const [{ data: users, error }, { data: roles, error: rolesError }] = await Promise.all([
+    db.auth.admin.listUsers({ perPage: 200 }),
+    db.from("user_roles").select("user_id, role"),
+  ]);
+  if (error) throw new Error(error.message);
+  if (rolesError) throw new Error(rolesError.message);
+  const byUser = new Map<string, string[]>();
+  for (const r of (roles ?? []) as { user_id: string; role: string }[]) {
+    byUser.set(r.user_id, [...(byUser.get(r.user_id) ?? []), r.role]);
+  }
+  return users.users.map((u) => ({
+    id: u.id,
+    email: u.email ?? "",
+    createdAt: u.created_at,
+    roles: byUser.get(u.id) ?? [],
+  }));
+}
+
+const isTeamRole = (r: string) => (TEAM_ROLES as readonly string[]).includes(r);
+
+// Only people with a desk role, and never platform staff, so a client admin can't see
+// other clients' users or change AppBuilder.ai's own accounts.
+export const listTeam = createServerFn({ method: "GET" })
+  .middleware([requireDeskAdmin])
+  .handler(async (): Promise<RoleUser[]> =>
+    (await readUsersAndRoles())
+      .filter((u) => !u.roles.includes("admin") && u.roles.some(isTeamRole))
+      .map((u) => ({ ...u, roles: u.roles.filter(isTeamRole) }))
+      .sort((a, b) => a.email.localeCompare(b.email)),
+  );
+
+export const addTeamMember = createServerFn({ method: "POST" })
+  .middleware([requireDeskAdmin])
+  .inputValidator((input: { email: string }) =>
+    z.object({ email: z.string().trim().toLowerCase().email() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const user = (await readUsersAndRoles()).find((u) => u.email.toLowerCase() === data.email);
+    if (!user) throw new Error("No account with that email yet. Ask them to sign up first.");
+    if (user.roles.includes("admin")) throw new Error("That's an AppBuilder.ai account.");
+    await writeRole(user.id, "ap_reviewer", true);
+  });
+
+export const setTeamRole = createServerFn({ method: "POST" })
+  .middleware([requireDeskAdmin])
+  .inputValidator(
+    (input: { userId: string; role: (typeof TEAM_ROLES)[number]; enabled: boolean }) =>
+      z
+        .object({ userId: z.string().uuid(), role: z.enum(TEAM_ROLES), enabled: z.boolean() })
+        .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    if (await isAdmin(data.userId))
+      throw new Error("AppBuilder.ai accounts are managed by the platform.");
+    if (data.userId === context.userId && data.role === "client_admin" && !data.enabled) {
+      throw new Error("You can't remove your own admin role.");
+    }
+    await writeRole(data.userId, data.role, data.enabled);
   });

@@ -55,7 +55,7 @@ export function ApDemoButton({
         setBusy(true);
         try {
           await signInApDemo();
-          navigate({ to: "/app/invoices/new" });
+          navigate({ to: "/app/overview" });
         } catch (err) {
           toast.error(err instanceof Error ? err.message : "Couldn't open the invoice desk demo.");
         } finally {

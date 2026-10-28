@@ -5,14 +5,16 @@ import {
   ClipboardList,
   Building2,
   FileInput,
-  History,
   Inbox,
   LayoutDashboard,
   LogOut,
   MessageSquarePlus,
   Package,
+  Scale,
   ReceiptText,
   ShieldCheck,
+  Store,
+  Users,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -41,7 +43,7 @@ const activeMarker =
 export function AppSidebar() {
   const { companyId } = useParams({ strict: false });
   const navigate = useNavigate();
-  const { user, isAdmin, canUseInvoiceDesk, signOut } = useAuth();
+  const { user, isAdmin, canUseInvoiceDesk, canManageDesk, signOut } = useAuth();
   const { setOpenMobile } = useSidebar();
 
   const companies = useQuery({ queryKey: ["my-companies"], queryFn: () => getMyCompanies() });
@@ -54,6 +56,13 @@ export function AppSidebar() {
     { to: "/app/invoices", label: "Queue", icon: Inbox },
     { to: "/app/purchase-orders", label: "Purchase orders", icon: ClipboardList },
     { to: "/app/suppliers", label: "Suppliers", icon: Building2 },
+    { to: "/app/rules", label: "Approval rules", icon: Scale },
+    ...(canManageDesk ? [{ to: "/app/team", label: "Team", icon: Users } as const] : []),
+  ] as const;
+  const platformNav = [
+    { to: "/app/platform/dashboard", label: "Dashboard", icon: ChartColumn },
+    { to: "/app/platform/clients", label: "Client portals", icon: Store },
+    { to: "/app/platform/users", label: "Users & roles", icon: ShieldCheck },
   ] as const;
 
   const nav = [
@@ -82,8 +91,11 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        {hasCompanies && (
+        {hasCompanies && companyId && (
           <SidebarGroup>
+            <SidebarGroupLabel>
+              {companies.data?.find((c) => c.id === companyId)?.name ?? "Client portal"}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {companyId &&
@@ -137,45 +149,23 @@ export function AppSidebar() {
         )}
         {isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+            <SidebarGroupLabel>AppBuilder.ai platform</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild className={activeMarker}>
-                    <Link
-                      to="/app/dashboard"
-                      activeProps={{ "data-active": "true" }}
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <ChartColumn />
-                      <span>Dashboard</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild className={activeMarker}>
-                    <Link
-                      to="/app/admin"
-                      activeProps={{ "data-active": "true" }}
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <ShieldCheck />
-                      <span>Admin</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild className={activeMarker}>
-                    <Link
-                      to="/app/admin-old"
-                      activeProps={{ "data-active": "true" }}
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <History />
-                      <span>Admin (old)</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {platformNav.map((item) => (
+                  <SidebarMenuItem key={item.to}>
+                    <SidebarMenuButton asChild className={activeMarker}>
+                      <Link
+                        to={item.to}
+                        activeProps={{ "data-active": "true" }}
+                        onClick={() => setOpenMobile(false)}
+                      >
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

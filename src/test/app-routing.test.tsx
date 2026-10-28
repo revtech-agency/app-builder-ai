@@ -21,15 +21,15 @@ describe("App routing", () => {
     ["/app/co_lumen/orders", "/app/$companyId/orders"],
     ["/app/co_lumen/new-order", "/app/$companyId/new-order"],
     ["/app/co_lumen/inventory", "/app/$companyId/inventory"],
-    ["/app/dashboard", "/app/dashboard"],
     ["/app/overview", "/app/overview"],
-    ["/app/admin", "/app/admin/"],
-    ["/app/admin/overview", "/app/admin/overview"],
-    ["/app/admin/purchase-orders", "/app/admin/purchase-orders"],
-    ["/app/admin/suppliers", "/app/admin/suppliers"],
-    ["/app/admin/users", "/app/admin/users"],
-    ["/app/admin/rules", "/app/admin/rules"],
-    ["/app/admin-old", "/app/admin-old"],
+    ["/app/purchase-orders", "/app/purchase-orders"],
+    ["/app/suppliers", "/app/suppliers"],
+    ["/app/rules", "/app/rules"],
+    ["/app/team", "/app/team"],
+    ["/app/platform", "/app/platform/"],
+    ["/app/platform/dashboard", "/app/platform/dashboard"],
+    ["/app/platform/clients", "/app/platform/clients"],
+    ["/app/platform/users", "/app/platform/users"],
   ])("matches %s to its own route", (path, routeId) => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
 
