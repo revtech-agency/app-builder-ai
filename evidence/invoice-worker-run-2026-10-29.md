@@ -1,12 +1,12 @@
 # Invoice worker test run, 2026-10-29
 
-**Result: 12 of 12 cases correct, on two runs in a row.**
+**Result: 12 of 12 cases correct, on four runs in a row.**
 
-- **Runs:** 2026-10-28 22:00:43 UTC and 22:02:07 UTC (00:00 and 00:02 Bucharest time, 29 Oct).
+- **Runs:** 2026-10-28 22:00:43 UTC and 22:02:07 UTC (00:00 and 00:02 Bucharest time, 29 Oct), then two more at 22:03:44 UTC and 22:04:55 UTC (00:03 and 00:04 Bucharest time). All four: 12 of 12.
 - **Runner:** `node n8n/invoice-worker/run-tests.mjs` (Node v24.18.0), against the production webhook `POST /webhook/invoice-intake`.
-- **Workflow:** n8n "Process supplier invoices" `Kxhmr00uS4MBXTSO` on `revtech-agency.app.n8n.cloud`. The live version wasn't read for this run; the last documented version is `030f7e0f…` (see `HUBSPOT.md`).
+- **Workflow:** n8n "Process supplier invoices" `Kxhmr00uS4MBXTSO` on `revtech-agency.app.n8n.cloud`. Live version `030f7e0f…`, read from n8n during these runs; it matches `HUBSPOT.md`.
 - **HubSpot:** portal 149650024, Procure-to-pay pipeline (`default`).
-- **Cleanup:** after each run, the runner archived the 12 invoices it created, with their 13 line items and 12 notes. The portal was back to its 6 sample invoices before the second run and after it. The second run got no false duplicates, which confirms the cleanup worked.
+- **Cleanup:** after each run, the runner archived the 12 invoices it created, with their 13 line items and 12 notes. The portal was back to its 6 sample invoices before and after the second run, and again after the fourth. No run after the first got false duplicates, which confirms the cleanup worked.
 
 A case passes when the worker returns the expected stage and every expected flag. The runner also compares `match_result` and `document_type` when a case lists them.
 
