@@ -489,6 +489,9 @@ export const decideInvoice = createServerFn({ method: "POST" })
     const email = (context.claims as { email?: string }).email ?? "unknown";
     const deal = await readInvoiceDeal(data.dealId, ["dealstage", "pipeline", "document_type"]);
     const currentKey = INVOICE_STAGES[deal.properties["dealstage"] ?? ""]?.key;
+    if (currentKey && ["approved_for_payment", "rejected", "duplicate"].includes(currentKey)) {
+      throw new Error("This invoice already has a final decision.");
+    }
     if (data.decision === "approve" && currentKey !== "ready_to_approve") {
       throw new Error("Only invoices in Ready to approve can be approved for payment.");
     }
@@ -535,7 +538,7 @@ export const askAssistant = createServerFn({ method: "POST" })
     const res = await n8n<{ reply?: string; output?: string }>("invoice-assistant", {
       session_id: data.sessionId,
       message: data.message,
-      deal_id: data.dealId ?? null,
+      invoice_deal_id: data.dealId ?? null,
       user_email: (context.claims as { email?: string }).email ?? "",
     });
     return { reply: res.reply ?? res.output ?? "No answer." };
