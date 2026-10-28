@@ -146,12 +146,6 @@ async function visibleCompanies(caller: Caller): Promise<Company[]> {
   return all.filter((c) => c.domain === domain);
 }
 
-// True when the order portal recognises this user as a casings client (by email domain or as
-// the casings demo account). Used to keep such users out of the invoice desk's default role.
-export async function hasClientCompany(caller: Caller): Promise<boolean> {
-  return (await visibleCompanies(caller)).length > 0;
-}
-
 async function requireCompany(caller: Caller, companyId: string): Promise<Company> {
   const company = (await visibleCompanies(caller)).find((c) => c.id === companyId);
   if (!company) throw new Error("You don't have access to this company.");

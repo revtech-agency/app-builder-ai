@@ -33,7 +33,7 @@ Invoice desk (app, HubSpot via server fns)
                         "Ask the worker" chat ──► n8n /webhook/invoice-assistant (read-only agent, 6 tools)
                         decisions ──► decideInvoice: stage change + note (approve only from Ready to approve)
    /app/suppliers, /app/purchase-orders, /app/team (desk admins), /app/rules (read-only), /app/overview
-   Reset demo ──► resetDemo: archives visitor invoices, restores the 6 sample invoices
+   Reset demo ──► resetDemo (demo account and admins only): archives visitor invoices, restores the 6 samples
 ```
 
 The principle "the LLM proposes, the rules decide" is respected on both paths: in the invoice worker the LLM only extracts fields and the `Apply Rules` code node decides the stage; in the order portal `placeOrder` applies deterministic TypeScript rules. The rules the reviewer sees in the app (`src/lib/invoice-rules.ts`) mirror `Apply Rules`; the duplication is tracked as BUGS B-10.
@@ -119,10 +119,11 @@ These still don't exist (compared with the "target structure" in the draft): `/a
 
 | Role | Who | Can |
 |---|---|---|
-| `ap_reviewer` | the bank's AP reviewers; **every new account gets it on its first sign-in**, unless it's a casings client | the invoice desk: queue, invoice page, decisions, submit document, chat, Reset demo |
+| `ap_reviewer` | the bank's AP reviewers, added by a desk admin on the Team page after they sign up (new accounts get no role) | the invoice desk: queue, invoice page, decisions, submit document, chat |
 | `client_admin` | the bank's desk admins | the above + suppliers, purchase orders, the team |
-| `admin` | AppBuilder.ai staff | everything, including the platform area and users & roles |
-| (no role) | casings clients, matched by confirmed email domain | their company's orders in the order portal |
+| `admin` | AppBuilder.ai staff | everything, including the platform area, users & roles and Reset demo |
+| (demo account `DEMO_AP_EMAIL`) | visitors who click Try the demo | `ap_reviewer` + Reset demo (only this account and admins can reset) |
+| (no role) | casings clients, matched by confirmed email domain; new accounts until an admin adds them | casings clients: their company's orders in the order portal; others: a message to ask their desk admin |
 
 ## 3. Local install
 
@@ -245,7 +246,7 @@ Billing (`src/lib/billing.ts`): monthly subscription from the start month + a fe
 
 - The order worker's 6 n8n flows and their prompts aren't in the repo; the invoice worker's are (`n8n/invoice-worker/`), but the export is older than the live version.
 - The invoice rules exist twice: in the n8n `Apply Rules` node and in `invoice-rules.ts` (B-10).
-- Every new account becomes an invoice desk reviewer, and the demo account is shared, so one visitor's Reset demo removes another's invoices (B-21).
+- The demo account is shared, so one visitor's Reset demo removes the invoices another visitor submitted (B-21; new accounts no longer get access on their own).
 - The approval level isn't enforced: any reviewer can approve a CFO-level invoice (R-I15).
 - Send back doesn't email the supplier; it moves the stage and saves a note.
 - No banking mock API; no separate orchestrator; the trace is the audit note, not a step-by-step timeline.

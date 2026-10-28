@@ -30,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/lib/auth";
 import { formatDate, formatMoney } from "@/lib/format";
 import { markDemoStep } from "@/lib/demo-guide";
 import { applyDemoReset } from "@/lib/invoice-rules";
@@ -74,6 +75,7 @@ function QueuePage() {
   const [q, setQ] = useState("");
   const invoices = useQuery({ queryKey: ["invoices"], queryFn: () => listInvoices() });
   const qc = useQueryClient();
+  const { isAdmin, isDemo } = useAuth();
   const reset = useMutation({
     mutationFn: () => resetDemo(),
     onSuccess: async (r) => {
@@ -133,27 +135,29 @@ function QueuePage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" disabled={reset.isPending}>
-                <RotateCcw /> {reset.isPending ? "Resetting…" : "Reset demo"}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reset the demo?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Removes every invoice submitted during the demo and puts the six sample invoices
-                  back as they started, so the sample emails work again. Suppliers and purchase
-                  orders stay as they are.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => reset.mutate()}>Reset demo</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {(isDemo || isAdmin) && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" disabled={reset.isPending}>
+                  <RotateCcw /> {reset.isPending ? "Resetting…" : "Reset demo"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reset the demo?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Removes every invoice submitted during the demo and puts the six sample invoices
+                    back as they started, so the sample emails work again. Suppliers and purchase
+                    orders stay as they are.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => reset.mutate()}>Reset demo</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           <Button asChild>
             <Link to="/app/invoices/new">Submit document</Link>
           </Button>

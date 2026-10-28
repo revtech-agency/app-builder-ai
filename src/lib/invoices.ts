@@ -3,7 +3,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requireInvoiceDesk } from "@/lib/admin";
+import { requireDemoReset, requireInvoiceDesk } from "@/lib/admin";
 import {
   DEMO_HISTORY,
   INVOICE_STAGES,
@@ -623,8 +623,9 @@ async function archive(type: string, ids: string[]) {
 // "Reset demo": archives every invoice a visitor created (with its line items and notes) and puts
 // the six sample invoices back to their starting stage, approver and audit note. Purchase orders
 // and suppliers are not touched. Archived records stay in HubSpot's recycle bin for 90 days.
+// Only the demo account and platform admins may run it (requireDemoReset).
 export const resetDemo = createServerFn({ method: "POST" })
-  .middleware([requireInvoiceDesk])
+  .middleware([requireInvoiceDesk, requireDemoReset])
   .handler(async (): Promise<ResetResult> => {
     const hubspot = await hs();
     const deals = await searchDeals(false, [
