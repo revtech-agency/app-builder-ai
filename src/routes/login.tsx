@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { DemoButton } from "@/components/demo-button";
+import { ApDemoButton, DemoButton } from "@/components/demo-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -104,6 +104,7 @@ function LoginPage() {
             </Button>
           </form>
           {!isSignUp && <DemoButton variant="outline" className="mt-3 w-full" />}
+          {!isSignUp && <ApDemoButton variant="outline" className="mt-2 w-full" />}
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {isSignUp ? "Already have an account?" : "New to AppBuilder.ai?"}{" "}
             <button

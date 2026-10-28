@@ -3,6 +3,10 @@ import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
   ChartColumn,
   ChevronsUpDown,
+  ClipboardList,
+  Building2,
+  FileInput,
+  Inbox,
   LogOut,
   MessageSquarePlus,
   Package,
@@ -42,13 +46,20 @@ const activeMarker =
 export function AppSidebar() {
   const { companyId } = useParams({ strict: false });
   const navigate = useNavigate();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, canUseInvoiceDesk, signOut } = useAuth();
   const { setOpenMobile } = useSidebar();
 
   const companies = useQuery({ queryKey: ["my-companies"], queryFn: () => getMyCompanies() });
   const cartCount = useCartCount(companyId);
 
   const company = companies.data?.find((c) => c.id === companyId);
+  const hasCompanies = (companies.data?.length ?? 0) > 0;
+  const deskNav = [
+    { to: "/app/invoices", label: "Queue", icon: Inbox },
+    { to: "/app/invoices/new", label: "Submit document", icon: FileInput },
+    { to: "/app/suppliers", label: "Suppliers", icon: Building2 },
+    { to: "/app/purchase-orders", label: "Purchase orders", icon: ClipboardList },
+  ] as const;
   const canSwitch = isAdmin && (companies.data?.length ?? 0) > 1;
 
   const nav = [
@@ -73,6 +84,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      {hasCompanies && (
       <SidebarHeader>
         {canSwitch ? (
           <DropdownMenu>
@@ -105,8 +117,10 @@ export function AppSidebar() {
           </div>
         )}
       </SidebarHeader>
+      )}
 
       <SidebarContent>
+        {hasCompanies && (
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -134,6 +148,31 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        )}
+        {canUseInvoiceDesk && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Invoice desk</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {deskNav.map((item) => (
+                  <SidebarMenuItem key={item.to}>
+                    <SidebarMenuButton asChild className={activeMarker}>
+                      <Link
+                        to={item.to}
+                        activeOptions={{ exact: item.to !== "/app/invoices" }}
+                        activeProps={{ "data-active": "true" }}
+                        onClick={() => setOpenMobile(false)}
+                      >
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         {isAdmin && (
           <SidebarGroup>
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
