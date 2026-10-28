@@ -76,6 +76,7 @@ const statusTone: Record<string, Tone> = {
   mismatch: "danger",
   no_po: "warning",
   ok: "success",
+  matched: "success",
   price_off: "danger",
   qty_off: "danger",
   // supplier status
