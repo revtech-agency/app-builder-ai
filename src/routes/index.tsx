@@ -12,6 +12,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
+import { BackToTop } from "@/components/back-to-top";
 import { ContactForm } from "@/components/contact-form";
 import { DemoButton } from "@/components/demo-button";
 import { Button } from "@/components/ui/button";
@@ -270,6 +271,7 @@ function Index() {
           </a>
         </div>
       </footer>
+      <BackToTop />
     </div>
   );
 }
