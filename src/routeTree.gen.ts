@@ -23,6 +23,7 @@ import { Route as AppCompanyIdInventoryRouteImport } from './routes/app/$company
 import { Route as AppCompanyIdNewOrderRouteImport } from './routes/app/$companyId/new-order'
 import { Route as AppCompanyIdOrdersRouteImport } from './routes/app/$companyId/orders'
 import { Route as AppInvoicesIndexRouteImport } from './routes/app/invoices/index'
+import { Route as AppInvoicesInvoiceIdRouteImport } from './routes/app/invoices/$invoiceId'
 import { Route as AppInvoicesNewRouteImport } from './routes/app/invoices/new'
 
 const IndexRoute = IndexRouteImport.update({
@@ -95,6 +96,11 @@ const AppInvoicesIndexRoute = AppInvoicesIndexRouteImport.update({
   path: '/invoices/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInvoicesInvoiceIdRoute = AppInvoicesInvoiceIdRouteImport.update({
+  id: '/invoices/$invoiceId',
+  path: '/invoices/$invoiceId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInvoicesNewRoute = AppInvoicesNewRouteImport.update({
   id: '/invoices/new',
   path: '/invoices/new',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
+  '/app/invoices/$invoiceId': typeof AppInvoicesInvoiceIdRoute
   '/app/invoices/new': typeof AppInvoicesNewRoute
   '/app/invoices/': typeof AppInvoicesIndexRoute
 }
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
+  '/app/invoices/$invoiceId': typeof AppInvoicesInvoiceIdRoute
   '/app/invoices/new': typeof AppInvoicesNewRoute
   '/app/invoices': typeof AppInvoicesIndexRoute
 }
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
+  '/app/invoices/$invoiceId': typeof AppInvoicesInvoiceIdRoute
   '/app/invoices/new': typeof AppInvoicesNewRoute
   '/app/invoices/': typeof AppInvoicesIndexRoute
 }
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
+    | '/app/invoices/$invoiceId'
     | '/app/invoices/new'
     | '/app/invoices/'
   fileRoutesByTo: FileRoutesByTo
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
+    | '/app/invoices/$invoiceId'
     | '/app/invoices/new'
     | '/app/invoices'
   id:
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
+    | '/app/invoices/$invoiceId'
     | '/app/invoices/new'
     | '/app/invoices/'
   fileRoutesById: FileRoutesById
@@ -312,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInvoicesIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/invoices/$invoiceId': {
+      id: '/app/invoices/$invoiceId'
+      path: '/invoices/$invoiceId'
+      fullPath: '/app/invoices/$invoiceId'
+      preLoaderRoute: typeof AppInvoicesInvoiceIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/invoices/new': {
       id: '/app/invoices/new'
       path: '/invoices/new'
@@ -345,6 +364,7 @@ interface AppRouteChildren {
   AppPurchaseOrdersRoute: typeof AppPurchaseOrdersRoute
   AppSuppliersRoute: typeof AppSuppliersRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppInvoicesInvoiceIdRoute: typeof AppInvoicesInvoiceIdRoute
   AppInvoicesNewRoute: typeof AppInvoicesNewRoute
   AppInvoicesIndexRoute: typeof AppInvoicesIndexRoute
 }
@@ -356,6 +376,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPurchaseOrdersRoute: AppPurchaseOrdersRoute,
   AppSuppliersRoute: AppSuppliersRoute,
   AppIndexRoute: AppIndexRoute,
+  AppInvoicesInvoiceIdRoute: AppInvoicesInvoiceIdRoute,
   AppInvoicesNewRoute: AppInvoicesNewRoute,
   AppInvoicesIndexRoute: AppInvoicesIndexRoute,
 }
