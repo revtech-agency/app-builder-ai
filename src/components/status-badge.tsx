@@ -75,6 +75,9 @@ const statusTone: Record<string, Tone> = {
   within_tolerance: "info",
   mismatch: "danger",
   no_po: "warning",
+  ok: "success",
+  price_off: "danger",
+  qty_off: "danger",
   // supplier status
   on_hold: "warning",
   // payment

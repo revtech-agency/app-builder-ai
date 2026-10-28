@@ -408,10 +408,8 @@ function InvoicePage() {
                     {d.notes.map((n) => (
                       <li key={n.id} className="text-sm">
                         <p className="text-xs text-muted-foreground">{formatDate(n.timestamp)}</p>
-                        <div
-                          className="whitespace-pre-wrap break-words"
-                          // HubSpot note bodies may contain simple HTML; render them as text.
-                        >
+                        {/* HubSpot note bodies may contain simple HTML; render them as text. */}
+                        <div className="whitespace-pre-wrap break-words">
                           {n.body.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "")}
                         </div>
                       </li>
@@ -434,7 +432,7 @@ function InvoicePage() {
                     {d.rawText ?? "No original text stored."}
                   </pre>
                 </CardContent>
-              </Collapsible>
+              </CollapsibleContent>
             </Collapsible>
           </Card>
 
