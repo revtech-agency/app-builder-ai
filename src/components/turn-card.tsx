@@ -29,7 +29,7 @@ export function TurnCard({ turn }: { turn: Turn }) {
             href={turn.preview_url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-foreground underline decoration-primary decoration-2 underline-offset-4 hover:decoration-foreground"
           >
             Preview <ExternalLink className="size-3" />
           </a>

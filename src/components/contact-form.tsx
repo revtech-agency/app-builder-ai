@@ -75,7 +75,7 @@ export function ContactForm() {
   if (status === "sent") {
     return (
       <div className="flex flex-col items-center gap-3 py-6 text-center">
-        <CheckCircle2 className="size-10 text-primary" />
+        <CheckCircle2 className="size-10 text-success" />
         <p className="text-lg font-semibold">Thank you, {form.firstname}</p>
         <p className="text-sm text-muted-foreground">
           We have your details and will be in touch at {form.email}.

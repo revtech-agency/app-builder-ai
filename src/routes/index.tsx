@@ -138,7 +138,7 @@ function Index() {
       <main>
         <section className="mx-auto w-full max-w-6xl px-4 pt-16 pb-20 md:pt-24">
           <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
-            <BadgeCheck className="size-3.5 text-primary" />
+            <BadgeCheck className="size-3.5 text-foreground" />
             AI workers for SME back-office work
           </p>
           <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
@@ -185,7 +185,7 @@ function Index() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {WORKERS.map((w) => (
               <div key={w.name} className="flex gap-4 rounded-xl border p-5">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <w.icon className="size-5" />
                 </span>
                 <div>
@@ -205,7 +205,9 @@ function Index() {
             <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {STEPS.map((s, i) => (
                 <li key={s.name} className="rounded-xl border bg-card p-5">
-                  <span className="text-sm font-semibold text-primary">{i + 1}</span>
+                  <span className="inline-flex size-6 items-center justify-center rounded-sm bg-primary font-mono text-sm font-semibold text-primary-foreground">
+                    {i + 1}
+                  </span>
                   <h3 className="mt-1 font-semibold">{s.name}</h3>
                   <p className="mt-2 text-sm text-muted-foreground">{s.text}</p>
                 </li>
@@ -218,7 +220,7 @@ function Index() {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {PRINCIPLES.map((p) => (
               <div key={p.title}>
-                <p.icon className="size-6 text-primary" />
+                <p.icon className="size-6 text-foreground" />
                 <h3 className="mt-3 font-semibold">{p.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{p.text}</p>
               </div>

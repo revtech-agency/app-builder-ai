@@ -145,7 +145,7 @@ function AnalysisResult({ result }: { result: SalesAnalysis }) {
                 href={result.quote.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                className="inline-flex items-center gap-1 font-medium text-foreground underline decoration-primary decoration-2 underline-offset-4 hover:decoration-foreground"
               >
                 Open quote {result.quote.number} <ExternalLink className="size-3.5" />
               </a>
@@ -155,7 +155,7 @@ function AnalysisResult({ result }: { result: SalesAnalysis }) {
                 href={result.quote.pdf_url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                className="inline-flex items-center gap-1 font-medium text-foreground underline decoration-primary decoration-2 underline-offset-4 hover:decoration-foreground"
               >
                 Quote PDF <ExternalLink className="size-3.5" />
               </a>

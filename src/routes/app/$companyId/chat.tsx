@@ -104,7 +104,7 @@ function ChatPage() {
             href={company.data.live_url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-foreground underline decoration-primary decoration-2 underline-offset-4 hover:decoration-foreground"
           >
             {company.data.live_url.replace("https://", "")} <ExternalLink className="size-3" />
           </a>

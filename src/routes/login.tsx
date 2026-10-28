@@ -108,7 +108,7 @@ function LoginPage() {
             {isSignUp ? "Already have an account?" : "New to AppBuilder.ai?"}{" "}
             <button
               type="button"
-              className="font-medium text-primary hover:underline"
+              className="font-medium text-foreground underline decoration-primary decoration-2 underline-offset-4 hover:decoration-foreground"
               onClick={() => {
                 setMode(isSignUp ? "signin" : "signup");
                 setError(null);

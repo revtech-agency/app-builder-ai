@@ -33,7 +33,7 @@ function ConstraintIndicator({ current }: { current: BindingConstraint }) {
           className={cn(
             "rounded-lg border p-3",
             i === currentIndex
-              ? "border-primary bg-primary/10 text-primary"
+              ? "border-primary bg-accent text-accent-foreground"
               : "text-muted-foreground",
           )}
         >
@@ -118,7 +118,7 @@ function GrowthPage() {
                   href={step.evidence_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                  className="inline-flex items-center gap-1 text-sm text-foreground underline decoration-primary decoration-2 underline-offset-4 hover:decoration-foreground"
                 >
                   Evidence <ExternalLink className="size-3" />
                 </a>

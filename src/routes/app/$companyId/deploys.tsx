@@ -119,7 +119,7 @@ function DeploysPage() {
                       target="_blank"
                       rel="noreferrer"
                       aria-label="Open deployment"
-                      className="text-primary"
+                      className="text-foreground hover:text-muted-foreground"
                     >
                       <ExternalLink className="size-4" />
                     </a>

@@ -8,7 +8,7 @@ const toneClass: Record<Tone, string> = {
   warning: "border-warning/30 bg-warning/10 text-warning",
   danger: "border-destructive/25 bg-destructive/10 text-destructive",
   muted: "border-border bg-muted text-muted-foreground",
-  info: "border-primary/25 bg-primary/10 text-primary",
+  info: "border-primary/40 bg-accent text-accent-foreground",
 };
 
 const statusTone: Record<string, Tone> = {
