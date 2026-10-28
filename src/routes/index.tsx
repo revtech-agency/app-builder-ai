@@ -17,6 +17,7 @@ import { BackToTop } from "@/components/back-to-top";
 import { ContactForm } from "@/components/contact-form";
 import { DemoButton } from "@/components/demo-button";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,7 +43,7 @@ export const Route = createFileRoute("/")({
 
 const STATS = [
   { value: "5%", text: "of Romanian enterprises use AI (EU: 20%), Eurostat 2025" },
-  { value: "12 min", text: "to retype one order by hand" },
+  { value: "12 min", text: "to retype one order by hand (vendor studies: 8–25 min)" },
 ];
 
 const PROBLEMS = [
@@ -72,6 +73,22 @@ const WORKERS = [
     side: "Buying side",
     name: "Purchasing worker",
     text: "Supplier invoice → matched three ways to the purchase order and the delivery note → approved for payment. Catches changed IBANs, duplicates, split purchases and overbilling.",
+  },
+];
+
+// Anonymized until each company agrees to be named.
+const PROOF = [
+  {
+    status: "Proof-of-concept client",
+    company: "A meat-accessories supplier",
+    worker: "Quote & order worker",
+    text: "216 clients order in their own formats and codes, for 250 items sold in metres and shipped in whole packs. Four people retype and confirm those orders today. The worker turns “4,200 m, calibre 52” into a quote for 9 rolls of 500 m.",
+  },
+  {
+    status: "Pilot prospect",
+    company: "A security services company",
+    worker: "Purchasing worker",
+    text: "About 60 staff, and about 430 purchase orders a year still written by hand in Word documents.",
   },
 ];
 
@@ -106,13 +123,18 @@ const PRINCIPLES = [
   },
 ];
 
-function OpenAppButton({ size = "default" }: { size?: "default" | "lg" }) {
+// Secondary entry for people who already have an account; the demo is the main path.
+function OpenAppLink({ className = "" }: { className?: string }) {
   return (
-    <Button asChild size={size}>
-      <Link to="/app">
-        Open the app <ArrowRight className="size-4" />
-      </Link>
-    </Button>
+    <Link
+      to="/app"
+      className={cn(
+        "inline-flex items-center gap-1 font-medium underline-offset-4 hover:underline",
+        className,
+      )}
+    >
+      Open the app <ArrowRight className="size-3.5" />
+    </Link>
   );
 }
 
@@ -127,7 +149,10 @@ function Index() {
             </span>
             AppBuilder.ai
           </span>
-          <OpenAppButton />
+          <div className="flex items-center gap-4">
+            <OpenAppLink className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline-flex" />
+            <DemoButton />
+          </div>
         </div>
       </header>
 
@@ -141,9 +166,9 @@ function Index() {
             <div className="mx-auto w-full max-w-6xl px-4 pt-16 pb-20 md:pt-24">
               <p className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
                 <BadgeCheck className="size-3.5 text-foreground" />
-                AI workers for SME back-office work
+                NexxtAI Hackathon 2026
               </p>
-              <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
+              <h1 className="mt-6 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl md:text-6xl">
                 AI workers that take SME purchasing and orders off the phone and the inbox.
               </h1>
               <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
@@ -152,12 +177,15 @@ function Index() {
                 step.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <OpenAppButton size="lg" />
-                <DemoButton size="lg" variant="outline" />
-                <Button asChild size="lg" variant="ghost">
+                <DemoButton size="lg" />
+                <Button asChild size="lg" variant="outline">
                   <a href="#contact">Talk to us</a>
                 </Button>
               </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                The demo uses fictional clients and sample prices. Have an account?{" "}
+                <OpenAppLink className="text-foreground" />
+              </p>
             </div>
           </div>
         </section>
@@ -214,6 +242,21 @@ function Index() {
             <Sparkles className="size-4 shrink-0 text-foreground" />
             Payment reminders, delivery scheduling: the next worker runs on the same modules.
           </p>
+
+          <h2 className="mt-16 text-2xl font-semibold tracking-tight md:text-3xl">
+            Built on real SME flows
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            {PROOF.map((p) => (
+              <figure key={p.company} className="rounded-xl border bg-muted/40 p-5">
+                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                  {p.status} · {p.worker}
+                </p>
+                <h3 className="mt-1 font-semibold">{p.company}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{p.text}</p>
+              </figure>
+            ))}
+          </div>
         </section>
 
         <section className="border-y bg-muted/40">
@@ -256,14 +299,11 @@ function Index() {
               See a worker handle real orders and invoices
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-primary-foreground/80">
-              Sign in to the app to try it, or tell us which flow eats your team's week.
+              Try the demo, or tell us which flow eats your team's week.
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Button asChild size="lg" variant="secondary">
-                <Link to="/app">
-                  Open the app <ArrowRight className="size-4" />
-                </Link>
-              </Button>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+              <DemoButton size="lg" variant="secondary" />
+              <OpenAppLink className="text-sm text-primary-foreground/80 hover:text-primary-foreground" />
             </div>
           </div>
         </section>
@@ -277,8 +317,8 @@ function Index() {
           <div>
             <h2 className="text-2xl font-semibold tracking-tight">Contact us</h2>
             <p className="mt-3 max-w-md text-muted-foreground">
-              Tell us who you are and we'll get back to you about running your quote &amp; order or
-              purchasing flow on an AI worker.
+              Tell us who you are. After you send it, we'll email you to set up a short call about
+              running your quote &amp; order or purchasing flow on an AI worker.
             </p>
             <img
               src={aiWorkersImage}
@@ -291,6 +331,10 @@ function Index() {
           </div>
           <div className="rounded-xl border bg-card p-6">
             <ContactForm />
+            <p className="mt-4 text-xs text-muted-foreground">
+              We use your details only to reply to you. We keep them in our CRM and never sell or
+              share them.
+            </p>
           </div>
         </div>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 border-t px-4 py-6 text-sm text-muted-foreground">
