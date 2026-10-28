@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
+import headerImage from "@/assets/app-header-fulfillment-robots.jpg";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -31,6 +32,13 @@ function AppLayout() {
           <Separator orientation="vertical" className="h-5" />
           <span className="text-sm font-semibold">AppBuilder.ai</span>
         </header>
+        <img
+          src={headerImage}
+          alt=""
+          width={1619}
+          height={971}
+          className="h-32 w-full border-b object-cover object-[center_55%] md:h-44"
+        />
         <Outlet />
       </SidebarInset>
     </SidebarProvider>

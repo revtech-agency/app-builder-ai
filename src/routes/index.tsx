@@ -12,6 +12,8 @@ import {
   UserCheck,
 } from "lucide-react";
 
+import aiWorkersImage from "@/assets/ai-workers-paper-processes.jpg";
+import heroImage from "@/assets/hero-robotic-document-workflow.jpg";
 import { BackToTop } from "@/components/back-to-top";
 import { ContactForm } from "@/components/contact-form";
 import { DemoButton } from "@/components/demo-button";
@@ -137,25 +139,33 @@ function Index() {
       </header>
 
       <main>
-        <section className="mx-auto w-full max-w-6xl px-4 pt-16 pb-20 md:pt-24">
-          <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
-            <BadgeCheck className="size-3.5 text-foreground" />
-            AI workers for SME back-office work
-          </p>
-          <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
-            Orders entered, quotes sent, purchases placed.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-            AppBuilder.ai runs the repeatable work your team retypes, chases and compares every day.
-            Each worker handles the clean cases on its own and flags only the exceptions, with a
-            person approving every sensitive step.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <OpenAppButton size="lg" />
-            <DemoButton size="lg" variant="outline" />
-            <Button asChild size="lg" variant="ghost">
-              <a href="#contact">Talk to us</a>
-            </Button>
+        <section
+          className="bg-cover bg-right-bottom bg-no-repeat"
+          style={{ backgroundImage: `url(${heroImage})` }}
+        >
+          {/* Fade from the left keeps the headline readable over the image. */}
+          <div className="bg-gradient-to-r from-background via-background/90 to-background/75 md:via-background/85 md:to-background/20">
+            <div className="mx-auto w-full max-w-6xl px-4 pt-16 pb-20 md:pt-24">
+              <p className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+                <BadgeCheck className="size-3.5 text-foreground" />
+                AI workers for SME back-office work
+              </p>
+              <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
+                Orders entered, quotes sent, purchases placed.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+                AppBuilder.ai runs the repeatable work your team retypes, chases and compares every
+                day. Each worker handles the clean cases on its own and flags only the exceptions,
+                with a person approving every sensitive step.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <OpenAppButton size="lg" />
+                <DemoButton size="lg" variant="outline" />
+                <Button asChild size="lg" variant="ghost">
+                  <a href="#contact">Talk to us</a>
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -259,6 +269,14 @@ function Index() {
               Tell us who you are and we'll get back to you about running your order, quote or
               purchasing flow on an AI worker.
             </p>
+            <img
+              src={aiWorkersImage}
+              alt="AI workers read, understand and act on paper business documents, taking a B2B order from processing to fulfilment without manual work."
+              width={900}
+              height={900}
+              loading="lazy"
+              className="mt-6 w-full max-w-md rounded-lg border"
+            />
           </div>
           <div className="rounded-xl border bg-card p-6">
             <ContactForm />
