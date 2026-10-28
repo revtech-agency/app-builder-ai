@@ -27,11 +27,16 @@ export const poStageIdFor = (key: string) =>
   Object.entries(PO_STAGES).find(([, s]) => s.key === key)?.[0] ?? null;
 
 // A PO's stage follows its delivery notes; only closing it is a manual step.
-export function poStageFor(lines: { quantity: number; receivedQuantity: number }[], closed: boolean) {
+export function poStageFor(
+  lines: { quantity: number; receivedQuantity: number }[],
+  closed: boolean,
+) {
   if (closed) return "po_closed";
   const received = lines.filter((l) => l.receivedQuantity > 0);
   if (received.length === 0) return "po_open";
-  return lines.every((l) => l.receivedQuantity >= l.quantity) ? "po_fully_received" : "po_partly_received";
+  return lines.every((l) => l.receivedQuantity >= l.quantity)
+    ? "po_fully_received"
+    : "po_partly_received";
 }
 
 export const stageIdFor = (key: string) =>
@@ -66,7 +71,11 @@ export const ANOMALY_LABELS: Record<string, string> = {
   low_confidence: "Document read with low confidence",
 };
 
-export const DANGER_ANOMALIES = new Set(["iban_mismatch", "iban_recently_changed", "split_purchase"]);
+export const DANGER_ANOMALIES = new Set([
+  "iban_mismatch",
+  "iban_recently_changed",
+  "split_purchase",
+]);
 
 export const anomalyLabel = (flag: string) => ANOMALY_LABELS[flag] ?? flag.replace(/_/g, " ");
 
@@ -76,7 +85,8 @@ export const splitList = (v: string | null | undefined) =>
     .map((s) => s.trim())
     .filter(Boolean);
 
-export const normIban = (v: string | null | undefined) => (v ?? "").replace(/\s+/g, "").toUpperCase();
+export const normIban = (v: string | null | undefined) =>
+  (v ?? "").replace(/\s+/g, "").toUpperCase();
 
 const DAY = 86_400_000;
 
@@ -114,7 +124,8 @@ export function invoiceChecks(i: CheckInput): Check[] {
     (!i.ibanOnInvoice || !s?.iban || normIban(i.ibanOnInvoice) === normIban(s.iban));
   const changedDays = daysBetween(s?.ibanChangedOn ?? null, i.invoiceDate);
   const recentlyChanged =
-    flags.has("iban_recently_changed") || (changedDays != null && changedDays >= 0 && changedDays <= 30);
+    flags.has("iban_recently_changed") ||
+    (changedDays != null && changedDays >= 0 && changedDays <= 30);
   const certOk =
     !flags.has("certificate_expired") &&
     (!s?.certificateValidUntil ||
@@ -124,7 +135,10 @@ export function invoiceChecks(i: CheckInput): Check[] {
   return [
     {
       label: "Supplier approved",
-      passed: s?.status === "approved" && !flags.has("supplier_blocked") && !flags.has("unknown_supplier"),
+      passed:
+        s?.status === "approved" &&
+        !flags.has("supplier_blocked") &&
+        !flags.has("unknown_supplier"),
     },
     { label: "IBAN matches file", passed: ibanMatches },
     { label: "IBAN not recently changed", passed: !recentlyChanged },
