@@ -124,14 +124,14 @@ function runTurn(chatId: string, message: ChatMessage, labels: string[], asksFou
   labels.slice(1).forEach((label, i) => {
     setTimeout(
       () => {
-        turn.steps[i].status = "done";
+        turn.steps[i]!.status = "done";
         turn.steps.push({ label, status: "running" });
       },
       (i + 1) * STEP_MS,
     );
   });
   setTimeout(() => {
-    turn.steps[turn.steps.length - 1].status = "done";
+    turn.steps[turn.steps.length - 1]!.status = "done";
     finishTurn(chatId, message, asksFounder);
   }, labels.length * STEP_MS);
 }
@@ -146,7 +146,7 @@ export async function sendFounderMessage(chatId: string, text: string): Promise<
   const turn: Turn = {
     id: newId("t"),
     status: "running",
-    steps: [{ label: labels[0], status: "running" }],
+    steps: [{ label: labels[0]!, status: "running" }],
     outcome: null,
     preview_url: null,
     cost_usd: 0,
