@@ -6,6 +6,11 @@ export type OrderStage = "ready" | "waiting" | "staff";
 
 export const PIPELINE_ID = "4275310781";
 
+// The UI counts in pieces of 100 m; the cart and orders themselves are still in metres.
+export const PIECE_METRES = 100;
+
+export const formatPieces = (metres: number) => String(Number((metres / PIECE_METRES).toFixed(2)));
+
 // HubSpot deal stage id -> stable key (also the StatusBadge key) and label.
 export const STAGES: Record<string, { key: string; label: string }> = {
   "6315918553": { key: "received", label: "Received" },

@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart";
 import type { CartLine } from "@/lib/cart";
 import { formatMoney } from "@/lib/format";
-import { evaluateLine } from "@/lib/order-rules";
+import { evaluateLine, formatPieces, PIECE_METRES } from "@/lib/order-rules";
 import { placeOrder, sendChat } from "@/lib/orders";
 
 export const Route = createFileRoute("/app/$companyId/new-order")({
@@ -198,12 +198,14 @@ function CartPanel({ companyId }: { companyId: string }) {
                       <Input
                         type="number"
                         min={1}
-                        value={l.metres || ""}
-                        onChange={(e) => cart.setMetres(l.sku, Number(e.target.value))}
-                        aria-label={`Metres of ${l.sku}`}
-                        className="w-28"
+                        value={l.metres ? formatPieces(l.metres) : ""}
+                        onChange={(e) =>
+                          cart.setMetres(l.sku, Number(e.target.value) * PIECE_METRES)
+                        }
+                        aria-label={`Pieces of ${l.sku}`}
+                        className="w-24"
                       />
-                      <span className="text-sm text-muted-foreground">m</span>
+                      <span className="text-sm text-muted-foreground">pc</span>
                     </div>
                     {t && (
                       <span className="text-sm tabular-nums">

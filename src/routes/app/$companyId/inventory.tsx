@@ -5,15 +5,16 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
-  Check,
   PackageOpen,
   PackageX,
+  Minus,
   Plus,
   Search,
   ShoppingCart,
+  Trash2,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -41,7 +42,7 @@ import {
 } from "@/components/ui/table";
 import { useCart } from "@/lib/cart";
 import { formatMoney } from "@/lib/format";
-import { evaluateLine } from "@/lib/order-rules";
+import { evaluateLine, formatPieces, PIECE_METRES } from "@/lib/order-rules";
 import { listInventory } from "@/lib/orders";
 import type { InventoryItem } from "@/lib/orders";
 
@@ -151,96 +152,144 @@ function SortHead({
   );
 }
 
+const MAX_PIECES = 9999;
+
+// "Add to cart" until the product is in the cart, then a − / + stepper with a trash button.
 function AddToCart({ item }: { item: InventoryItem }) {
   const cart = useCart();
-  const [metres, setMetres] = useState("");
-  const value = Number(metres);
-  const unit = item.unitsPerPack > 0 ? item.unitsPerPack : 1;
+  const line = cart.lines.find((l) => l.sku === item.sku);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const cancelled = useRef(false);
   const packWord = item.packType ?? "pack";
-  const inCart = cart.lines.filter((l) => l.sku === item.sku).reduce((sum, l) => sum + l.metres, 0);
+
+  if (!line) {
+    return (
+      <Button
+        size="sm"
+        onClick={() => {
+          cart.addLine({
+            sku: item.sku,
+            name: item.name,
+            metres: PIECE_METRES,
+            metres_per_pack: item.unitsPerPack,
+            min_sale_packs: item.minSalePacks ?? undefined,
+            price_per_pack: item.price,
+            stock_packs: item.stockPacks ?? undefined,
+            pack_type: item.packType ?? undefined,
+          });
+          toast.success(`Added ${item.sku} to your cart`);
+        }}
+      >
+        <ShoppingCart /> Add to cart
+      </Button>
+    );
+  }
 
   // Same rounding / stock rules the order itself is checked against.
-  const preview =
-    value > 0
-      ? evaluateLine({
-          metres: value,
-          unitsPerPack: item.unitsPerPack,
-          minSalePacks: item.minSalePacks,
-          packType: item.packType,
-          stockPacks: item.stockPacks,
-        })
-      : null;
+  const preview = evaluateLine({
+    metres: line.metres,
+    unitsPerPack: item.unitsPerPack,
+    minSalePacks: item.minSalePacks,
+    packType: item.packType,
+    stockPacks: item.stockPacks,
+  });
 
-  const add = () => {
-    if (!(value > 0)) return;
-    cart.addLine({
-      sku: item.sku,
-      name: item.name,
-      metres: value,
-      metres_per_pack: item.unitsPerPack,
-      min_sale_packs: item.minSalePacks ?? undefined,
-      price_per_pack: item.price,
-      stock_packs: item.stockPacks ?? undefined,
-      pack_type: item.packType ?? undefined,
-    });
-    toast.success(`Added ${value} m of ${item.sku} to your cart`);
-    setMetres("");
+  const remove = () => {
+    cart.removeLine(item.sku);
+    toast.success(`Removed ${item.sku} from your cart`);
+  };
+
+  const startEditing = () => {
+    cancelled.current = false;
+    setDraft(formatPieces(line.metres));
+    setEditing(true);
+  };
+
+  const commit = () => {
+    setEditing(false);
+    if (cancelled.current || draft.trim() === "") return;
+    const pieces = Math.floor(Number(draft));
+    if (!Number.isFinite(pieces)) return;
+    if (pieces <= 0) remove();
+    else cart.setMetres(item.sku, Math.min(pieces, MAX_PIECES) * PIECE_METRES);
   };
 
   return (
     <div className="flex flex-col items-end gap-1.5">
-      <div className="flex items-center gap-2">
-        <div className="relative">
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 text-muted-foreground hover:text-destructive"
+          aria-label={`Remove ${item.sku} from cart`}
+          onClick={remove}
+        >
+          <Trash2 />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-8 rounded-full"
+          aria-label="One piece fewer"
+          disabled={line.metres - PIECE_METRES <= 0}
+          onClick={() => cart.setMetres(item.sku, line.metres - PIECE_METRES)}
+        >
+          <Minus />
+        </Button>
+        {editing ? (
           <Input
-            type="number"
-            min={1}
-            value={metres}
-            onChange={(e) => setMetres(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && add()}
-            placeholder={String(unit)}
-            aria-label={`Metres of ${item.sku}`}
-            className="h-8 w-28 pr-7 text-right tabular-nums"
+            autoFocus
+            inputMode="numeric"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
+            onFocus={(e) => e.currentTarget.select()}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+              if (e.key === "Escape") {
+                cancelled.current = true;
+                e.currentTarget.blur();
+              }
+            }}
+            aria-label={`Pieces of ${item.sku}`}
+            className="h-8 w-16 text-center tabular-nums"
           />
-          <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs text-muted-foreground">
-            m
-          </span>
-        </div>
-        <Button size="sm" disabled={!(value > 0)} onClick={add}>
-          <Plus /> Add
+        ) : (
+          <button
+            type="button"
+            title="Double-click to type a quantity"
+            aria-label={`${formatPieces(line.metres)} pieces of ${item.sku}. Double-click or press Enter to edit.`}
+            onDoubleClick={startEditing}
+            onKeyDown={(e) => e.key === "Enter" && startEditing()}
+            className="h-8 min-w-12 rounded-md px-2 text-center font-semibold tabular-nums outline-none select-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {formatPieces(line.metres)}
+          </button>
+        )}
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-8 rounded-full"
+          aria-label="One piece more"
+          disabled={line.metres + PIECE_METRES > MAX_PIECES * PIECE_METRES}
+          onClick={() => cart.setMetres(item.sku, line.metres + PIECE_METRES)}
+        >
+          <Plus />
         </Button>
       </div>
 
-      {preview ? (
-        <div className="text-right text-xs" aria-live="polite">
-          <span className="font-medium tabular-nums">
-            {preview.packs} {packWord}
-            {preview.packs === 1 ? "" : "s"} · {preview.packMetres} m ·{" "}
-            {formatMoney(preview.packs * item.price)}
-          </span>
-          {(preview.roundingNote || preview.stockNote) && (
-            <div className="mt-0.5 flex items-start justify-end gap-1 text-warning">
-              <AlertTriangle className="mt-0.5 size-3 shrink-0" />
-              <span>{[preview.roundingNote, preview.stockNote].filter(Boolean).join(" · ")}</span>
-            </div>
-          )}
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setMetres(String(unit * Math.max(item.minSalePacks ?? 1, 1)))}
-          className="rounded-sm text-xs text-muted-foreground underline-offset-2 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          Fill {Math.max(item.minSalePacks ?? 1, 1)} {packWord}
-          {Math.max(item.minSalePacks ?? 1, 1) === 1 ? "" : "s"} (
-          {unit * Math.max(item.minSalePacks ?? 1, 1)} m)
-        </button>
-      )}
-
-      {inCart > 0 && (
-        <span className="inline-flex items-center gap-1 text-xs text-success">
-          <Check className="size-3" /> {inCart} m in cart
+      <div className="text-right text-xs" aria-live="polite">
+        <span className="font-medium tabular-nums">
+          {formatPieces(line.metres)} pc · {formatMoney(preview.packs * item.price)}
         </span>
-      )}
+        {(preview.roundingNote || preview.stockNote) && (
+          <div className="mt-0.5 flex items-start justify-end gap-1 text-warning">
+            <AlertTriangle className="mt-0.5 size-3 shrink-0" />
+            <span>{[preview.roundingNote, preview.stockNote].filter(Boolean).join(" · ")}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
