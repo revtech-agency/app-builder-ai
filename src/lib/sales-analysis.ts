@@ -1,6 +1,6 @@
 // Calls the n8n "AI Sales Proposal" workflow (POST /webhook/sales-analysis) from the server,
 // so the webhook URL stays out of the browser and only admins can trigger it.
-// Each run creates a Google Slides deck and a HubSpot contact, deal and task.
+// Each run creates a HubSpot contact, deal, published quote and task, and emails the quote.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -56,7 +56,13 @@ export type SalesAnalysis = {
   };
   lead_score: number;
   priority: "high" | "medium" | "low";
-  slides: { presentationId: string; url: string };
+  quote: {
+    id: string;
+    number?: string;
+    url?: string;
+    pdf_url?: string;
+    emailed_to: string | null;
+  };
   hubspot: { contactId: number | string; dealId: number | string; taskId: number | string | null };
 };
 

@@ -41,8 +41,8 @@ function SalesAnalysisPage() {
       <div>
         <h1 className="text-2xl font-semibold">Sales analysis</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Paste a customer request. The AI drafts requirements, pricing and a proposal, builds a
-          Slides deck, and logs the contact, deal and follow-up task in HubSpot.
+          Paste a customer request. The AI drafts requirements, pricing and a proposal, creates the
+          contact, deal and a published quote in HubSpot, and emails the quote to the customer.
         </p>
       </div>
 
@@ -140,14 +140,31 @@ function AnalysisResult({ result }: { result: SalesAnalysis }) {
         <CardContent className="space-y-3">
           <p className="text-sm">{pr.executive_summary}</p>
           <div className="flex flex-wrap gap-4 text-sm">
-            <a
-              href={result.slides.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-            >
-              Open proposal deck <ExternalLink className="size-3.5" />
-            </a>
+            {result.quote.url && (
+              <a
+                href={result.quote.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+              >
+                Open quote {result.quote.number} <ExternalLink className="size-3.5" />
+              </a>
+            )}
+            {result.quote.pdf_url && (
+              <a
+                href={result.quote.pdf_url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+              >
+                Quote PDF <ExternalLink className="size-3.5" />
+              </a>
+            )}
+            <span className="text-muted-foreground">
+              {result.quote.emailed_to
+                ? `Emailed to ${result.quote.emailed_to}`
+                : "Not emailed (no customer email)"}
+            </span>
             <span className="text-muted-foreground">
               HubSpot deal {String(result.hubspot.dealId)} · contact{" "}
               {String(result.hubspot.contactId)}
