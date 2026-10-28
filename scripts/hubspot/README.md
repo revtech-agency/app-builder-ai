@@ -11,7 +11,7 @@
 ## Run it
 
 ```sh
-cp .env.example .env.local                # add a HubSpot private app token (never in .env)
+cp .env.example .env.local                # add HUBSPOT_ACCESS_TOKEN, a HubSpot private app token (never in .env)
 bun scripts/hubspot/setup.ts --dry-run    # reads only
 bun scripts/hubspot/setup.ts              # writes
 bun scripts/hubspot/setup.ts --history-only   # live-demo setup (below)
