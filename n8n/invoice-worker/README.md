@@ -73,13 +73,15 @@ up to 5,000 team lead, up to 25,000 head of department, above that the CFO.
 
 Checked against portal 149650024 on 2026-10-28: the line-item properties, anomaly_flags options and order_channel options exist.
 
+The expected-versus-actual run is done: 12 of 12 cases correct on 2026-10-29, see
+[`evidence/invoice-worker-run-2026-10-29.md`](../../evidence/invoice-worker-run-2026-10-29.md).
+
 These files were built and checked offline: the JSON parses, every connection points at a real node,
 all code compiles, and the rules ran correctly on 15 mock cases. They are now imported and active in n8n,
 but these points have not been confirmed yet:
 
 - Respond to Webhook behaves quietly when the run started from the Gmail trigger.
 - Node versions match your n8n version (the nodes were written from memory of the current node set).
-- The expected-versus-actual run has not been done yet (see below).
 
 ## Test set
 
