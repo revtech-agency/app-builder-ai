@@ -1,8 +1,7 @@
 [
   {
     "id": "01-clean-match",
-    "description": "Clean invoice: every line matches the PO and the delivery.",
-    "needs_po_lines": "PO-2026-0440 (TechNova). Copy one line exactly: code, description, ordered quantity, agreed price.",
+    "description": "Clean invoice: every line matches the PO and the delivery (Office Supplies, PO-2026-0444).",
     "expected": {
       "stage": "ready_to_approve",
       "match_result": "full_match",
@@ -11,14 +10,13 @@
     "request": {
       "source_id": "test-01-clean-match",
       "filename": "01-clean-match.txt",
-      "text": "INVOICE TN-60001\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0440\nBank account (IBAN): RO34DEMO0000000000001002\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\n<FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES>\n\nNet: <FILL FROM PO LINES>\nVAT 21%: <FILL FROM PO LINES>\nTotal due: <FILL FROM PO LINES>",
+      "text": "INVOICE OS-2026-1301\nSupplier: Office Supplies Demo SRL\nVAT ID: RO10000001\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0444\nBank account (IBAN): RO12DEMO0000000000001001\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nPEN-BOX | Ballpoint pens, box of 50 | 100 | 12.40 | 1240.00\nNOTE-PAD | Sticky notes, pack of 12 | 200 | 3.10 | 620.00\n\nNet: 1860.00\nVAT 21%: 390.60\nTotal due: 2250.60",
       "submitted_by": "demo+test@appbuilder.ai"
     }
   },
   {
     "id": "02-price-off",
-    "description": "Unit price about 9% above the PO price.",
-    "needs_po_lines": "PO-2026-0440. Copy a line, then raise the unit price by about 9%.",
+    "description": "Unit price about 9% above the PO price (Office Supplies, PO-2026-0444).",
     "expected": {
       "stage": "needs_review",
       "match_result": "mismatch",
@@ -27,14 +25,13 @@
     "request": {
       "source_id": "test-02-price-off",
       "filename": "02-price-off.txt",
-      "text": "INVOICE TN-60002\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0440\nBank account (IBAN): RO34DEMO0000000000001002\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\n<FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES>\n\nNet: <FILL FROM PO LINES>\nVAT 21%: <FILL FROM PO LINES>\nTotal due: <FILL FROM PO LINES>",
+      "text": "INVOICE OS-2026-1302\nSupplier: Office Supplies Demo SRL\nVAT ID: RO10000001\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0444\nBank account (IBAN): RO12DEMO0000000000001001\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nPEN-BOX | Ballpoint pens, box of 50 | 50 | 13.52 | 676.00\n\nNet: 676.00\nVAT 21%: 141.96\nTotal due: 817.96",
       "submitted_by": "demo+test@appbuilder.ai"
     }
   },
   {
     "id": "03-quantity-over-delivery",
     "description": "Invoiced quantity is higher than what the delivery notes show as received.",
-    "needs_po_lines": "PO-2026-0418 (TechNova, partly received). Pick a line and invoice more than its received quantity.",
     "expected": {
       "stage": "waiting_on_supplier",
       "match_result": "mismatch",
@@ -43,14 +40,13 @@
     "request": {
       "source_id": "test-03-quantity-over-delivery",
       "filename": "03-quantity-over-delivery.txt",
-      "text": "INVOICE TN-60003\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0418\nBank account (IBAN): RO34DEMO0000000000001002\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\n<FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES>\n\nNet: <FILL FROM PO LINES>\nVAT 21%: <FILL FROM PO LINES>\nTotal due: <FILL FROM PO LINES>",
+      "text": "INVOICE TN-60003\nSupplier: TechNova Hardware SRL\nVAT ID: RO10000002\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0418\nBank account (IBAN): RO34DEMO0000000000001002\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nDOCK-USBC | USB-C docking station | 15 | 185.00 | 2775.00\nLAP-14 | Laptop 14\", 16 GB RAM, 512 GB SSD | 4 | 1150.00 | 4600.00\n\nNet: 7375.00\nVAT 21%: 1548.75\nTotal due: 8923.75",
       "submitted_by": "demo+test@appbuilder.ai"
     }
   },
   {
     "id": "04-tax-certificate-expired",
     "description": "SecureGuard's tax certificate expired on 2026-09-30.",
-    "needs_po_lines": "PO-2026-0425 (SecureGuard). Copy one line exactly so the match is clean.",
     "expected": {
       "stage": "waiting_on_supplier",
       "anomaly_flags": [
@@ -60,7 +56,7 @@
     "request": {
       "source_id": "test-04-tax-certificate-expired",
       "filename": "04-tax-certificate-expired.txt",
-      "text": "INVOICE SG-2026-310\nSupplier: SecureGuard Services SRL\nVAT ID: RO10000004\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0425\nBank account (IBAN): RO78DEMO0000000000001004\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\n<FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES> | <FILL FROM PO LINES>\n\nNet: <FILL FROM PO LINES>\nVAT 21%: <FILL FROM PO LINES>\nTotal due: <FILL FROM PO LINES>",
+      "text": "INVOICE SG-2026-310\nSupplier: SecureGuard Services SRL\nVAT ID: RO10000004\nInvoice date: 2026-10-27\nDue date: 2026-11-26\nPurchase order: PO-2026-0425\nBank account (IBAN): RO78DEMO0000000000001004\nCurrency: EUR\n\nItem code | Description | Qty | Unit price | Line total\nSEC-HOUR | Security guard hours, branch network, October | 720 | 14.50 | 10440.00\n\nNet: 10440.00\nVAT 21%: 2192.40\nTotal due: 12632.40",
       "submitted_by": "demo+test@appbuilder.ai"
     }
   },

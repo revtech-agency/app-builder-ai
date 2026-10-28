@@ -92,14 +92,13 @@ in the HubSpot portal now, each with its expected stage and flags. `run-tests.mj
 `/webhook/invoice-intake` and prints a pass/fail table:
 
 ```sh
-INVOICE_APP_KEY=<the AppBuilder app key value> node n8n/invoice-worker/run-tests.mjs
+INVOICE_APP_KEY=<the AppBuilder app key value> HUBSPOT_API_KEY=<private app token> node n8n/invoice-worker/run-tests.mjs
 ```
 
 Add `--test` for n8n's test webhook, `--only 05-duplicate` for one case, or `--suffix -2` to rerun under
-new source IDs (a repeated ID returns the deal that already exists). Each run creates real deals in HubSpot.
+new source IDs (a repeated ID returns the deal that already exists). Each run creates real deals in HubSpot
+and archives them, with their line items and notes, at the end; `--keep` leaves them in place.
 
-Eight cases (duplicate, IBAN mismatch, recent IBAN change, unapproved supplier, unknown supplier, no PO,
-split purchase, supplier question) can run as they are. Cases 01 to 04 (clean match, price off, quantity over
-delivery, expired certificate) need real PO line data, which could not be read from HubSpot, so they contain
-`<FILL FROM PO LINES>` placeholders and the runner skips them until you fill them in from the PO deals named
-in each case's `needs_po_lines` field.
+All 12 cases run. Cases 01 and 02 use Office Supplies PO-2026-0444 so they don't interfere with the
+split-purchase case on PO-2026-0440. Every case uses 21% VAT, like the sample invoices. Latest run:
+[`evidence/invoice-worker-run-2026-10-29.md`](../../evidence/invoice-worker-run-2026-10-29.md).
