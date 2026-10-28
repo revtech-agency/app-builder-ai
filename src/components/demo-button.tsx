@@ -36,7 +36,7 @@ export function DemoButton(props: Omit<ComponentProps<typeof Button>, "onClick">
   );
 }
 
-// Signs in to the accounts-payable demo reviewer and opens the invoice desk.
+// Signs in to the accounts-payable demo reviewer and opens Submit document, where the samples are.
 // The label defaults to "Try the invoice desk"; the landing page passes "Try the demo".
 export function ApDemoButton({
   children = "Try the invoice desk",
@@ -55,7 +55,7 @@ export function ApDemoButton({
         setBusy(true);
         try {
           await signInApDemo();
-          navigate({ to: "/app/invoices" });
+          navigate({ to: "/app/invoices/new" });
         } catch (err) {
           toast.error(err instanceof Error ? err.message : "Couldn't open the invoice desk demo.");
         } finally {
