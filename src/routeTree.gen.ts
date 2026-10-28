@@ -24,6 +24,7 @@ import { Route as AppCompanyIdInventoryRouteImport } from './routes/app/$company
 import { Route as AppCompanyIdNewOrderRouteImport } from './routes/app/$companyId/new-order'
 import { Route as AppCompanyIdOrdersRouteImport } from './routes/app/$companyId/orders'
 import { Route as AppAdminIndexRouteImport } from './routes/app/admin/index'
+import { Route as AppAdminOverviewRouteImport } from './routes/app/admin/overview'
 import { Route as AppAdminPurchaseOrdersRouteImport } from './routes/app/admin/purchase-orders'
 import { Route as AppAdminRulesRouteImport } from './routes/app/admin/rules'
 import { Route as AppAdminSuppliersRouteImport } from './routes/app/admin/suppliers'
@@ -107,6 +108,11 @@ const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminOverviewRoute = AppAdminOverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminPurchaseOrdersRoute = AppAdminPurchaseOrdersRouteImport.update({
   id: '/purchase-orders',
   path: '/purchase-orders',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
+  '/app/admin/overview': typeof AppAdminOverviewRoute
   '/app/admin/purchase-orders': typeof AppAdminPurchaseOrdersRoute
   '/app/admin/rules': typeof AppAdminRulesRoute
   '/app/admin/suppliers': typeof AppAdminSuppliersRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
+  '/app/admin/overview': typeof AppAdminOverviewRoute
   '/app/admin/purchase-orders': typeof AppAdminPurchaseOrdersRoute
   '/app/admin/rules': typeof AppAdminRulesRoute
   '/app/admin/suppliers': typeof AppAdminSuppliersRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
+  '/app/admin/overview': typeof AppAdminOverviewRoute
   '/app/admin/purchase-orders': typeof AppAdminPurchaseOrdersRoute
   '/app/admin/rules': typeof AppAdminRulesRoute
   '/app/admin/suppliers': typeof AppAdminSuppliersRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
+    | '/app/admin/overview'
     | '/app/admin/purchase-orders'
     | '/app/admin/rules'
     | '/app/admin/suppliers'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
+    | '/app/admin/overview'
     | '/app/admin/purchase-orders'
     | '/app/admin/rules'
     | '/app/admin/suppliers'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
+    | '/app/admin/overview'
     | '/app/admin/purchase-orders'
     | '/app/admin/rules'
     | '/app/admin/suppliers'
@@ -401,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminIndexRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/app/admin/overview': {
+      id: '/app/admin/overview'
+      path: '/overview'
+      fullPath: '/app/admin/overview'
+      preLoaderRoute: typeof AppAdminOverviewRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/app/admin/purchase-orders': {
       id: '/app/admin/purchase-orders'
       path: '/purchase-orders'
@@ -470,6 +489,7 @@ const AppCompanyIdRouteWithChildren = AppCompanyIdRoute._addFileChildren(
 )
 
 interface AppAdminRouteChildren {
+  AppAdminOverviewRoute: typeof AppAdminOverviewRoute
   AppAdminPurchaseOrdersRoute: typeof AppAdminPurchaseOrdersRoute
   AppAdminRulesRoute: typeof AppAdminRulesRoute
   AppAdminSuppliersRoute: typeof AppAdminSuppliersRoute
@@ -478,6 +498,7 @@ interface AppAdminRouteChildren {
 }
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminOverviewRoute: AppAdminOverviewRoute,
   AppAdminPurchaseOrdersRoute: AppAdminPurchaseOrdersRoute,
   AppAdminRulesRoute: AppAdminRulesRoute,
   AppAdminSuppliersRoute: AppAdminSuppliersRoute,

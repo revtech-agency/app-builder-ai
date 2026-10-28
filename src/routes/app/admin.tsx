@@ -9,6 +9,7 @@ export const Route = createFileRoute("/app/admin")({
 });
 
 const tabs = [
+  { to: "/app/admin/overview", label: "Overview" },
   { to: "/app/admin/purchase-orders", label: "Purchase orders" },
   { to: "/app/admin/suppliers", label: "Suppliers" },
   { to: "/app/admin/users", label: "Users & roles" },

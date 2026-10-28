@@ -2,6 +2,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/admin/")({
   beforeLoad: () => {
-    throw redirect({ to: "/app/admin/purchase-orders", replace: true });
+    throw redirect({ to: "/app/admin/overview", replace: true });
   },
 });

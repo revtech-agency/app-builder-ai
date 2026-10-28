@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -26,9 +26,10 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPurchaseOrder, updatePurchaseOrder } from "@/lib/back-office";
 import { formatMoney } from "@/lib/format";
-import { poStageFor } from "@/lib/invoice-rules";
+import { PO_STAGES, poStageFor } from "@/lib/invoice-rules";
 import { listPurchaseOrders, listSuppliers } from "@/lib/invoices";
 import type { PurchaseOrder } from "@/lib/invoices";
 
@@ -330,6 +331,20 @@ function PurchaseOrdersAdminPage() {
   // key remounts the dialog so its form starts from the chosen PO
   const [editing, setEditing] = useState<{ key: number; po: PurchaseOrder | null } | null>(null);
   const openDialog = (po: PurchaseOrder | null) => setEditing({ key: Date.now(), po });
+  const [tab, setTab] = useState("all");
+  const [q, setQ] = useState("");
+  const all = pos.data ?? [];
+  const counts: Record<string, number> = { all: all.length };
+  for (const p of all) counts[p.stage] = (counts[p.stage] ?? 0) + 1;
+  const term = q.trim().toLowerCase();
+  const rows = all.filter(
+    (p) =>
+      (tab === "all" || p.stage === tab) &&
+      (!term ||
+        [p.poNumber, p.supplierName, p.budgetCode, p.requester].some((v) =>
+          v?.toLowerCase().includes(term),
+        )),
+  );
 
   return (
     <div className="space-y-4">
@@ -341,6 +356,32 @@ function PurchaseOrdersAdminPage() {
           <Plus className="size-4" />
           New PO
         </Button>
+      </div>
+      <div className="flex flex-col gap-3">
+        <div className="overflow-x-auto">
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList className="h-auto">
+              {[{ key: "all", label: "All" }, ...Object.values(PO_STAGES)].map((t) => (
+                <TabsTrigger key={t.key} value={t.key} className="gap-1.5">
+                  {t.label}
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {counts[t.key] ?? 0}
+                  </span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search PO no., supplier, budget or requester"
+            className="pl-9"
+            aria-label="Search purchase orders"
+          />
+        </div>
       </div>
       {pos.isLoading && (
         <div className="space-y-3">
@@ -356,8 +397,13 @@ function PurchaseOrdersAdminPage() {
           </CardContent>
         </Card>
       )}
+      {all.length > 0 && rows.length === 0 && (
+        <p className="py-6 text-center text-sm text-muted-foreground">
+          No purchase orders match this filter.
+        </p>
+      )}
       <div className="space-y-3">
-        {pos.data?.map((po) => {
+        {rows.map((po) => {
           const ordered = po.lines.reduce((s, l) => s + l.quantity, 0);
           const received = po.lines.reduce(
             (s, l) => s + Math.min(l.receivedQuantity, l.quantity),

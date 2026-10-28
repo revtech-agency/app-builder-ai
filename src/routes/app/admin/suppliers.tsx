@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Search, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -33,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createSupplier, SUPPLIER_STATUSES, updateSupplier } from "@/lib/back-office";
 import { formatDate } from "@/lib/format";
 import { normIban } from "@/lib/invoice-rules";
@@ -199,6 +200,13 @@ function SupplierDialog({
   );
 }
 
+// Full IBAN only in the edit dialog; the list shows country code and last 4.
+const maskIban = (iban: string | null) => {
+  if (!iban) return "—";
+  const clean = iban.replace(/\s+/g, "");
+  return `${clean.slice(0, 2)}•• ••••${clean.slice(-4)}`;
+};
+
 const daysAgo = (d: string | null) =>
   d ? Math.floor((Date.now() - new Date(d).getTime()) / 86_400_000) : null;
 
@@ -209,6 +217,17 @@ function SuppliersAdminPage() {
     null,
   );
   const openDialog = (supplier: SupplierRow | null) => setEditing({ key: Date.now(), supplier });
+  const [tab, setTab] = useState("all");
+  const [q, setQ] = useState("");
+  const all = suppliers.data ?? [];
+  const counts: Record<string, number> = { all: all.length };
+  for (const s of all) if (s.status) counts[s.status] = (counts[s.status] ?? 0) + 1;
+  const term = q.trim().toLowerCase();
+  const rows = all.filter(
+    (s) =>
+      (tab === "all" || s.status === tab) &&
+      (!term || [s.name, s.vatId].some((v) => v?.toLowerCase().includes(term))),
+  );
 
   return (
     <div className="space-y-4">
@@ -220,6 +239,40 @@ function SuppliersAdminPage() {
           <Plus className="size-4" />
           New supplier
         </Button>
+      </div>
+      <p className="flex gap-2 rounded-md border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
+        <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+        An IBAN changed in the last 30 days (a common fraud pattern) and an expired or missing tax
+        certificate both hold the supplier's invoices for review.
+      </p>
+      <div className="flex flex-col gap-3">
+        <div className="overflow-x-auto">
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList className="h-auto">
+              {[
+                { key: "all", label: "All" },
+                ...SUPPLIER_STATUSES.map((k) => ({ key: k, label: STATUS_LABELS[k] })),
+              ].map((t) => (
+                <TabsTrigger key={t.key} value={t.key} className="gap-1.5">
+                  {t.label}
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {counts[t.key] ?? 0}
+                  </span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search supplier or VAT ID"
+            className="pl-9"
+            aria-label="Search suppliers"
+          />
+        </div>
       </div>
       {suppliers.isLoading && (
         <div className="space-y-2">
@@ -246,14 +299,22 @@ function SuppliersAdminPage() {
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden md:table-cell">VAT ID</TableHead>
                 <TableHead className="hidden md:table-cell">IBAN</TableHead>
-                <TableHead className="hidden sm:table-cell">Certificate until</TableHead>
+                <TableHead className="hidden sm:table-cell">Tax certificate valid until</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">Open invoices</TableHead>
                 <TableHead className="text-right">
                   <span className="sr-only">Edit</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {suppliers.data.map((s) => {
+              {rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="py-6 text-center text-muted-foreground">
+                    No suppliers match this filter.
+                  </TableCell>
+                </TableRow>
+              )}
+              {rows.map((s) => {
                 const changed = daysAgo(s.ibanChangedOn);
                 const recent = changed != null && changed <= 30;
                 const expired = s.certificateValidUntil
@@ -267,19 +328,32 @@ function SuppliersAdminPage() {
                       {s.vatId ?? "—"}
                     </TableCell>
                     <TableCell className="hidden font-mono text-xs md:table-cell">
-                      {s.iban ?? "—"}
+                      {maskIban(s.iban)}
                       {recent && (
-                        <div className="font-sans text-warning">Changed {changed} days ago</div>
+                        <div className="flex items-center gap-1 font-sans text-warning">
+                          <TriangleAlert className="size-3" /> Changed {changed} days ago
+                        </div>
                       )}
                     </TableCell>
                     <TableCell
                       className={cn(
                         "hidden whitespace-nowrap sm:table-cell",
-                        expired && "font-medium text-destructive",
+                        (expired || !s.certificateValidUntil) && "font-medium text-destructive",
                       )}
                     >
-                      {formatDate(s.certificateValidUntil)}
-                      {expired && <span className="ml-1 text-xs">(expired)</span>}
+                      {expired || !s.certificateValidUntil ? (
+                        <span className="flex items-center gap-1">
+                          <TriangleAlert className="size-3.5" />
+                          {s.certificateValidUntil
+                            ? `Expired (${formatDate(s.certificateValidUntil)})`
+                            : "Missing"}
+                        </span>
+                      ) : (
+                        formatDate(s.certificateValidUntil)
+                      )}
+                    </TableCell>
+                    <TableCell className="hidden text-right tabular-nums sm:table-cell">
+                      {s.openInvoices}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
