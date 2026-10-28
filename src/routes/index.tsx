@@ -296,7 +296,7 @@ function Index() {
         <section className="mx-auto w-full max-w-6xl px-4 pb-20">
           <div className="rounded-2xl bg-primary px-6 py-12 text-center text-primary-foreground md:px-12">
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              See a worker handle real orders and invoices
+              See a worker handle orders and invoices
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-primary-foreground/80">
               Try the demo, or tell us which flow eats your team's week.
