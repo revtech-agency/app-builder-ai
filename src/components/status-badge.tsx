@@ -60,6 +60,9 @@ const statusTone: Record<string, Tone> = {
   ready_to_confirm: "info",
   confirmed: "success",
   duplicate: "muted",
+  // payment
+  current: "success",
+  overdue: "danger",
   // roles
   admin: "info",
   user: "muted",

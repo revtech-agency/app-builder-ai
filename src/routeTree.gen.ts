@@ -16,10 +16,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppCompanyIdRouteImport } from './routes/app/$companyId'
 import { Route as AppAdminRouteImport } from './routes/app/admin'
+import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
 import { Route as AppCompanyIdInventoryRouteImport } from './routes/app/$companyId/inventory'
 import { Route as AppCompanyIdNewOrderRouteImport } from './routes/app/$companyId/new-order'
 import { Route as AppCompanyIdOrdersRouteImport } from './routes/app/$companyId/orders'
-import { Route as AppCompanyIdSalesAnalysisRouteImport } from './routes/app/$companyId/sales-analysis'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -56,6 +56,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCompanyIdInventoryRoute = AppCompanyIdInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
@@ -71,12 +76,6 @@ const AppCompanyIdOrdersRoute = AppCompanyIdOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => AppCompanyIdRoute,
 } as any)
-const AppCompanyIdSalesAnalysisRoute =
-  AppCompanyIdSalesAnalysisRouteImport.update({
-    id: '/sales-analysis',
-    path: '/sales-analysis',
-    getParentRoute: () => AppCompanyIdRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -85,11 +84,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin': typeof AppAdminRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/app/': typeof AppIndexRoute
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
-  '/app/$companyId/sales-analysis': typeof AppCompanyIdSalesAnalysisRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -97,11 +96,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin': typeof AppAdminRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/app': typeof AppIndexRoute
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
-  '/app/$companyId/sales-analysis': typeof AppCompanyIdSalesAnalysisRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,11 +110,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin': typeof AppAdminRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/app/': typeof AppIndexRoute
   '/app/$companyId/inventory': typeof AppCompanyIdInventoryRoute
   '/app/$companyId/new-order': typeof AppCompanyIdNewOrderRoute
   '/app/$companyId/orders': typeof AppCompanyIdOrdersRoute
-  '/app/$companyId/sales-analysis': typeof AppCompanyIdSalesAnalysisRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -126,11 +125,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/app/$companyId'
     | '/app/admin'
+    | '/app/dashboard'
     | '/app/'
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
-    | '/app/$companyId/sales-analysis'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -138,11 +137,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/app/$companyId'
     | '/app/admin'
+    | '/app/dashboard'
     | '/app'
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
-    | '/app/$companyId/sales-analysis'
   id:
     | '__root__'
     | '/'
@@ -151,11 +150,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/app/$companyId'
     | '/app/admin'
+    | '/app/dashboard'
     | '/app/'
     | '/app/$companyId/inventory'
     | '/app/$companyId/new-order'
     | '/app/$companyId/orders'
-    | '/app/$companyId/sales-analysis'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -216,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/$companyId/inventory': {
       id: '/app/$companyId/inventory'
       path: '/inventory'
@@ -237,13 +243,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCompanyIdOrdersRouteImport
       parentRoute: typeof AppCompanyIdRoute
     }
-    '/app/$companyId/sales-analysis': {
-      id: '/app/$companyId/sales-analysis'
-      path: '/sales-analysis'
-      fullPath: '/app/$companyId/sales-analysis'
-      preLoaderRoute: typeof AppCompanyIdSalesAnalysisRouteImport
-      parentRoute: typeof AppCompanyIdRoute
-    }
   }
 }
 
@@ -251,14 +250,12 @@ interface AppCompanyIdRouteChildren {
   AppCompanyIdInventoryRoute: typeof AppCompanyIdInventoryRoute
   AppCompanyIdNewOrderRoute: typeof AppCompanyIdNewOrderRoute
   AppCompanyIdOrdersRoute: typeof AppCompanyIdOrdersRoute
-  AppCompanyIdSalesAnalysisRoute: typeof AppCompanyIdSalesAnalysisRoute
 }
 
 const AppCompanyIdRouteChildren: AppCompanyIdRouteChildren = {
   AppCompanyIdInventoryRoute: AppCompanyIdInventoryRoute,
   AppCompanyIdNewOrderRoute: AppCompanyIdNewOrderRoute,
   AppCompanyIdOrdersRoute: AppCompanyIdOrdersRoute,
-  AppCompanyIdSalesAnalysisRoute: AppCompanyIdSalesAnalysisRoute,
 }
 
 const AppCompanyIdRouteWithChildren = AppCompanyIdRoute._addFileChildren(
@@ -268,12 +265,14 @@ const AppCompanyIdRouteWithChildren = AppCompanyIdRoute._addFileChildren(
 interface AppRouteChildren {
   AppCompanyIdRoute: typeof AppCompanyIdRouteWithChildren
   AppAdminRoute: typeof AppAdminRoute
+  AppDashboardRoute: typeof AppDashboardRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCompanyIdRoute: AppCompanyIdRouteWithChildren,
   AppAdminRoute: AppAdminRoute,
+  AppDashboardRoute: AppDashboardRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

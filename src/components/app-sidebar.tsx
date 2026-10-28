@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
+  ChartColumn,
   ChevronsUpDown,
   LogOut,
   MessageSquarePlus,
   Package,
   ReceiptText,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -139,21 +139,18 @@ export function AppSidebar() {
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {companyId && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild className={activeMarker}>
-                      <Link
-                        to="/app/$companyId/sales-analysis"
-                        params={{ companyId }}
-                        activeProps={{ "data-active": "true" }}
-                        onClick={() => setOpenMobile(false)}
-                      >
-                        <Sparkles />
-                        <span>Sales analysis</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild className={activeMarker}>
+                    <Link
+                      to="/app/dashboard"
+                      activeProps={{ "data-active": "true" }}
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      <ChartColumn />
+                      <span>Dashboard</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className={activeMarker}>
                     <Link

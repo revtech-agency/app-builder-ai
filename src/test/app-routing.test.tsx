@@ -21,7 +21,7 @@ describe("App routing", () => {
     ["/app/co_lumen/orders", "/app/$companyId/orders"],
     ["/app/co_lumen/new-order", "/app/$companyId/new-order"],
     ["/app/co_lumen/inventory", "/app/$companyId/inventory"],
-    ["/app/co_lumen/sales-analysis", "/app/$companyId/sales-analysis"],
+    ["/app/dashboard", "/app/dashboard"],
     ["/app/admin", "/app/admin"],
   ])("matches %s to its own route", (path, routeId) => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
