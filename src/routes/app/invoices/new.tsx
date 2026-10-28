@@ -113,7 +113,8 @@ function SubmitPage() {
       <div>
         <h1 className="text-2xl font-semibold">Submit document</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Paste a supplier email or attach a PDF invoice. The worker reads it, runs the three-way match and files it.
+          Paste a supplier email or attach a PDF invoice. The worker reads it, runs the three-way
+          match and files it.
         </p>
       </div>
 
@@ -122,7 +123,13 @@ function SubmitPage() {
           <div className="flex flex-wrap gap-2">
             <span className="self-center text-xs text-muted-foreground">Try a sample:</span>
             {SAMPLES.map((s) => (
-              <Button key={s.label} type="button" variant="outline" size="sm" onClick={() => setText(s.text)}>
+              <Button
+                key={s.label}
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setText(s.text)}
+              >
                 {s.label}
               </Button>
             ))}
@@ -161,7 +168,12 @@ function SubmitPage() {
               <div className="flex items-center gap-2 rounded-md border p-2 text-sm">
                 <FileText className="size-4 text-muted-foreground" />
                 <span className="min-w-0 flex-1 truncate">{file.name}</span>
-                <Button variant="ghost" size="icon" aria-label="Remove file" onClick={() => setFile(null)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Remove file"
+                  onClick={() => setFile(null)}
+                >
                   <X className="size-4" />
                 </Button>
               </div>
@@ -180,7 +192,9 @@ function SubmitPage() {
             {submit.isPending && <Loader2 className="size-4 animate-spin" />}
             {submit.isPending ? PHASES[phase] : "Submit"}
           </Button>
-          {submit.error && <p className="text-sm text-destructive">{(submit.error as Error).message}</p>}
+          {submit.error && (
+            <p className="text-sm text-destructive">{(submit.error as Error).message}</p>
+          )}
         </CardContent>
       </Card>
 
@@ -202,7 +216,9 @@ function SubmitPage() {
           <CardContent className="space-y-4">
             <AnomalyChips flags={flags} />
             {r.exception_reason && (
-              <p className="rounded-md border bg-muted p-3 text-sm text-muted-foreground">{r.exception_reason}</p>
+              <p className="rounded-md border bg-muted p-3 text-sm text-muted-foreground">
+                {r.exception_reason}
+              </p>
             )}
             {!!r.lines?.length && (
               <ul className="divide-y rounded-md border text-sm">
@@ -210,7 +226,9 @@ function SubmitPage() {
                   <li key={i} className="flex flex-wrap items-start justify-between gap-2 p-3">
                     <div className="min-w-0">
                       <div className="font-medium">{l.name ?? l.sku}</div>
-                      {l.line_check_note && <div className="text-xs text-muted-foreground">{l.line_check_note}</div>}
+                      {l.line_check_note && (
+                        <div className="text-xs text-muted-foreground">{l.line_check_note}</div>
+                      )}
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {splitList(l.line_check).map((c) => (

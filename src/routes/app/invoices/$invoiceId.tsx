@@ -30,7 +30,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate, formatMoney } from "@/lib/format";
 import { daysBetween, invoiceChecks, normIban } from "@/lib/invoice-rules";
@@ -61,9 +68,29 @@ function findPoLine(line: InvoiceLine, poLines: PoLine[]) {
   return poLines.find(
     (p) =>
       (line.sku && p.sku === line.sku) ||
-      (line.poLineRef && (p.sku === line.poLineRef || p.id === line.poLineRef || p.name === line.poLineRef)),
+      (line.poLineRef &&
+        (p.sku === line.poLineRef || p.id === line.poLineRef || p.name === line.poLineRef)),
   );
 }
+
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
+
+const decodeEntities = (text: string) =>
+  text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, code: string) => {
+    if (code[0] === "#") {
+      const n =
+        code[1] === "x" || code[1] === "X" ? parseInt(code.slice(2), 16) : Number(code.slice(1));
+      return Number.isFinite(n) && n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : m;
+    }
+    return NAMED_ENTITIES[code.toLowerCase()] ?? m;
+  });
 
 const offCell = "bg-destructive/10 font-semibold text-destructive";
 
@@ -96,23 +123,33 @@ function MatchTable({ invoice }: { invoice: InvoiceDetail }) {
                 <TableCell className="min-w-48">
                   <div className="font-medium">{l.name}</div>
                   <div className="text-xs text-muted-foreground">{l.sku}</div>
-                  {l.lineCheckNote && <div className="mt-1 text-xs text-muted-foreground">{l.lineCheckNote}</div>}
+                  {l.lineCheckNote && (
+                    <div className="mt-1 text-xs text-muted-foreground">{l.lineCheckNote}</div>
+                  )}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">{po ? po.quantity : "—"}</TableCell>
                 <TableCell className={cn("text-right tabular-nums", qtyOff && offCell)}>
                   {po ? po.receivedQuantity : "—"}
                   {po?.deliveryNoteRef && (
-                    <div className="text-xs font-normal text-muted-foreground">{po.deliveryNoteRef}</div>
+                    <div className="text-xs font-normal text-muted-foreground">
+                      {po.deliveryNoteRef}
+                    </div>
                   )}
                 </TableCell>
-                <TableCell className={cn("text-right tabular-nums", qtyOff && offCell)}>{l.quantity}</TableCell>
-                <TableCell className="text-right tabular-nums">{po ? formatMoney(po.price) : "—"}</TableCell>
+                <TableCell className={cn("text-right tabular-nums", qtyOff && offCell)}>
+                  {l.quantity}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {po ? formatMoney(po.price) : "—"}
+                </TableCell>
                 <TableCell className={cn("text-right tabular-nums", priceOff && offCell)}>
                   {formatMoney(l.price)}
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {l.lineCheck.length ? l.lineCheck.map((c) => <StatusBadge key={c} status={c} />) : "—"}
+                    {l.lineCheck.length
+                      ? l.lineCheck.map((c) => <StatusBadge key={c} status={c} />)
+                      : "—"}
                   </div>
                 </TableCell>
               </TableRow>
@@ -126,8 +163,11 @@ function MatchTable({ invoice }: { invoice: InvoiceDetail }) {
 
 function SupplierPanel({ invoice }: { invoice: InvoiceDetail }) {
   const s = invoice.supplier;
-  if (!s) return <p className="text-sm text-muted-foreground">No supplier linked to this invoice.</p>;
-  const differs = Boolean(invoice.ibanOnInvoice && s.iban && normIban(invoice.ibanOnInvoice) !== normIban(s.iban));
+  if (!s)
+    return <p className="text-sm text-muted-foreground">No supplier linked to this invoice.</p>;
+  const differs = Boolean(
+    invoice.ibanOnInvoice && s.iban && normIban(invoice.ibanOnInvoice) !== normIban(s.iban),
+  );
   const days = daysBetween(s.ibanChangedOn, invoice.invoiceDate);
   const expired =
     s.certificateValidUntil && invoice.invoiceDate
@@ -149,15 +189,29 @@ function SupplierPanel({ invoice }: { invoice: InvoiceDetail }) {
       </div>
       <div>
         <dt className="text-xs text-muted-foreground">Certificate valid until</dt>
-        <dd className={cn(expired && "font-medium text-destructive")}>{formatDate(s.certificateValidUntil)}</dd>
+        <dd className={cn(expired && "font-medium text-destructive")}>
+          {formatDate(s.certificateValidUntil)}
+        </dd>
       </div>
-      <div className={cn("rounded-md border p-2", differs && "border-destructive/40 bg-destructive/10")}>
+      <div
+        className={cn(
+          "rounded-md border p-2",
+          differs && "border-destructive/40 bg-destructive/10",
+        )}
+      >
         <dt className="text-xs text-muted-foreground">IBAN on file</dt>
         <dd className="break-all font-mono text-xs">{s.iban ?? "—"}</dd>
       </div>
-      <div className={cn("rounded-md border p-2", differs && "border-destructive/40 bg-destructive/10")}>
+      <div
+        className={cn(
+          "rounded-md border p-2",
+          differs && "border-destructive/40 bg-destructive/10",
+        )}
+      >
         <dt className="text-xs text-muted-foreground">IBAN on invoice</dt>
-        <dd className={cn("break-all font-mono text-xs", differs && "font-semibold text-destructive")}>
+        <dd
+          className={cn("break-all font-mono text-xs", differs && "font-semibold text-destructive")}
+        >
           {invoice.ibanOnInvoice ?? "—"}
         </dd>
       </div>
@@ -166,12 +220,16 @@ function SupplierPanel({ invoice }: { invoice: InvoiceDetail }) {
         <dd>
           {formatDate(s.ibanChangedOn)}
           {days != null && days >= 0 && (
-            <span className={cn("ml-1 text-xs", days <= 30 ? "text-warning" : "text-muted-foreground")}>
+            <span
+              className={cn("ml-1 text-xs", days <= 30 ? "text-warning" : "text-muted-foreground")}
+            >
               ({days} days before invoice)
             </span>
           )}
           {s.previousIban && (
-            <span className="block font-mono text-xs text-muted-foreground">Previously {s.previousIban}</span>
+            <span className="block font-mono text-xs text-muted-foreground">
+              Previously {s.previousIban}
+            </span>
           )}
         </dd>
       </div>
@@ -228,7 +286,11 @@ function AssistantPanel({ dealId }: { dealId: string }) {
           send(input);
         }}
       >
-        <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask a question…" />
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask a question…"
+        />
         <Button type="submit" size="icon" aria-label="Send" disabled={ask.isPending}>
           <Send className="size-4" />
         </Button>
@@ -307,7 +369,9 @@ function InvoicePage() {
           <Skeleton className="h-40 w-full" />
         </div>
       )}
-      {invoice.error && <p className="text-sm text-destructive">{(invoice.error as Error).message}</p>}
+      {invoice.error && (
+        <p className="text-sm text-destructive">{(invoice.error as Error).message}</p>
+      )}
 
       {d && (
         <>
@@ -323,14 +387,23 @@ function InvoicePage() {
                 {d.poNumber ? ` · ${d.poNumber}` : ""}
               </p>
               <p className="text-sm font-medium">{approvalText(d.approvalLevel)}</p>
-              {d.approvedBy && <p className="text-xs text-muted-foreground">Approved by {d.approvedBy}</p>}
+              {d.approvedBy && (
+                <p className="text-xs text-muted-foreground">Approved by {d.approvedBy}</p>
+              )}
             </div>
             <div className="text-right">
               <p className="text-2xl font-semibold tabular-nums">{formatMoney(d.amount)}</p>
               {d.vatAmount != null && (
-                <p className="text-xs text-muted-foreground">incl. VAT {formatMoney(d.vatAmount)}</p>
+                <p className="text-xs text-muted-foreground">
+                  incl. VAT {formatMoney(d.vatAmount)}
+                </p>
               )}
-              <Button variant="outline" size="sm" className="mt-2" onClick={() => setChatOpen(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => setChatOpen(true)}
+              >
                 <MessageCircle /> Ask the worker
               </Button>
             </div>
@@ -357,7 +430,9 @@ function InvoicePage() {
                     <span
                       className={cn(
                         "flex size-5 shrink-0 items-center justify-center rounded-full",
-                        c.passed ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive",
+                        c.passed
+                          ? "bg-success/15 text-success"
+                          : "bg-destructive/15 text-destructive",
                       )}
                     >
                       {c.passed ? <Check className="size-3.5" /> : <X className="size-3.5" />}
@@ -381,7 +456,9 @@ function InvoicePage() {
               )}
             </CardHeader>
             <CardContent>
-              {!d.po && <p className="mb-3 text-sm text-warning">No matching purchase order was found.</p>}
+              {!d.po && (
+                <p className="mb-3 text-sm text-warning">No matching purchase order was found.</p>
+              )}
               <MatchTable invoice={d} />
             </CardContent>
           </Card>
@@ -410,7 +487,11 @@ function InvoicePage() {
                         <p className="text-xs text-muted-foreground">{formatDate(n.timestamp)}</p>
                         {/* HubSpot note bodies may contain simple HTML; render them as text. */}
                         <div className="whitespace-pre-wrap break-words">
-                          {n.body.replace(/<br\s*\/?>|<\/(p|div|li)>/gi, "\n").replace(/<[^>]+>/g, "")}
+                          {decodeEntities(
+                            n.body
+                              .replace(/<br\s*\/?>|<\/(p|div|li)>/gi, "\n")
+                              .replace(/<[^>]+>/g, ""),
+                          )}
                         </div>
                       </li>
                     ))}
@@ -445,10 +526,18 @@ function InvoicePage() {
               >
                 Approve for payment
               </Button>
-              <Button variant="outline" disabled={closed || decide.isPending} onClick={() => setDialog("send_back")}>
+              <Button
+                variant="outline"
+                disabled={closed || decide.isPending}
+                onClick={() => setDialog("send_back")}
+              >
                 Send back
               </Button>
-              <Button variant="outline" disabled={closed || decide.isPending} onClick={() => setDialog("duplicate")}>
+              <Button
+                variant="outline"
+                disabled={closed || decide.isPending}
+                onClick={() => setDialog("duplicate")}
+              >
                 Mark duplicate
               </Button>
               <Button
@@ -492,7 +581,9 @@ function InvoicePage() {
                 <>
                   <DialogHeader>
                     <DialogTitle>{DECISION_TEXT[dialog].title}</DialogTitle>
-                    <DialogDescription>Add a comment — it's saved to the invoice's activity.</DialogDescription>
+                    <DialogDescription>
+                      Add a comment — it's saved to the invoice's activity.
+                    </DialogDescription>
                   </DialogHeader>
                   <Textarea
                     rows={4}
