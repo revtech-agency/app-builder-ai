@@ -9,7 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate, formatMoney } from "@/lib/format";
 import { listInvoices } from "@/lib/invoices";
@@ -56,11 +63,18 @@ function QueuePage() {
 
   const stats = useMemo(() => {
     const today = new Date().toDateString();
-    const cleared = all.filter((i) => i.stage === "ready_to_approve" || i.stage === "approved_for_payment").length;
-    const exceptions = all.filter((i) => i.stage === "needs_review" || i.stage === "waiting_on_supplier");
-    const waiting = all.filter((i) => ["needs_review", "waiting_on_supplier", "ready_to_approve", "received"].includes(i.stage));
+    const cleared = all.filter(
+      (i) => i.stage === "ready_to_approve" || i.stage === "approved_for_payment",
+    ).length;
+    const exceptions = all.filter(
+      (i) => i.stage === "needs_review" || i.stage === "waiting_on_supplier",
+    );
+    const waiting = all.filter((i) =>
+      ["needs_review", "waiting_on_supplier", "ready_to_approve", "received"].includes(i.stage),
+    );
     return {
-      today: all.filter((i) => i.createdAt && new Date(i.createdAt).toDateString() === today).length,
+      today: all.filter((i) => i.createdAt && new Date(i.createdAt).toDateString() === today)
+        .length,
       cleared: all.length ? Math.round((cleared / all.length) * 100) : 0,
       exceptions: exceptions.length,
       waiting: waiting.reduce((s, i) => s + i.amount, 0),
@@ -119,7 +133,9 @@ function QueuePage() {
               {TABS.map((t) => (
                 <TabsTrigger key={t.key} value={t.key} className="gap-1.5">
                   {t.label}
-                  <span className="font-mono text-xs text-muted-foreground">{counts[t.key] ?? 0}</span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {counts[t.key] ?? 0}
+                  </span>
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -144,7 +160,9 @@ function QueuePage() {
           <Skeleton className="h-12 w-full" />
         </div>
       )}
-      {invoices.error && <p className="text-sm text-destructive">{(invoices.error as Error).message}</p>}
+      {invoices.error && (
+        <p className="text-sm text-destructive">{(invoices.error as Error).message}</p>
+      )}
       {invoices.data && rows.length === 0 && (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
@@ -173,7 +191,9 @@ function QueuePage() {
                 <TableRow
                   key={i.id}
                   className="cursor-pointer"
-                  onClick={() => navigate({ to: "/app/invoices/$invoiceId", params: { invoiceId: i.id } })}
+                  onClick={() =>
+                    navigate({ to: "/app/invoices/$invoiceId", params: { invoiceId: i.id } })
+                  }
                 >
                   <TableCell className="font-medium">
                     <Link
@@ -186,12 +206,21 @@ function QueuePage() {
                   </TableCell>
                   <TableCell className="font-mono text-xs">{i.invoiceNumber ?? "—"}</TableCell>
                   <TableCell className="whitespace-nowrap">{formatDate(i.invoiceDate)}</TableCell>
-                  <TableCell className={cn("whitespace-nowrap", isOverdue(i) && "font-medium text-destructive")}>
+                  <TableCell
+                    className={cn(
+                      "whitespace-nowrap",
+                      isOverdue(i) && "font-medium text-destructive",
+                    )}
+                  >
                     {formatDate(i.dueDate)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(i.amount)}</TableCell>
-                  <TableCell>{i.matchResult ? <StatusBadge status={i.matchResult} /> : "—"}</TableCell>
-                  <TableCell className="whitespace-nowrap capitalize">{approvalShort(i.approvalLevel)}</TableCell>
+                  <TableCell>
+                    {i.matchResult ? <StatusBadge status={i.matchResult} /> : "—"}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap capitalize">
+                    {approvalShort(i.approvalLevel)}
+                  </TableCell>
                   <TableCell className="min-w-48">
                     <AnomalyChips flags={i.anomalyFlags} />
                   </TableCell>

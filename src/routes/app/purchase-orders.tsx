@@ -6,7 +6,14 @@ import { StatusBadge } from "@/components/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatMoney } from "@/lib/format";
 import { listPurchaseOrders } from "@/lib/invoices";
 import type { PurchaseOrder } from "@/lib/invoices";
@@ -23,7 +30,9 @@ function PoCard({ po }: { po: PurchaseOrder }) {
         <CollapsibleTrigger className="group flex w-full items-center gap-3 p-4 text-left">
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-sm font-semibold">{po.poNumber ?? "No PO number"}</span>
+              <span className="font-mono text-sm font-semibold">
+                {po.poNumber ?? "No PO number"}
+              </span>
               <StatusBadge status={po.stage} />
             </div>
             <p className="text-xs text-muted-foreground">
@@ -59,11 +68,15 @@ function PoCard({ po }: { po: PurchaseOrder }) {
                         </div>
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{l.quantity}</TableCell>
-                      <TableCell className="text-right tabular-nums">{l.receivedQuantity}</TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {l.receivedQuantity}
+                      </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {Math.max(l.quantity - l.receivedQuantity, 0)}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">{formatMoney(l.price)}</TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatMoney(l.price)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -84,7 +97,9 @@ function PurchaseOrdersPage() {
     <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-2xl font-semibold">Purchase orders</h1>
-        <p className="mt-1 text-sm text-muted-foreground">What was ordered and what has been delivered.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          What was ordered and what has been delivered.
+        </p>
       </div>
       {pos.isLoading && (
         <div className="space-y-3">
@@ -95,7 +110,9 @@ function PurchaseOrdersPage() {
       {pos.error && <p className="text-sm text-destructive">{(pos.error as Error).message}</p>}
       {pos.data?.length === 0 && (
         <Card>
-          <CardContent className="py-10 text-center text-sm text-muted-foreground">No purchase orders yet.</CardContent>
+          <CardContent className="py-10 text-center text-sm text-muted-foreground">
+            No purchase orders yet.
+          </CardContent>
         </Card>
       )}
       <div className="space-y-3">

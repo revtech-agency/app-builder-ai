@@ -85,69 +85,72 @@ export function AppSidebar() {
   return (
     <Sidebar>
       {hasCompanies && (
-      <SidebarHeader>
-        {canSwitch ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-auto w-full justify-between border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                {companyLabel}
-                <ChevronsUpDown className="size-4 shrink-0 text-sidebar-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[--radix-dropdown-menu-trigger-width]">
-              {companies.data?.map((c) => (
-                <DropdownMenuItem
-                  key={c.id}
-                  onSelect={() => {
-                    setOpenMobile(false);
-                    navigate({ to: "/app/$companyId/orders", params: { companyId: c.id } });
-                  }}
+        <SidebarHeader>
+          {canSwitch ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-auto w-full justify-between border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 >
-                  {c.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <div className="rounded-md border border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground">
-            {companyLabel}
-          </div>
-        )}
-      </SidebarHeader>
+                  {companyLabel}
+                  <ChevronsUpDown className="size-4 shrink-0 text-sidebar-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-[--radix-dropdown-menu-trigger-width]"
+              >
+                {companies.data?.map((c) => (
+                  <DropdownMenuItem
+                    key={c.id}
+                    onSelect={() => {
+                      setOpenMobile(false);
+                      navigate({ to: "/app/$companyId/orders", params: { companyId: c.id } });
+                    }}
+                  >
+                    {c.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="rounded-md border border-sidebar-border bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground">
+              {companyLabel}
+            </div>
+          )}
+        </SidebarHeader>
       )}
 
       <SidebarContent>
         {hasCompanies && (
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {companyId &&
-                nav.map((item) => (
-                  <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild className={activeMarker}>
-                      <Link
-                        to={item.to}
-                        params={{ companyId }}
-                        activeProps={{ "data-active": "true" }}
-                        onClick={() => setOpenMobile(false)}
-                      >
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                    {item.badge > 0 && (
-                      <SidebarMenuBadge className="rounded-sm bg-sidebar-primary font-mono font-bold text-sidebar-primary-foreground">
-                        {item.badge}
-                      </SidebarMenuBadge>
-                    )}
-                  </SidebarMenuItem>
-                ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {companyId &&
+                  nav.map((item) => (
+                    <SidebarMenuItem key={item.to}>
+                      <SidebarMenuButton asChild className={activeMarker}>
+                        <Link
+                          to={item.to}
+                          params={{ companyId }}
+                          activeProps={{ "data-active": "true" }}
+                          onClick={() => setOpenMobile(false)}
+                        >
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      {item.badge > 0 && (
+                        <SidebarMenuBadge className="rounded-sm bg-sidebar-primary font-mono font-bold text-sidebar-primary-foreground">
+                          {item.badge}
+                        </SidebarMenuBadge>
+                      )}
+                    </SidebarMenuItem>
+                  ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
         {canUseInvoiceDesk && (
           <SidebarGroup>
