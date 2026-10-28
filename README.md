@@ -26,7 +26,7 @@ and routes each one to the right HubSpot stage:
 - `test-cases.json` and `run-tests.mjs`: 12 synthetic invoices with expected results, and a runner that
   prints expected versus actual.
 
-The workflows are saved inactive and have not yet been imported or run. See the
+The workflows are imported and live in n8n. See the
 [folder README](n8n/invoice-worker/README.md) for import steps, the rules, how this differs from the
 original brief, and what still needs checking.
 
