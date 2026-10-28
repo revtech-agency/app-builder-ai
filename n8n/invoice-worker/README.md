@@ -2,7 +2,7 @@
 
 Three importable n8n workflows for the banking demo: an AP worker that does a three-way match
 (PO, delivery, invoice) and sends each invoice to the right HubSpot stage. All three are tagged
-`appbuilder` and `invoice-worker` and are saved **inactive**.
+`appbuilder` and `invoice-worker` and are imported and active in n8n (see [Live in n8n](#live-in-n8n)).
 
 | File | Workflow | Entry |
 | --- | --- | --- |
@@ -72,8 +72,8 @@ up to 5,000 team lead, up to 25,000 head of department, above that the CFO.
 ## Not verified against the live accounts
 
 These files were built and checked offline: the JSON parses, every connection points at a real node,
-all code compiles, and the rules ran correctly on 15 mock cases. They have **not** been imported into n8n
-or run against HubSpot. Check these first:
+all code compiles, and the rules ran correctly on 15 mock cases. They are now imported and active in n8n,
+but these points have not been confirmed against HubSpot yet:
 
 - Line-item properties (`received_quantity`, `delivery_note_ref`, `po_line_ref`, `line_check`,
   `line_check_note`, `field_confidence`) exist in HubSpot. The connector that checked HubSpot could not read them.
