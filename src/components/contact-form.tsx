@@ -12,24 +12,43 @@ const HUBSPOT_PORTAL_ID = "149650024";
 const HUBSPOT_FORM_ID = "da6f5e44-b92d-4ac3-8663-615af39ad3bd";
 
 const CustomerDetails = z.object({
-  firstname: z.string().trim().min(1, "Enter your name."),
-  lastname: z.string().trim().min(1, "Enter your surname."),
-  company: z.string().trim().min(1, "Enter your company."),
+  firstname: z.string().trim().min(1, "Enter your first name."),
+  lastname: z.string().trim().min(1, "Enter your last name."),
   email: z.string().trim().email("Enter a valid email address."),
+  phone: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || /^\+?[\d\s().-]{7,20}$/.test(v), "Enter a valid phone number."),
+  jobtitle: z.string().trim(),
+  company: z.string().trim().min(1, "Enter your company name."),
 });
 
 type CustomerDetails = z.infer<typeof CustomerDetails>;
 type Errors = Partial<Record<keyof CustomerDetails, string>>;
 
-const FIELDS: { key: keyof CustomerDetails; label: string; type?: string; autoComplete: string }[] =
-  [
-    { key: "firstname", label: "Name", autoComplete: "given-name" },
-    { key: "lastname", label: "Surname", autoComplete: "family-name" },
-    { key: "company", label: "Company", autoComplete: "organization" },
-    { key: "email", label: "Email", type: "email", autoComplete: "email" },
-  ];
+const FIELDS: {
+  key: keyof CustomerDetails;
+  label: string;
+  type?: string;
+  autoComplete: string;
+  optional?: boolean;
+}[] = [
+  { key: "firstname", label: "First name", autoComplete: "given-name" },
+  { key: "lastname", label: "Last name", autoComplete: "family-name" },
+  { key: "email", label: "Email", type: "email", autoComplete: "email" },
+  { key: "phone", label: "Phone", type: "tel", autoComplete: "tel", optional: true },
+  { key: "jobtitle", label: "Job title", autoComplete: "organization-title", optional: true },
+  { key: "company", label: "Company name", autoComplete: "organization" },
+];
 
-const EMPTY: CustomerDetails = { firstname: "", lastname: "", company: "", email: "" };
+const EMPTY: CustomerDetails = {
+  firstname: "",
+  lastname: "",
+  email: "",
+  phone: "",
+  jobtitle: "",
+  company: "",
+};
 
 async function submitToHubSpot(data: CustomerDetails) {
   const res = await fetch(
@@ -38,7 +57,10 @@ async function submitToHubSpot(data: CustomerDetails) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        fields: Object.entries(data).map(([name, value]) => ({ objectTypeId: "0-1", name, value })),
+        // Optional fields left blank are omitted so HubSpot doesn't validate an empty phone.
+        fields: Object.entries(data)
+          .filter(([, value]) => value !== "")
+          .map(([name, value]) => ({ objectTypeId: "0-1", name, value })),
         context: { pageUri: window.location.href, pageName: document.title },
       }),
     },
@@ -95,7 +117,10 @@ export function ContactForm() {
     >
       {FIELDS.map((f) => (
         <div key={f.key} className="space-y-2">
-          <Label htmlFor={f.key}>{f.label}</Label>
+          <Label htmlFor={f.key}>
+            {f.label}
+            {f.optional && <span className="font-normal text-muted-foreground"> (optional)</span>}
+          </Label>
           <Input
             id={f.key}
             type={f.type ?? "text"}
