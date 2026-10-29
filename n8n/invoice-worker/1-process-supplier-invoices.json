@@ -12,7 +12,7 @@
         },
         "simple": false,
         "filters": {
-          "q": "{(to:demo+invoices@appbuilder.ai is:unread) (to:daniel@tigros.io {filename:pdf subject:invoice subject:factura})} -\"Sent by the AppBuilder.ai invoice worker\""
+          "q": "{(to:demo+invoices@appbuilder.ai is:unread) (to:daniel@tigros.io from:daniel@tigros.io {filename:pdf subject:invoice subject:factura})} -\"Sent by the AppBuilder.ai invoice worker\""
         },
         "options": {
           "downloadAttachments": true

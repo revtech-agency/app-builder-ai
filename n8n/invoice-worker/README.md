@@ -16,14 +16,14 @@ Four importable n8n workflows for the banking demo: an AP worker that does a thr
 All AppBuilder workflows live in the
 [01-AppBuilderAI](https://revtech-agency.app.n8n.cloud/projects/LZoZHxCNLl9iD0EU/folders/t5PMIeVchFarBmhr/workflows)
 folder on revtech-agency.app.n8n.cloud. Open one at `https://revtech-agency.app.n8n.cloud/workflow/<ID>`.
-IDs and status as of 2026-10-28.
+IDs and status as of 2026-10-28 (Send demo invoice email added 2026-10-29).
 
 | Worker | Workflow | ID | Status | Entry |
 | --- | --- | --- | --- | --- |
 | Invoice | Process supplier invoices | `Kxhmr00uS4MBXTSO` | Active | Gmail trigger and `POST /webhook/invoice-intake` (app) |
 | Invoice | Invoice assistant chat | `HI8tvI2HG70NlgPo` | Active | `POST /webhook/invoice-assistant` (app) |
 | Invoice | Look up purchase order | `rc72KPALhtJhwLZm` | Active | Tool for the invoice assistant |
-| Invoice | Send demo invoice email | not imported yet | — | `POST /webhook/invoice-demo-send` (app) |
+| Invoice | Send demo invoice email | `AaooGE5gsNiY6TDl` | Active | `POST /webhook/invoice-demo-send` (app) |
 | Order | Order assistant chat | `IhNhsoxf7x1a4Eys` | Active | `POST /webhook/order-assistant` (app) |
 | Order | Send offer for app order | `1PSXF6gMFLxl1oJH` | Active | `POST /webhook/app-order-offer` (app) |
 | Order | Process order emails | `cb1oRwq7IPuFlACQ` | Active | Gmail trigger (`to:demo+orders@appbuilder.ai is:unread`) |
@@ -39,13 +39,18 @@ Workflow 1 reads two mailboxes through the "DaniS TMT Gmail" credential (the dan
 account; demo+invoices@appbuilder.ai is delivered to it). Gmail query:
 
 ```text
-{(to:demo+invoices@appbuilder.ai is:unread) (to:daniel@tigros.io {filename:pdf subject:invoice subject:factura})} -"Sent by the AppBuilder.ai invoice worker"
+{(to:demo+invoices@appbuilder.ai is:unread) (to:daniel@tigros.io from:daniel@tigros.io {filename:pdf subject:invoice subject:factura})} -"Sent by the AppBuilder.ai invoice worker"
 ```
 
 | Mailbox | Picks up | Result email to | After reading |
 | --- | --- | --- | --- |
-| daniel@tigros.io | a PDF attached, or "invoice"/"factura" in the subject | daniel@tigros.io | left unread (working inbox) |
+| daniel@tigros.io | only mail the account sends to itself (the demo sends), with a PDF attached or "invoice"/"factura" in the subject | daniel@tigros.io | left unread (working inbox) |
 | demo+invoices@appbuilder.ai | every unread email | daniel@tigros.io | marked read |
+
+`from:daniel@tigros.io` keeps real mail in that inbox out for now: only the demo sends (workflow 4,
+or mail you send yourself) become deals. To open the inbox to real supplier invoices, remove
+`from:daniel@tigros.io` from the `Gmail Trigger` query, here and in n8n. Every matching email then
+becomes a deal in the demo portal and gets a result email.
 
 The list lives in the `Prepare Email` node and in `INTAKE_MAILBOXES` (`src/lib/intake.ts`, shown on
 the app's Email intake page); `src/test/email-intake.test.ts` fails if the two disagree.
@@ -71,6 +76,12 @@ supplier's email. It refuses any recipient that is not a monitored mailbox.
 
 ### Deploying this change
 
+Deployed on 2026-10-29 (steps 1–3, then the Clean match test of step 4 sent through the
+`invoice-demo-send` webhook, since the Email intake page was not merged yet). Live n8n versions:
+workflow 1 `3eb23400-8ead-46a1-9ea0-1b6083078774` (rollback: `030f7e0f-07b6-42ca-8620-61525f0ce617`,
+the version before email intake), workflow 4 `b677106d-3814-4a34-a867-ac6e5e4559e3`. Workflow 1 was
+updated in place, not re-imported, so its IDs and credentials did not change.
+
 Order matters: workflow 1 writes five new deal properties, and HubSpot rejects the whole deal if a
 property doesn't exist.
 
@@ -92,9 +103,11 @@ property doesn't exist.
    result email says what is missing, and a supplier "information needed" email also arrives at
    daniel@tigros.io (the demo's sender).
 
-Not verified yet (no n8n access when this was written): the Gmail query's nested `{ }` / `( )`
-grouping, the Gmail node's `attachmentsUi` option on workflow 4, and how the Gmail trigger handles
-mail sent from the account to itself.
+Verified in the 2026-10-29 deployment (Clean match, n8n executions 360 and 361, deal
+`533365512404`): the Gmail query's nested `{ }` / `( )` grouping works; workflow 4 attaches the PDF
+(`attachmentsUi`); mail the account sends to itself does trigger workflow 1; the result email
+arrives at daniel@tigros.io, `notified_to` / `notified_at` are set, and the result email is not
+read back in. The "Tax certificate expired" case of step 4 was not sent.
 
 ## Import
 
