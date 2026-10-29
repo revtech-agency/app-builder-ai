@@ -128,6 +128,25 @@ seconds apart: one run (execution 373), two deals (`533287231677`, `532716985571
 against its own PO and history. The app webhook path still passes (`run-tests.mjs --only
 08-supplier-not-approved`).
 
+Duplicates in one Gmail poll (fixed 2026-10-29, live workflow 1
+`0de20bcf-5af9-459f-914d-4e2c898a3a1c`, rollback `fa781b6c-1fb2-4760-9059-e8846db2221b`):
+
+- Two copies of one invoice in the same poll both became deals: the history search can't see a deal
+  created earlier in the same run. `Match Supplier` now also outputs each email's
+  `source_message_id` and invoice number, and `Apply Rules` marks an invoice Duplicate when an
+  earlier email of the run has the same supplier and invoice number.
+- Gmail returns the newest email first, so `Prepare Email` now passes a poll's emails on oldest
+  first: the later copy is the duplicate.
+- Several emails per run hit HubSpot's per-second search limit (429 in `Look Up History`, execution
+  381, which failed the whole run). The five search nodes (`Find Existing`, `Fetch Suppliers`,
+  `Look Up PO`, `Get PO Lines`, `Look Up History`) retry up to 4 times, 1.5 s apart. The create
+  nodes don't retry, so a retry can't create a record twice.
+- `Send Recipient Notification` and `Record Notification` now also have `onError:
+  continueRegularOutput` live, as in this file; it was missed when they were first deployed.
+
+Verified: "Clean match" sent twice three seconds apart gave one run (execution 384), the first copy
+Ready to approve and the second Duplicate.
+
 ## Import
 
 1. Import workflow **3** first (n8n: Workflows, menu, Import from file). Copy its workflow ID from the URL.

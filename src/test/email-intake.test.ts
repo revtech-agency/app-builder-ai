@@ -8,17 +8,22 @@ import { invoicePdf } from "@/lib/invoice-pdf";
 
 type Item = { json: Record<string, unknown>; binary?: Record<string, unknown> };
 
-// Runs an n8n Code node's JavaScript with stubs for $input and $('Node').item. A node that runs
-// once per item returns one { json } object; n8n (and this helper) wrap it in a list.
+// Runs an n8n Code node's JavaScript with stubs for $input, $('Node').item and $('Node').all().
+// A node that runs once per item returns one { json } object; n8n (and this helper) wrap it in a
+// list.
 function runCode(
   workflow: { nodes: { name: string; parameters: Record<string, unknown> }[] },
   name: string,
   input: Item[],
   refs: Record<string, Record<string, unknown>> = {},
+  lists: Record<string, Record<string, unknown>[]> = {},
 ): Item[] {
   const node = workflow.nodes.find((n) => n.name === name);
   if (!node) throw new Error(`No node ${name}`);
-  const $ = (ref: string) => ({ item: { json: refs[ref] ?? {} } });
+  const $ = (ref: string) => ({
+    item: { json: refs[ref] ?? {} },
+    all: () => (lists[ref] ?? []).map((json) => ({ json })),
+  });
   const $input = { all: () => input };
   const fn = new Function("$", "$input", "$json", node.parameters["jsCode"] as string);
   const out = fn($, $input, input[0]?.json ?? {}) as Item[] | Item;
@@ -130,6 +135,41 @@ describe("n8n email intake", () => {
         );
       }
     }
+  });
+
+  it("passes on the emails of one poll oldest first", () => {
+    const out = runCode(invoiceWorker, "Prepare Email", [
+      email("daniel@tigros.io", { id: "newer", date: "2026-10-29T08:07:19.000Z" }),
+      email("daniel@tigros.io", { id: "older", date: "2026-10-29T08:07:14.000Z" }),
+    ]);
+    expect(out.map((o) => o.json["gmail_id"])).toEqual(["older", "newer"]);
+  });
+
+  it("marks a second copy of an invoice in the same Gmail poll as a duplicate", () => {
+    const supplier = { id: "7", name: "Office Supplies Demo SRL", supplier_status: "approved" };
+    const batch = ["gmail-a", "gmail-b"].map((id) => ({
+      supplier,
+      source_message_id: id,
+      invoice_number: "OS-2026-1301",
+    }));
+    const stage = (sourceId: string) =>
+      runCode(
+        invoiceWorker,
+        "Apply Rules",
+        [],
+        {
+          "Read Document": {
+            output: { document_type: "invoice", invoice_number: "OS-2026-1301", total_amount: 100 },
+          },
+          "Build Document Text": { source_message_id: sourceId, channel: "email" },
+          "Match Supplier": { supplier },
+          "Collect PO": { po: null, po_lines: [] },
+          "Look Up History": { results: [] },
+        },
+        { "Match Supplier": batch },
+      )[0]!.json["stage"];
+    expect(stage("gmail-a")).not.toBe("duplicate");
+    expect(stage("gmail-b")).toBe("duplicate");
   });
 
   it("only lets the demo sender mail a monitored mailbox", () => {
