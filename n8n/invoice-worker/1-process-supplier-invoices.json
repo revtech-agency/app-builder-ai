@@ -24,7 +24,7 @@
       "typeVersion": 1.2,
       "position": [
         0,
-        0
+        144
       ],
       "credentials": {
         "gmailOAuth2": {
@@ -1258,6 +1258,69 @@
       ]
     }
   },
+  "nodeGroups": [
+    {
+      "id": "f7dd93eb-0e6c-4a7b-9c26-90fe0a70433a",
+      "name": "Receive and dedupe",
+      "nodeNames": [
+        "Has PDF?",
+        "Extract PDF Text",
+        "Build Document Text",
+        "Find Existing",
+        "Already processed?"
+      ],
+      "description": "Email or app upload in: PDF to text, then skips anything already filed (same source ID). Out: new documents only."
+    },
+    {
+      "id": "5cecd462-74cf-419d-b993-fe46221cfa3c",
+      "name": "AI reads the invoice",
+      "nodeNames": [
+        "Fetch Suppliers",
+        "Read Document",
+        "Anthropic Chat Model",
+        "Match Supplier"
+      ],
+      "description": "Claude extracts supplier, IBAN, invoice number, PO and lines with confidence; matched to a HubSpot supplier by VAT ID or name."
+    },
+    {
+      "id": "c956f834-1eef-4bdf-b3d7-a78a2659a28b",
+      "name": "Three-way match and rules",
+      "nodeNames": [
+        "Look Up PO",
+        "PO found?",
+        "Get PO Lines",
+        "Collect PO",
+        "Look Up History",
+        "Apply Rules",
+        "Reminder for known invoice?"
+      ],
+      "description": "PO, delivery notes and supplier history from HubSpot; fixed approval rules pick the stage and flags. The AI does not decide."
+    },
+    {
+      "id": "397c3d2b-b946-4ef6-9f99-cce56a1a18d8",
+      "name": "File in HubSpot",
+      "nodeNames": [
+        "Create Invoice Deal",
+        "Create Line Items",
+        "Create Audit Note"
+      ],
+      "description": "Invoice deal in the Procure-to-pay pipeline, its line items and an audit note listing every check."
+    },
+    {
+      "id": "add854f7-a688-4245-83a1-66a85f9b8443",
+      "name": "Email recipient and supplier",
+      "nodeNames": [
+        "Notify recipient?",
+        "Build Notification",
+        "Send Recipient Notification",
+        "Record Notification",
+        "Send supplier email?",
+        "Send Supplier Email",
+        "Email channel?"
+      ],
+      "description": "Result email to daniel@tigros.io (what to do next, every check), recorded on the deal; asks the supplier for anything missing."
+    }
+  ],
   "active": false,
   "settings": {
     "executionOrder": "v1"
