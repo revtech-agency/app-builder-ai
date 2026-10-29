@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 // Copy follows the NexxtAI finals deck (Raiffeisen, AI for Operational Efficiency): risky
 // payments stopped before they leave, measured in euros held; the accounts-payable invoice
-// worker leads, the SME market and the quote & order worker follow as
+// worker leads, the company market and the quote & order worker follow as
 // the same engine. Keep claims to what the deck and the repo show; the learning loop and the EU
 // model route are not built or confirmed yet.
 export const Route = createFileRoute("/")({
@@ -54,7 +54,7 @@ export const Route = createFileRoute("/")({
 const TODAY = [
   "Invoices arrive by email as PDFs, each in the supplier's own format.",
   "A clerk matches every line against the PO and the delivery note.",
-  "Fraud signals like a changed IBAN or a split purchase are easy to miss.",
+  "Fraud signals like a changed IBAN, a higher amount or a split purchase are easy to miss.",
 ];
 
 const PROCESS_STATS = [
@@ -198,8 +198,8 @@ const PRINCIPLES = [
   },
   {
     icon: Plug,
-    title: "Fits existing systems",
-    text: "Only the lookups and the writes touch HubSpot. Moving to the bank's ERP replaces those steps, not the rules.",
+    title: "Runs on the bank's approved tools",
+    text: "The rules sit in one code step and every lookup and write is a connector. On the bank's ERP, workflow platform and EU model route, the 12 checks, the rules and the audit trail move unchanged.",
   },
   {
     icon: Receipt,
@@ -221,9 +221,12 @@ const NOT_PROVEN = [
   "The learning loop, where corrections staff confirm become history for the next invoice, isn't built yet.",
 ];
 
-const SME_STATS = [
+const MARKET_STATS = [
   { value: "5%", text: "of Romanian enterprises use AI (EU: 20%), Eurostat 2025" },
-  { value: "12 min", text: "to retype one order by hand (vendor studies: 8–25 min)" },
+  {
+    value: "12 min",
+    text: "to retype one order by hand (vendor studies: 8–25 min): about €1.37 of labour at €6.85 an hour",
+  },
 ];
 
 const WORKERS = [
@@ -370,7 +373,7 @@ function Index() {
 
         <section className="mx-auto w-full max-w-6xl px-4 py-16">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            The LLM reads; coded rules decide anything about money
+            The LLM reads; coded, deterministic rules decide anything about money
           </h2>
           <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {STEPS.map((s, i) => (
@@ -435,8 +438,9 @@ function Index() {
             ))}
           </dl>
           <p className="mt-6 text-sm text-muted-foreground">
-            Stack: n8n · Claude Sonnet 5.5 · HubSpot · Lovable. Code, workflows, test cases and the
-            setup script:{" "}
+            Demo stack: n8n · Claude Sonnet 5.5 · HubSpot · Lovable, stand-ins for the bank's ERP,
+            workflow platform and review screen. Built to be rebuilt on the bank's approved tools.
+            Code, workflows, test cases and the setup script:{" "}
             <a
               href="https://github.com/revtech-agency/app-builder-ai"
               className="font-medium text-foreground underline-offset-4 hover:underline"
@@ -468,7 +472,8 @@ function Index() {
             <p className="mt-3 text-sm">
               <span className="font-semibold">Next:</span> a pilot with one bank accounts-payable
               team on real supplier invoices, measured in euros of risky payments held. Then RO
-              e-Factura as a live intake channel: the demo simulates the ANAF SPV inbox today.
+              e-Factura intake (simulated in the demo today; it covers Romanian suppliers, so email
+              stays for foreign ones) and other CEE markets: the checks are country-neutral.
             </p>
           </div>
         </section>
@@ -482,11 +487,11 @@ function Index() {
               The invoice worker's steps carry over to other processes: read the document, look up
               the records, apply that process's rules, flag the exceptions, a person decides.
               Adapting it means new lookups and new rules, not a new product, so each next worker
-              goes live faster. SMEs still run purchasing and orders by phone and email, which makes
-              them the next market.
+              goes live faster. Companies with 10–249 staff still run purchasing and orders by phone
+              and email, which makes them the next market.
             </p>
             <dl className="mt-8 grid gap-6 sm:grid-cols-2">
-              {SME_STATS.map((s) => (
+              {MARKET_STATS.map((s) => (
                 <div key={s.value}>
                   <dt className="text-5xl font-semibold tracking-tight md:text-6xl">{s.value}</dt>
                   <dd className="mt-2 text-sm text-muted-foreground">{s.text}</dd>
@@ -514,7 +519,9 @@ function Index() {
               Priced per piece of work done, not per seat. Partners set it up; no IT team needed.
             </p>
 
-            <h3 className="mt-12 text-xl font-semibold tracking-tight">Built on real SME flows</h3>
+            <h3 className="mt-12 text-xl font-semibold tracking-tight">
+              Built on real company flows
+            </h3>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {PROOF.map((p) => (
                 <figure key={p.company} className="rounded-xl border bg-card p-5">
