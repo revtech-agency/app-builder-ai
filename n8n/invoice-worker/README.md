@@ -35,20 +35,23 @@ IDs and status as of 2026-10-28 (Send demo invoice email added 2026-10-29).
 
 ## Email intake
 
-Workflow 1 reads two mailboxes through the "DaniS TMT Gmail" credential (the daniel@tigros.io
-account; demo+invoices@appbuilder.ai is delivered to it). Gmail query:
+Workflow 1 reads four addresses through the "DaniS TMT Gmail" credential (the daniel@tigros.io
+account; daniel@appbuilder.ai, demo@appbuilder.ai and demo+invoices@appbuilder.ai are delivered to
+it). Gmail query:
 
 ```text
-{(to:demo+invoices@appbuilder.ai is:unread) (to:daniel@tigros.io from:daniel@tigros.io {filename:pdf subject:invoice subject:factura})} -"Sent by the AppBuilder.ai invoice worker"
+{(to:demo+invoices@appbuilder.ai is:unread) (from:daniel@tigros.io {to:daniel@tigros.io to:daniel@appbuilder.ai to:demo@appbuilder.ai} {filename:pdf subject:invoice subject:factura})} -"Sent by the AppBuilder.ai invoice worker"
 ```
 
 | Mailbox | Picks up | Result email to | After reading |
 | --- | --- | --- | --- |
 | daniel@tigros.io | only mail the account sends to itself (the demo sends), with a PDF attached or "invoice"/"factura" in the subject | daniel@tigros.io | left unread (working inbox) |
+| daniel@appbuilder.ai | same as daniel@tigros.io (an alias of it) | daniel@tigros.io | left unread |
+| demo@appbuilder.ai | same as daniel@tigros.io (an alias of it) | daniel@tigros.io | left unread |
 | demo+invoices@appbuilder.ai | every unread email | daniel@tigros.io | marked read |
 
-`from:daniel@tigros.io` keeps real mail in that inbox out for now: only the demo sends (workflow 4,
-or mail you send yourself) become deals. To open the inbox to real supplier invoices, remove
+`from:daniel@tigros.io` keeps real mail to that inbox and its two aliases out for now: only the demo
+sends (workflow 4, or mail you send yourself) become deals. To open the inbox to real supplier invoices, remove
 `from:daniel@tigros.io` from the `Gmail Trigger` query, here and in n8n. Every matching email then
 becomes a deal in the demo portal and gets a result email.
 
@@ -108,6 +111,17 @@ Verified in the 2026-10-29 deployment (Clean match, n8n executions 360 and 361, 
 (`attachmentsUi`); mail the account sends to itself does trigger workflow 1; the result email
 arrives at daniel@tigros.io, `notified_to` / `notified_at` are set, and the result email is not
 read back in. The "Tax certificate expired" case of step 4 was not sent.
+
+Aliases (added 2026-10-29, live workflow 1 `2317091d-b406-44b1-aa2e-26dec8fae19b`, rollback
+`3eb23400-8ead-46a1-9ea0-1b6083078774`): demo sends to daniel@appbuilder.ai (execution 368, deal
+`532708179160`) and demo@appbuilder.ai (execution 370, deal `533278345423`) were picked up, with
+`email_received_by` set to the alias and the result email sent to daniel@tigros.io.
+
+Known limit: the email path handles one email per Gmail poll. When two emails arrive within the same
+minute, `Build Document Text` still has both but `Apply Rules` returns only the first, so the second
+never becomes a deal (seen in execution 368; the once-for-all-items Code nodes before it are the
+likely cause, not yet confirmed). Send demo invoices at
+least a minute apart.
 
 ## Import
 

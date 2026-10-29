@@ -24,6 +24,20 @@ export const INTAKE_MAILBOXES: IntakeMailbox[] = [
     marksRead: false,
   },
   {
+    address: "daniel@appbuilder.ai",
+    picksUp:
+      "Alias of daniel@tigros.io: only mail from daniel@tigros.io itself, with a PDF attached or “invoice” or “factura” in the subject",
+    notifies: "daniel@tigros.io",
+    marksRead: false,
+  },
+  {
+    address: "demo@appbuilder.ai",
+    picksUp:
+      "Alias of daniel@tigros.io: only mail from daniel@tigros.io itself, with a PDF attached or “invoice” or “factura” in the subject",
+    notifies: "daniel@tigros.io",
+    marksRead: false,
+  },
+  {
     address: "demo+invoices@appbuilder.ai",
     picksUp: "Every unread email",
     notifies: "daniel@tigros.io",
