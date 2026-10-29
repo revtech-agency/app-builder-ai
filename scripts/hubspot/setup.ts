@@ -301,9 +301,18 @@ async function loadOrders(pipeline: { id: string; stages: Record<string, string>
     const client = demo.clients.find((c) => c.key === o.client)!;
     const ids = clients.get(o.client)!;
     const lines = o.lines as Line[];
+    // Same total as placeOrder: whole packs times the pack price; unmatched lines count as 0.
+    const amount =
+      Math.round(
+        lines.reduce((sum, line) => {
+          const product = line.sku ? bySku.get(line.sku) : undefined;
+          return sum + (product ? packsFor(line, product).packs * product.price : 0);
+        }, 0) * 100,
+      ) / 100;
     const deal = await write(`deal ${o.id}`, "POST", "/crm/v3/objects/deals", {
       properties: {
         dealname: `${o.id} · ${client.name}`,
+        amount,
         deal_currency_code: "EUR",
         pipeline: pipeline.id,
         dealstage: pipeline.stages[o.stage],
@@ -325,7 +334,7 @@ async function loadOrders(pipeline: { id: string; stages: Record<string, string>
       const li = await write(`line ${o.id} ${line.sku ?? line.client_code}`, "POST", "/crm/v3/objects/line_items", {
         properties: {
           ...(product
-            ? { hs_product_id: skuToId.get(product.sku), quantity: packs }
+            ? { hs_product_id: skuToId.get(product.sku), quantity: packs, price: product.price }
             : { name: `${line.client_code} (no match yet, closest: ${line.suggested_sku})`, quantity: 0 }),
           hs_line_item_currency_code: "EUR",
           ordered_quantity: line.metres,
