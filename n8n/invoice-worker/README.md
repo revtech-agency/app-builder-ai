@@ -1,27 +1,29 @@
 # Supplier invoice worker (n8n workflows)
 
-Three importable n8n workflows for the banking demo: an AP worker that does a three-way match
+Four importable n8n workflows for the banking demo: an AP worker that does a three-way match
 (PO, delivery, invoice) and sends each invoice to the right HubSpot stage. All three are tagged
 `appbuilder` and `invoice-worker` and are imported and active in n8n (see [Live in n8n](#live-in-n8n)).
 
 | File | Workflow | Entry |
 | --- | --- | --- |
-| `1-process-supplier-invoices.json` | Process supplier invoices | Gmail trigger (`to:demo+invoices@appbuilder.ai is:unread`) and `POST /webhook/invoice-intake` |
+| `1-process-supplier-invoices.json` | Process supplier invoices | Gmail trigger (demo+invoices@appbuilder.ai and daniel@tigros.io, see [Email intake](#email-intake)) and `POST /webhook/invoice-intake` |
 | `2-invoice-assistant-chat.json` | Invoice assistant chat | `POST /webhook/invoice-assistant` |
 | `3-look-up-purchase-order.json` | Look up purchase order | Called by workflow 2 as a tool |
+| `4-send-demo-invoice-email.json` | Send demo invoice email | `POST /webhook/invoice-demo-send` (app, Email intake page) |
 
 ## Live in n8n
 
 All AppBuilder workflows live in the
 [01-AppBuilderAI](https://revtech-agency.app.n8n.cloud/projects/LZoZHxCNLl9iD0EU/folders/t5PMIeVchFarBmhr/workflows)
 folder on revtech-agency.app.n8n.cloud. Open one at `https://revtech-agency.app.n8n.cloud/workflow/<ID>`.
-IDs and status as of 2026-10-28.
+IDs and status as of 2026-10-28 (Send demo invoice email added 2026-10-29).
 
 | Worker | Workflow | ID | Status | Entry |
 | --- | --- | --- | --- | --- |
 | Invoice | Process supplier invoices | `Kxhmr00uS4MBXTSO` | Active | Gmail trigger and `POST /webhook/invoice-intake` (app) |
 | Invoice | Invoice assistant chat | `HI8tvI2HG70NlgPo` | Active | `POST /webhook/invoice-assistant` (app) |
 | Invoice | Look up purchase order | `rc72KPALhtJhwLZm` | Active | Tool for the invoice assistant |
+| Invoice | Send demo invoice email | `AaooGE5gsNiY6TDl` | Active | `POST /webhook/invoice-demo-send` (app) |
 | Order | Order assistant chat | `IhNhsoxf7x1a4Eys` | Active | `POST /webhook/order-assistant` (app) |
 | Order | Send offer for app order | `1PSXF6gMFLxl1oJH` | Active | `POST /webhook/app-order-offer` (app) |
 | Order | Process order emails | `cb1oRwq7IPuFlACQ` | Active | Gmail trigger (`to:demo+orders@appbuilder.ai is:unread`) |
@@ -30,6 +32,120 @@ IDs and status as of 2026-10-28.
 | Order | Approve order from offer link | `rujs7V5m4YWXzaqi` | Active | `/webhook/order-approval` (link in the offer email) |
 | Order | Send order offer | `LhA7BRoC6tkibSFI` | Inactive | Older PDF version, no longer called |
 | Sales | AI Sales Proposal - Webhook to HubSpot Quote | `ONXAlT74A1TlkOPv` | Inactive | Not used by the app |
+
+## Email intake
+
+Workflow 1 reads four addresses through the "DaniS TMT Gmail" credential (the daniel@tigros.io
+account; daniel@appbuilder.ai, demo@appbuilder.ai and demo+invoices@appbuilder.ai are delivered to
+it). Gmail query:
+
+```text
+{(to:demo+invoices@appbuilder.ai is:unread) (from:daniel@tigros.io {to:daniel@tigros.io to:daniel@appbuilder.ai to:demo@appbuilder.ai} {filename:pdf subject:invoice subject:factura})} -"Sent by the AppBuilder.ai invoice worker"
+```
+
+| Mailbox | Picks up | Result email to | After reading |
+| --- | --- | --- | --- |
+| daniel@tigros.io | only mail the account sends to itself (the demo sends), with a PDF attached or "invoice"/"factura" in the subject | daniel@tigros.io | left unread (working inbox) |
+| daniel@appbuilder.ai | same as daniel@tigros.io (an alias of it) | daniel@tigros.io | left unread |
+| demo@appbuilder.ai | same as daniel@tigros.io (an alias of it) | daniel@tigros.io | left unread |
+| demo+invoices@appbuilder.ai | every unread email | daniel@tigros.io | marked read |
+
+`from:daniel@tigros.io` keeps real mail to that inbox and its two aliases out for now: only the demo
+sends (workflow 4, or mail you send yourself) become deals. To open the inbox to real supplier invoices, remove
+`from:daniel@tigros.io` from the `Gmail Trigger` query, here and in n8n. Every matching email then
+becomes a deal in the demo portal and gets a result email.
+
+The list lives in the `Prepare Email` node and in `INTAKE_MAILBOXES` (`src/lib/intake.ts`, shown on
+the app's Email intake page); `src/test/email-intake.test.ts` fails if the two disagree.
+
+For every email-channel invoice it creates, the workflow now also:
+
+1. stores `email_from`, `email_subject` and `email_received_by` on the deal;
+2. emails the recipient (`Notify recipient?` → `Build Notification` → `Send Recipient Notification`):
+   the result, what to do next (approve and by whom, which checks failed, what the supplier still
+   has to send and whether they were already asked, or "do not pay twice"), every check with ✓/✗,
+   the lines, and a link to the invoice in the app;
+3. records `notified_to` and `notified_at` on the deal (`Record Notification`). A Gmail error does
+   not stop the run; the deal then shows "not sent (Gmail error)".
+
+Every email the workflow sends (result emails and the supplier "information needed" email) ends with
+"Sent by the AppBuilder.ai invoice worker". The Gmail query excludes that phrase and `Prepare Email`
+drops anything containing it, so the workflow never reads its own mail back in (both mailboxes are
+the same Gmail account, and the demo emails are sent from it to itself).
+
+Workflow 4 sends a demo invoice (`demo-invoices/` at the repo root, built from `test-cases.json`)
+to a monitored mailbox, with the PDF attached, so it goes through the Gmail trigger like a
+supplier's email. It refuses any recipient that is not a monitored mailbox.
+
+### Deploying this change
+
+Deployed on 2026-10-29 (steps 1–3, then the Clean match test of step 4 sent through the
+`invoice-demo-send` webhook, since the Email intake page was not merged yet). Live n8n versions:
+workflow 1 `3eb23400-8ead-46a1-9ea0-1b6083078774` (rollback: `030f7e0f-07b6-42ca-8620-61525f0ce617`,
+the version before email intake), workflow 4 `b677106d-3814-4a34-a867-ac6e5e4559e3`. Workflow 1 was
+updated in place, not re-imported, so its IDs and credentials did not change.
+
+Order matters: workflow 1 writes five new deal properties, and HubSpot rejects the whole deal if a
+property doesn't exist.
+
+1. Create the properties (reads the token from `.env.local`, touches nothing else):
+   `bun scripts/hubspot/setup-invoices.ts --properties-only`. New deal properties: `email_from`,
+   `email_subject`, `email_received_by`, `notified_to`, `notified_at`.
+2. In n8n, update "Process supplier invoices" (`Kxhmr00uS4MBXTSO`) from
+   `1-process-supplier-invoices.json`. Changed: `Gmail Trigger` (query), `Prepare Email` (now runs
+   once for all items), `Prepare App Request`, `Build Document Text`, `Apply Rules` (three deal
+   properties and four output fields added; the rules themselves are unchanged), `Send Supplier
+   Email` (footer), `Email channel?` (marks read only where configured). New: `Notify recipient?`,
+   `Build Notification`, `Send Recipient Notification`, `Record Notification`, between
+   `Create Audit Note` and `Send supplier email?`.
+3. Import `4-send-demo-invoice-email.json` and publish it. Credentials: "AppBuilder app key" on the
+   webhook, "DaniS TMT Gmail" on both Gmail nodes.
+4. Test: on the app's Email intake page, send "Clean match". Within about two minutes it should show
+   as Ready to approve, and daniel@tigros.io should get "AppBuilder invoice check: Ready to approve
+   · Invoice OS-2026-1301 · Office Supplies Demo SRL". Then send "Tax certificate expired": the
+   result email says what is missing, and a supplier "information needed" email also arrives at
+   daniel@tigros.io (the demo's sender).
+
+Verified in the 2026-10-29 deployment (Clean match, n8n executions 360 and 361, deal
+`533365512404`): the Gmail query's nested `{ }` / `( )` grouping works; workflow 4 attaches the PDF
+(`attachmentsUi`); mail the account sends to itself does trigger workflow 1; the result email
+arrives at daniel@tigros.io, `notified_to` / `notified_at` are set, and the result email is not
+read back in. The "Tax certificate expired" case of step 4 was not sent.
+
+Aliases (added 2026-10-29, live workflow 1 `2317091d-b406-44b1-aa2e-26dec8fae19b`, rollback
+`3eb23400-8ead-46a1-9ea0-1b6083078774`): demo sends to daniel@appbuilder.ai (execution 368, deal
+`532708179160`) and demo@appbuilder.ai (execution 370, deal `533278345423`) were picked up, with
+`email_received_by` set to the alias and the result email sent to daniel@tigros.io.
+
+Several emails in one Gmail poll (fixed 2026-10-29, live workflow 1
+`fa781b6c-1fb2-4760-9059-e8846db2221b`, rollback `2317091d-b406-44b1-aa2e-26dec8fae19b`): two emails
+in the same poll used to give one deal (execution 368). `Match Supplier` ran once for all items,
+read `$('Read Document').item` (always the first item in that mode) and returned one item. It and the
+other Code nodes that read `$('Node').item` (`Collect PO`, `Apply Rules`, `Build Notification`,
+`Build Response`, `Existing Response`) now run once per item; `src/test/email-intake.test.ts` fails
+if a Code node that reads `$('Node').item` runs once for all items. Verified with two demo sends three
+seconds apart: one run (execution 373), two deals (`533287231677`, `532716985571`), each checked
+against its own PO and history. The app webhook path still passes (`run-tests.mjs --only
+08-supplier-not-approved`).
+
+Duplicates in one Gmail poll (fixed 2026-10-29, live workflow 1
+`0de20bcf-5af9-459f-914d-4e2c898a3a1c`, rollback `fa781b6c-1fb2-4760-9059-e8846db2221b`):
+
+- Two copies of one invoice in the same poll both became deals: the history search can't see a deal
+  created earlier in the same run. `Match Supplier` now also outputs each email's
+  `source_message_id` and invoice number, and `Apply Rules` marks an invoice Duplicate when an
+  earlier email of the run has the same supplier and invoice number.
+- Gmail returns the newest email first, so `Prepare Email` now passes a poll's emails on oldest
+  first: the later copy is the duplicate.
+- Several emails per run hit HubSpot's per-second search limit (429 in `Look Up History`, execution
+  381, which failed the whole run). The five search nodes (`Find Existing`, `Fetch Suppliers`,
+  `Look Up PO`, `Get PO Lines`, `Look Up History`) retry up to 4 times, 1.5 s apart. The create
+  nodes don't retry, so a retry can't create a record twice.
+- `Send Recipient Notification` and `Record Notification` now also have `onError:
+  continueRegularOutput` live, as in this file; it was missed when they were first deployed.
+
+Verified: "Clean match" sent twice three seconds apart gave one run (execution 384), the first copy
+Ready to approve and the second Duplicate.
 
 ## Import
 

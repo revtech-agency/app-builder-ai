@@ -88,16 +88,28 @@ export type PurchaseOrder = {
   lines: PoLine[];
 };
 
-export type InvoiceDetail = InvoiceSummary & {
-  ibanOnInvoice: string | null;
-  vatAmount: number | null;
-  rawText: string | null;
-  approvedBy: string | null;
-  lines: InvoiceLine[];
-  notes: InvoiceNote[];
-  supplier: Supplier | null;
-  po: PurchaseOrder | null;
+// Set by the invoice worker on invoices that came in by email (see the Email intake page).
+export type EmailIntake = {
+  emailFrom: string | null;
+  emailSubject: string | null;
+  receivedBy: string | null;
+  notifiedTo: string | null;
+  notifiedAt: string | null;
 };
+
+export type EmailIntakeRow = InvoiceSummary & EmailIntake;
+
+export type InvoiceDetail = InvoiceSummary &
+  EmailIntake & {
+    ibanOnInvoice: string | null;
+    vatAmount: number | null;
+    rawText: string | null;
+    approvedBy: string | null;
+    lines: InvoiceLine[];
+    notes: InvoiceNote[];
+    supplier: Supplier | null;
+    po: PurchaseOrder | null;
+  };
 
 export type SupplierRow = Supplier & { openInvoices: number };
 
@@ -152,8 +164,16 @@ const INVOICE_PROPS = [
   "order_channel",
   "createdate",
 ];
+const EMAIL_PROPS = [
+  "email_from",
+  "email_subject",
+  "email_received_by",
+  "notified_to",
+  "notified_at",
+];
 const DETAIL_PROPS = [
   ...INVOICE_PROPS,
+  ...EMAIL_PROPS,
   "iban_on_invoice",
   "vat_amount",
   "raw_order_text",
@@ -294,6 +314,16 @@ function toSummary(d: HsObject, supplierName: string | null): InvoiceSummary {
   };
 }
 
+function toEmailIntake(p: Props): EmailIntake {
+  return {
+    emailFrom: p["email_from"] || null,
+    emailSubject: p["email_subject"] || null,
+    receivedBy: p["email_received_by"] || null,
+    notifiedTo: p["notified_to"] || null,
+    notifiedAt: p["notified_at"] || null,
+  };
+}
+
 function toSupplier(o: HsObject): Supplier {
   const p = o.properties;
   return {
@@ -373,6 +403,23 @@ export const listInvoices = createServerFn({ method: "GET" })
     return deals.map((d) => toSummary(d, byDeal.get(d.id) ?? null));
   });
 
+// Invoices the worker read from a monitored mailbox, newest first, with who was notified.
+export const listEmailIntake = createServerFn({ method: "GET" })
+  .middleware([requireInvoiceDesk])
+  .handler(async (): Promise<EmailIntakeRow[]> => {
+    const deals = await searchDeals(
+      false,
+      [...INVOICE_PROPS, ...EMAIL_PROPS],
+      [{ propertyName: "order_channel", operator: "EQ", value: "email" }],
+      100,
+    );
+    const { byDeal } = await supplierNames(deals.map((d) => d.id));
+    return deals.map((d) => ({
+      ...toSummary(d, byDeal.get(d.id) ?? null),
+      ...toEmailIntake(d.properties),
+    }));
+  });
+
 export const getInvoice = createServerFn({ method: "GET" })
   .middleware([requireInvoiceDesk])
   .inputValidator((input: { dealId: string }) => DealInput.parse(input))
@@ -413,6 +460,7 @@ export const getInvoice = createServerFn({ method: "GET" })
 
     return {
       ...toSummary(deal, supplierObj?.properties["name"] ?? null),
+      ...toEmailIntake(p),
       ibanOnInvoice: p["iban_on_invoice"] || null,
       vatAmount: num(p["vat_amount"]),
       rawText: p["raw_order_text"] || null,

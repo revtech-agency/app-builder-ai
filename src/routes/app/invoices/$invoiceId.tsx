@@ -421,6 +421,13 @@ function InvoicePage() {
               {d.approvedBy && (
                 <p className="text-xs text-muted-foreground">Approved by {d.approvedBy}</p>
               )}
+              {d.emailFrom && (
+                <p className="text-xs text-muted-foreground">
+                  Emailed by {d.emailFrom}
+                  {d.receivedBy ? ` to ${d.receivedBy}` : ""}
+                  {d.notifiedTo ? ` · result emailed to ${d.notifiedTo}` : ""}
+                </p>
+              )}
             </div>
             <div className="text-right">
               <p className="text-2xl font-semibold tabular-nums">{formatMoney(d.amount)}</p>

@@ -11,6 +11,9 @@ The app (TanStack Start, React, Tailwind, shadcn/ui, Supabase auth) has two area
   - Invoice page: the three-way match, every check passed or failed, the supplier, the audit trail, and an
     "Ask the worker" chat. Reviewers approve, send back, reject or mark a duplicate there.
   - `/app/invoices/new`: submit a document as text or PDF.
+  - `/app/intake`: email intake. The mailboxes the worker reads (daniel@tigros.io and
+    demo+invoices@appbuilder.ai), every invoice that came in by email with who got the result email,
+    and the demo invoices to send (also as files in [`demo-invoices/`](demo-invoices)).
   - Desk admins manage suppliers, purchase orders and the team. Everyone on the desk can see the
     approval rules (read-only).
   - The demo account gets a step-by-step guide and a Reset demo action.
@@ -37,10 +40,11 @@ AI worker that checks supplier invoices against purchase orders and delivery not
 and routes each one to the right HubSpot stage:
 
 - `1-process-supplier-invoices.json`: reads an invoice from Gmail or `POST /webhook/invoice-intake`,
-  applies the procurement rules, writes the HubSpot deal, line items and audit note, and asks the supplier
-  for anything missing.
+  applies the procurement rules, writes the HubSpot deal, line items and audit note, emails the
+  recipient how the invoice matched and what to do, and asks the supplier for anything missing.
 - `2-invoice-assistant-chat.json`: a read-only chat for the reviewer, on `POST /webhook/invoice-assistant`.
 - `3-look-up-purchase-order.json`: the PO lookup used by the chat.
+- `4-send-demo-invoice-email.json`: emails a demo invoice to a monitored mailbox, from the app.
 - `test-cases.json` and `run-tests.mjs`: 12 synthetic invoices with expected results, and a runner that
   prints expected versus actual.
 

@@ -12,7 +12,7 @@
         },
         "simple": false,
         "filters": {
-          "q": "to:demo+invoices@appbuilder.ai is:unread"
+          "q": "{(to:demo+invoices@appbuilder.ai is:unread) (from:daniel@tigros.io {to:daniel@tigros.io to:daniel@appbuilder.ai to:demo@appbuilder.ai} {filename:pdf subject:invoice subject:factura})} -\"Sent by the AppBuilder.ai invoice worker\""
         },
         "options": {
           "downloadAttachments": true
@@ -57,8 +57,8 @@
     },
     {
       "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "const j = $json;\nconst from = (j.from && j.from.value && j.from.value[0] && j.from.value[0].address) || (typeof j.from === 'string' ? j.from : '') || '';\nconst out = { json: { source_message_id: 'gmail-' + j.id, gmail_id: j.id, channel: 'email', submitted_by: from, subject: j.subject || '', filename: '', text: (j.text || j.snippet || '') } };\nconst bin = $input.item.binary;\nif (bin) {\n  const pdfKey = Object.keys(bin).find((k) => String(bin[k].mimeType || '').indexOf('pdf') >= 0);\n  if (pdfKey) {\n    out.binary = { data: bin[pdfKey] };\n    out.json.filename = bin[pdfKey].fileName || '';\n  }\n}\nreturn out;"
+        "mode": "runOnceForAllItems",
+        "jsCode": "// The mailboxes this workflow watches (see the Gmail Trigger query), who gets the \"how this\n// invoice matched\" email for each, and whether the email is marked read once processed.\n// daniel@tigros.io is a working inbox, so its mail is left unread; daniel@appbuilder.ai and\n// demo@appbuilder.ai are aliases of it. Keep in step with INTAKE_MAILBOXES in src/lib/intake.ts.\nconst MAILBOXES = {\n  'daniel@tigros.io': { notify: 'daniel@tigros.io', markRead: false },\n  'daniel@appbuilder.ai': { notify: 'daniel@tigros.io', markRead: false },\n  'demo@appbuilder.ai': { notify: 'daniel@tigros.io', markRead: false },\n  'demo+invoices@appbuilder.ai': { notify: 'daniel@tigros.io', markRead: true }\n};\n// Emails this workflow sends (recipient notifications, supplier requests) end with this line.\nconst MARKER = 'Sent by the AppBuilder.ai invoice worker';\nconst addrs = (h) => ((h && h.value) || []).map((v) => String(v.address || '').toLowerCase());\nconst out = [];\n// Gmail returns the newest email first; oldest first means a later copy of an invoice is the one\n// Apply Rules marks as the duplicate.\nconst items = $input.all().map((item, i) => ({ item, i })).sort((a, b) => String(a.item.json.date || '').localeCompare(String(b.item.json.date || '')));\nfor (const { item, i } of items) {\n  const j = item.json;\n  const text = String(j.text || j.snippet || '');\n  if ((text + String(j.html || '')).indexOf(MARKER) >= 0) continue;\n  const from = (j.from && j.from.value && j.from.value[0] && j.from.value[0].address) || (typeof j.from === 'string' ? j.from : '') || '';\n  const receivedBy = addrs(j.to).concat(addrs(j.cc)).find((a) => MAILBOXES[a]) || 'daniel@tigros.io';\n  const box = MAILBOXES[receivedBy];\n  const o = { json: { source_message_id: 'gmail-' + j.id, gmail_id: j.id, channel: 'email', submitted_by: from, subject: j.subject || '', filename: '', text: text, received_by: receivedBy, notify_to: box.notify, mark_read: box.markRead }, pairedItem: { item: i } };\n  const bin = item.binary;\n  if (bin) {\n    const pdfKey = Object.keys(bin).find((k) => String(bin[k].mimeType || '').indexOf('pdf') >= 0);\n    if (pdfKey) {\n      o.binary = { data: bin[pdfKey] };\n      o.json.filename = bin[pdfKey].fileName || '';\n    }\n  }\n  out.push(o);\n}\nreturn out;"
       },
       "id": "4817072b-9bf6-481b-9047-5680b27b2aae",
       "name": "Prepare Email",
@@ -72,7 +72,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const b = $json.body || {};\nconst out = { json: { source_message_id: 'app-' + b.source_id, gmail_id: '', channel: 'app', submitted_by: b.submitted_by || '', subject: '', filename: b.filename || '', text: b.text || '' } };\nif (b.pdf_base64) {\n  const buf = Buffer.from(b.pdf_base64, 'base64');\n  out.binary = { data: await this.helpers.prepareBinaryData(buf, b.filename || 'invoice.pdf', 'application/pdf') };\n}\nreturn out;"
+        "jsCode": "const b = $json.body || {};\nconst out = { json: { source_message_id: 'app-' + b.source_id, gmail_id: '', channel: 'app', submitted_by: b.submitted_by || '', subject: '', filename: b.filename || '', text: b.text || '', received_by: '', notify_to: '', mark_read: false } };\nif (b.pdf_base64) {\n  const buf = Buffer.from(b.pdf_base64, 'base64');\n  out.binary = { data: await this.helpers.prepareBinaryData(buf, b.filename || 'invoice.pdf', 'application/pdf') };\n}\nreturn out;"
       },
       "id": "619cc4e5-9992-4b74-af85-bccaf8539ac8",
       "name": "Prepare App Request",
@@ -135,7 +135,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const m = $('Has PDF?').item.json;\nconst hasPdf = !!($('Has PDF?').item.binary && $('Has PDF?').item.binary.data);\nconst pdf = hasPdf ? String($json.text || ($json.pdf_text && $json.pdf_text.text) || '') : '';\nconst body = ((m.subject ? 'Subject: ' + m.subject + '\\n' : '') + (m.text || '') + '\\n' + pdf).trim().slice(0, 60000);\nreturn { json: { source_message_id: m.source_message_id, gmail_id: m.gmail_id, channel: m.channel, submitted_by: m.submitted_by, subject: m.subject, document_text: body } };"
+        "jsCode": "const m = $('Has PDF?').item.json;\nconst hasPdf = !!($('Has PDF?').item.binary && $('Has PDF?').item.binary.data);\nconst pdf = hasPdf ? String($json.text || ($json.pdf_text && $json.pdf_text.text) || '') : '';\nconst body = ((m.subject ? 'Subject: ' + m.subject + '\\n' : '') + (m.text || '') + '\\n' + pdf).trim().slice(0, 60000);\nreturn { json: { source_message_id: m.source_message_id, gmail_id: m.gmail_id, channel: m.channel, submitted_by: m.submitted_by, subject: m.subject, document_text: body, received_by: m.received_by || '', notify_to: m.notify_to || '', mark_read: !!m.mark_read } };"
       },
       "id": "6c893541-c204-4885-a654-1cd22f25eb35",
       "name": "Build Document Text",
@@ -169,7 +169,10 @@
         "hubspotAppToken": {
           "name": "AppBuilder HubSpot Service Key"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 1500
     },
     {
       "parameters": {
@@ -207,8 +210,8 @@
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const r = ($json.results || [])[0];\nconst p = r.properties || {};\nreturn [{ json: { already_processed: true, deal_id: r.id, stage_id: p.dealstage, document_type: p.document_type, invoice_number: p.invoice_number, amount: p.amount, match_result: p.match_result, approval_level: p.approval_level, anomaly_flags: p.anomaly_flags ? String(p.anomaly_flags).split(';') : [], exception_reason: p.exception_reason || '' } }];"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const r = ($json.results || [])[0];\nconst p = r.properties || {};\nreturn { json: { already_processed: true, deal_id: r.id, stage_id: p.dealstage, document_type: p.document_type, invoice_number: p.invoice_number, amount: p.amount, match_result: p.match_result, approval_level: p.approval_level, anomaly_flags: p.anomaly_flags ? String(p.anomaly_flags).split(';') : [], exception_reason: p.exception_reason || '' } };"
       },
       "id": "da5accc2-4719-4255-8039-170863ca8506",
       "name": "Existing Response",
@@ -242,7 +245,10 @@
         "hubspotAppToken": {
           "name": "AppBuilder HubSpot Service Key"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 1500
     },
     {
       "parameters": {
@@ -287,8 +293,8 @@
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const ex = $('Read Document').item.json.output || {};\nconst list = (($('Fetch Suppliers').item.json.results) || []).map((r) => Object.assign({ id: r.id }, r.properties));\nconst norm = (s) => String(s || '').toLowerCase().replace(/\\(demo\\)/g, '').replace(/[^a-z0-9]/g, '');\nconst vat = norm(ex.vat_id);\nlet supplier = vat ? (list.find((c) => norm(c.supplier_vat_id) === vat) || null) : null;\nif (!supplier && ex.supplier_name) {\n  const n = norm(ex.supplier_name);\n  if (n.length >= 4) {\n    supplier = list.find((c) => { const m = norm(c.name); return m.length >= 4 && (m === n || m.includes(n) || n.includes(m)); }) || null;\n  }\n}\nreturn [{ json: { supplier } }];"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const ex = $('Read Document').item.json.output || {};\nconst list = (($('Fetch Suppliers').item.json.results) || []).map((r) => Object.assign({ id: r.id }, r.properties));\nconst norm = (s) => String(s || '').toLowerCase().replace(/\\(demo\\)/g, '').replace(/[^a-z0-9]/g, '');\nconst vat = norm(ex.vat_id);\nlet supplier = vat ? (list.find((c) => norm(c.supplier_vat_id) === vat) || null) : null;\nif (!supplier && ex.supplier_name) {\n  const n = norm(ex.supplier_name);\n  if (n.length >= 4) {\n    supplier = list.find((c) => { const m = norm(c.name); return m.length >= 4 && (m === n || m.includes(n) || n.includes(m)); }) || null;\n  }\n}\n// Source and invoice number let Apply Rules spot two copies of one invoice in the same Gmail poll.\nreturn { json: { supplier, source_message_id: $('Build Document Text').item.json.source_message_id, invoice_number: ex.invoice_number || '' } };"
       },
       "id": "96041dbd-562c-471a-beb5-ef406b14a216",
       "name": "Match Supplier",
@@ -322,7 +328,10 @@
         "hubspotAppToken": {
           "name": "AppBuilder HubSpot Service Key"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 1500
     },
     {
       "parameters": {
@@ -381,12 +390,15 @@
         "hubspotAppToken": {
           "name": "AppBuilder HubSpot Service Key"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 1500
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "let po = null;\nlet lines = [];\ntry { const r = $('Look Up PO').item.json.results || []; po = r[0] ? Object.assign({ id: r[0].id }, r[0].properties) : null; } catch (e) { po = null; }\ntry { lines = ($('Get PO Lines').item.json.results || []).map((l) => Object.assign({ id: l.id }, l.properties)); } catch (e) { lines = []; }\nreturn [{ json: { po, po_lines: lines } }];"
+        "mode": "runOnceForEachItem",
+        "jsCode": "let po = null;\nlet lines = [];\ntry { const r = $('Look Up PO').item.json.results || []; po = r[0] ? Object.assign({ id: r[0].id }, r[0].properties) : null; } catch (e) { po = null; }\ntry { lines = ($('Get PO Lines').item.json.results || []).map((l) => Object.assign({ id: l.id }, l.properties)); } catch (e) { lines = []; }\nreturn { json: { po, po_lines: lines } };"
       },
       "id": "475c6da8-00ce-4059-a04c-b5bfc16827d2",
       "name": "Collect PO",
@@ -420,12 +432,15 @@
         "hubspotAppToken": {
           "name": "AppBuilder HubSpot Service Key"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 1500
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const S = {\"received\":\"6318170298\",\"waiting_on_supplier\":\"6318170299\",\"needs_review\":\"6318170300\",\"ready_to_approve\":\"6318170301\",\"approved\":\"6318170302\",\"duplicate\":\"6318170303\",\"rejected\":\"6318170304\"};\nconst LABEL = { waiting_on_supplier: 'Waiting on supplier', needs_review: 'Needs review', ready_to_approve: 'Ready to approve', duplicate: 'Duplicate' };\nconst ex = $('Read Document').item.json.output || {};\nconst meta = $('Build Document Text').item.json;\nconst supplier = $('Match Supplier').item.json.supplier;\nconst poData = $('Collect PO').item.json;\nconst po = poData.po;\nconst poLines = poData.po_lines || [];\nconst history = (($('Look Up History').item.json.results) || []).map((r) => Object.assign({ id: r.id }, r.properties));\nconst LIMIT = 5000;\nconst DAY = 86400000;\nconst today = new Date();\ntoday.setHours(0, 0, 0, 0);\nconst toDate = (s) => { if (s === undefined || s === null || s === '') return null; const d = /^\\d{10,}$/.test(String(s)) ? new Date(Number(s)) : new Date(s); return isNaN(d) ? null : d; };\nconst normIban = (s) => String(s || '').toUpperCase().replace(/\\s+/g, '');\nconst normText = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst docType = ['invoice', 'credit_note', 'reminder', 'question', 'other'].indexOf(ex.document_type) >= 0 ? ex.document_type : 'other';\nconst invDateObj = toDate(ex.invoice_date) || today;\nconst invDate = toDate(ex.invoice_date) ? String(ex.invoice_date).slice(0, 10) : '';\nconst total = Number(ex.total_amount) || 0;\n\nconst order = { ready_to_approve: 1, waiting_on_supplier: 2, needs_review: 3, duplicate: 4 };\nlet stage = 'ready_to_approve';\nconst raise = (s) => { if (order[s] > order[stage]) stage = s; };\nconst flags = [];\nconst reasons = [];\nconst checks = [];\nconst missing = [];\nconst fail = (flag, stg, reason, name) => { if (flag) flags.push(flag); reasons.push(reason); raise(stg); checks.push({ ok: false, name: name || flag, detail: reason }); };\nconst pass = (name, detail) => checks.push({ ok: true, name, detail });\n\nconst target = history.find((h) => normText(h.invoice_number) === normText(ex.invoice_number) && normText(ex.invoice_number));\nconst routeReminder = docType === 'reminder' && !!target;\n\nlet matchResult = '';\nlet lines = [];\n\nif (docType === 'question') {\n  fail(null, 'needs_review', ex.summary || 'Supplier question needs a person.', 'Supplier question');\n} else if (docType === 'other') {\n  fail(null, 'needs_review', 'Document is not an invoice, credit note, reminder or question.', 'Document type');\n} else if (docType === 'reminder') {\n  if (target) { pass('Payment reminder', 'Matched to invoice ' + ex.invoice_number + '.'); }\n  else { fail(null, 'needs_review', 'Payment reminder for invoice ' + (ex.invoice_number || '(no number)') + ', which is not in the system.', 'Payment reminder'); }\n} else {\n  // duplicate\n  const dup = history.find((h) => normText(h.invoice_number) === normText(ex.invoice_number) && normText(ex.invoice_number) && h.dealstage !== S.rejected);\n  if (dup) fail('duplicate', 'duplicate', 'Invoice ' + ex.invoice_number + ' from this supplier was already received.', 'Duplicate check');\n  else pass('Duplicate check', 'No earlier invoice with this number.');\n\n  // supplier\n  if (!supplier) fail('unknown_supplier', 'needs_review', 'The sender could not be matched to a known supplier.', 'Supplier');\n  else if (supplier.supplier_status !== 'approved') fail('supplier_blocked', 'needs_review', 'Supplier ' + supplier.name + ' has status ' + supplier.supplier_status + ', not approved.', 'Supplier status');\n  else pass('Supplier', supplier.name + ' is approved.');\n\n  if (supplier) {\n    // IBAN\n    if (ex.iban && supplier.supplier_iban && normIban(ex.iban) !== normIban(supplier.supplier_iban)) {\n      fail('iban_mismatch', 'needs_review', 'IBAN on the invoice differs from the one on file. Verify by phone before paying.', 'IBAN');\n    } else pass('IBAN', 'Matches the IBAN on file.');\n    const changed = toDate(supplier.iban_changed_on);\n    if (changed) {\n      const diff = (invDateObj - changed) / DAY;\n      if (diff >= 0 && diff <= 30) fail('iban_recently_changed', 'needs_review', 'Supplier IBAN was changed ' + Math.round(diff) + ' days before this invoice. Confirm the change by phone.', 'IBAN change');\n      else pass('IBAN change', 'No recent change.');\n    }\n    // certificate\n    const cert = toDate(supplier.tax_certificate_valid_until);\n    if (!cert || cert < today) {\n      fail('certificate_expired', 'waiting_on_supplier', 'Tax-compliance certificate is ' + (cert ? 'expired' : 'missing') + '.', 'Tax certificate');\n      missing.push('a current tax-compliance certificate');\n    } else pass('Tax certificate', 'Valid until ' + String(supplier.tax_certificate_valid_until).slice(0, 10) + '.');\n  }\n\n  // split purchase: only invoices on the same PO count, so unrelated purchases from one supplier don't trigger it\n  const samePo = normText(ex.po_number);\n  const win = samePo ? history.filter((h) => normText(h.po_number) === samePo && toDate(h.invoice_date) && Math.abs((toDate(h.invoice_date) - invDateObj) / DAY) <= 14 && h.dealstage !== S.rejected && normText(h.invoice_number) !== normText(ex.invoice_number)) : [];\n  const amounts = win.map((h) => Number(h.amount) || 0).concat([total]);\n  const sum = amounts.reduce((a, b) => a + b, 0);\n  if (win.length >= 1 && amounts.every((a) => a <= LIMIT) && sum > LIMIT) {\n    fail('split_purchase', 'needs_review', amounts.length + ' invoices on ' + ex.po_number + ' within 14 days each under EUR ' + LIMIT + ' but EUR ' + sum.toFixed(2) + ' together.', 'Split purchase');\n  } else pass('Split purchase', 'No pattern of invoices on this PO just under the approval limit.');\n\n  // confidence\n  const conf = [];\n  const c = ex.confidence || {};\n  const fieldMap = { supplier_name: ex.supplier_name, vat_id: ex.vat_id, iban: ex.iban, invoice_number: ex.invoice_number, invoice_date: ex.invoice_date, po_number: ex.po_number, total_amount: ex.total_amount };\n  Object.keys(fieldMap).forEach((k) => { if (fieldMap[k] && typeof c[k] === 'number') conf.push(c[k]); });\n  (ex.lines || []).forEach((l) => { if (typeof l.confidence === 'number') conf.push(l.confidence); });\n  var minConf = conf.length ? Math.min.apply(null, conf) : null;\n  if (minConf !== null && minConf < 0.8) fail('low_confidence', 'needs_review', 'Lowest field confidence is ' + minConf.toFixed(2) + ', below 0.80.', 'Extraction confidence');\n  else pass('Extraction confidence', minConf === null ? 'No confidence data.' : 'Lowest field confidence ' + minConf.toFixed(2) + '.');\n\n  // PO and lines\n  const findPoLine = (l) => {\n    const code = normText(l.item_code);\n    let m = code ? (poLines.find((p) => normText(p.hs_sku) === code) || null) : null;\n    if (!m) { const d = normText(l.description); if (d.length >= 4) m = poLines.find((p) => { const n = normText(p.name); return n && (n === d || n.indexOf(d) >= 0 || d.indexOf(n) >= 0); }) || null; }\n    return m;\n  };\n  let anyOff = false;\n  let anyPct = false;\n  // A line reports every problem it has: line_check is a multi-select (e.g. price_off;qty_off).\n  lines = (ex.lines || []).map((l) => {\n    const qty = Number(l.quantity) || 0;\n    const price = Number(l.unit_price) || 0;\n    const issues = [];\n    const notes = [];\n    let pct = 0;\n    let pl = null;\n    if (!po) { issues.push('not_on_po'); notes.push('No purchase order to match against.'); }\n    else {\n      pl = findPoLine(l);\n      if (!pl) { issues.push('not_on_po'); notes.push('Item ' + (l.item_code || l.description) + ' is not on PO ' + po.po_number + '.'); }\n      else {\n        const poPrice = Number(pl.price) || 0;\n        const received = Number(pl.received_quantity) || 0;\n        pct = poPrice ? (price - poPrice) / poPrice : 0;\n        const pctText = (pct > 0 ? '+' : '') + (pct * 100).toFixed(1) + '%';\n        if (Math.abs(pct) > 0.02) { issues.push('price_off'); notes.push('Invoiced ' + qty + ' at EUR ' + price.toFixed(2) + '; PO price EUR ' + poPrice.toFixed(2) + ' (' + pctText + ').'); }\n        if (qty > received) { issues.push('qty_off'); notes.push('Invoiced ' + qty + '; only ' + received + ' received per delivery notes (ordered ' + pl.quantity + ').'); }\n        if (!issues.length) notes.push(pct !== 0 ? 'Price within 2% of the PO (' + pctText + ').' : 'Matches the PO line and the delivery.');\n      }\n    }\n    if (issues.length) anyOff = true;\n    if (pct !== 0) anyPct = true;\n    return { name: l.description || l.item_code || 'Line', hs_sku: l.item_code || '', quantity: qty, price: price, po_line_ref: pl ? String(pl.id) : '', line_check: issues.length ? issues.join(';') : 'matched', line_check_note: notes.join(' '), field_confidence: Number(l.confidence) || 0 };\n  });\n\n  if (!ex.po_number || !po) {\n    matchResult = 'no_po';\n    fail(null, 'waiting_on_supplier', ex.po_number ? 'Purchase order ' + ex.po_number + ' was not found.' : 'The invoice has no purchase order number.', 'Purchase order');\n    missing.push('the purchase order number this invoice relates to');\n  } else {\n    pass('Purchase order', 'Found ' + po.po_number + ' (budget ' + (po.budget_code || 'n/a') + ').');\n    lines.forEach((l) => {\n      const iss = l.line_check.split(';');\n      if (l.line_check === 'matched') { pass('Line check', l.name + ': ' + l.line_check_note); return; }\n      const needsPerson = iss.indexOf('not_on_po') >= 0 || iss.indexOf('price_off') >= 0;\n      fail(null, needsPerson ? 'needs_review' : 'waiting_on_supplier', l.name + ': ' + l.line_check_note, 'Line check');\n      if (iss.indexOf('qty_off') >= 0) missing.push('a corrected quantity or delivery note for ' + l.name);\n    });\n    matchResult = anyOff ? 'mismatch' : (anyPct ? 'within_tolerance' : 'full_match');\n  }\n}\n\nconst approvalLevel = total <= LIMIT ? 'team_lead' : (total <= 25000 ? 'head_of_department' : 'cfo');\nconst stageKey = stage;\nlet draft = '';\nif (stage === 'waiting_on_supplier' && missing.length) {\n  draft = 'Dear ' + (supplier ? supplier.name : 'supplier') + ',\\n\\nThank you for invoice ' + (ex.invoice_number || '') + '. Before we can process it we still need:\\n- ' + missing.join('\\n- ') + '\\n\\nPlease reply to this email with the details.\\n\\nKind regards,\\nAccounts Payable (demo)';\n}\nconst esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst audit = '<p><b>Invoice worker audit</b> - result: ' + LABEL[stageKey] + '</p><ul>' + checks.map((k) => '<li>' + (k.ok ? '&#10003;' : '&#10007;') + ' ' + esc(k.name) + ': ' + esc(k.detail) + '</li>').join('') + '</ul>';\n\nconst props = {\n  dealname: (ex.invoice_number || docType) + ' · ' + (supplier ? supplier.name : (ex.supplier_name || 'Unknown supplier')),\n  pipeline: 'default',\n  dealstage: S[stageKey === 'ready_to_approve' ? 'ready_to_approve' : stageKey],\n  amount: total || '',\n  document_type: docType,\n  invoice_number: ex.invoice_number || '',\n  invoice_date: invDate,\n  due_date: toDate(ex.due_date) ? String(ex.due_date).slice(0, 10) : '',\n  po_number: ex.po_number || '',\n  iban_on_invoice: ex.iban || '',\n  vat_amount: Number(ex.vat_amount) || '',\n  match_result: matchResult,\n  approval_level: (docType === 'invoice' || docType === 'credit_note') ? approvalLevel : '',\n  anomaly_flags: flags.join(';'),\n  exception_reason: reasons.join(' '),\n  source_message_id: meta.source_message_id,\n  raw_order_text: String(meta.document_text || '').slice(0, 5000),\n  order_channel: meta.channel,\n  min_field_confidence: typeof minConf === 'number' ? minConf : ''\n};\nObject.keys(props).forEach((k) => { if (props[k] === '' || props[k] === null || props[k] === undefined) delete props[k]; });\n\nreturn [{ json: {\n  stage: stageKey,\n  stage_label: LABEL[stageKey],\n  channel: meta.channel,\n  source_id: meta.gmail_id,\n  reply_to: meta.submitted_by,\n  subject: meta.subject,\n  route_reminder: routeReminder,\n  reminder_target_deal_id: target ? target.id : null,\n  supplier_id: supplier ? supplier.id : null,\n  supplier_name: supplier ? supplier.name : (ex.supplier_name || ''),\n  document_type: docType,\n  invoice_number: ex.invoice_number || '',\n  amount: total,\n  match_result: matchResult,\n  approval_level: props.approval_level || '',\n  anomaly_flags: flags,\n  exception_reason: reasons.join(' '),\n  deal_properties: props,\n  line_items: lines,\n  audit_html: audit,\n  supplier_email_draft: draft\n} }];"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const S = {\"received\":\"6318170298\",\"waiting_on_supplier\":\"6318170299\",\"needs_review\":\"6318170300\",\"ready_to_approve\":\"6318170301\",\"approved\":\"6318170302\",\"duplicate\":\"6318170303\",\"rejected\":\"6318170304\"};\nconst LABEL = { waiting_on_supplier: 'Waiting on supplier', needs_review: 'Needs review', ready_to_approve: 'Ready to approve', duplicate: 'Duplicate' };\nconst ex = $('Read Document').item.json.output || {};\nconst meta = $('Build Document Text').item.json;\nconst supplier = $('Match Supplier').item.json.supplier;\nconst poData = $('Collect PO').item.json;\nconst po = poData.po;\nconst poLines = poData.po_lines || [];\nconst history = (($('Look Up History').item.json.results) || []).map((r) => Object.assign({ id: r.id }, r.properties));\nconst LIMIT = 5000;\nconst DAY = 86400000;\nconst today = new Date();\ntoday.setHours(0, 0, 0, 0);\nconst toDate = (s) => { if (s === undefined || s === null || s === '') return null; const d = /^\\d{10,}$/.test(String(s)) ? new Date(Number(s)) : new Date(s); return isNaN(d) ? null : d; };\nconst normIban = (s) => String(s || '').toUpperCase().replace(/\\s+/g, '');\nconst normText = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst docType = ['invoice', 'credit_note', 'reminder', 'question', 'other'].indexOf(ex.document_type) >= 0 ? ex.document_type : 'other';\nconst invDateObj = toDate(ex.invoice_date) || today;\nconst invDate = toDate(ex.invoice_date) ? String(ex.invoice_date).slice(0, 10) : '';\nconst total = Number(ex.total_amount) || 0;\n\nconst order = { ready_to_approve: 1, waiting_on_supplier: 2, needs_review: 3, duplicate: 4 };\nlet stage = 'ready_to_approve';\nconst raise = (s) => { if (order[s] > order[stage]) stage = s; };\nconst flags = [];\nconst reasons = [];\nconst checks = [];\nconst missing = [];\nconst fail = (flag, stg, reason, name) => { if (flag) flags.push(flag); reasons.push(reason); raise(stg); checks.push({ ok: false, name: name || flag, detail: reason }); };\nconst pass = (name, detail) => checks.push({ ok: true, name, detail });\n\nconst target = history.find((h) => normText(h.invoice_number) === normText(ex.invoice_number) && normText(ex.invoice_number));\nconst routeReminder = docType === 'reminder' && !!target;\n\nlet matchResult = '';\nlet lines = [];\n\nif (docType === 'question') {\n  fail(null, 'needs_review', ex.summary || 'Supplier question needs a person.', 'Supplier question');\n} else if (docType === 'other') {\n  fail(null, 'needs_review', 'Document is not an invoice, credit note, reminder or question.', 'Document type');\n} else if (docType === 'reminder') {\n  if (target) { pass('Payment reminder', 'Matched to invoice ' + ex.invoice_number + '.'); }\n  else { fail(null, 'needs_review', 'Payment reminder for invoice ' + (ex.invoice_number || '(no number)') + ', which is not in the system.', 'Payment reminder'); }\n} else {\n  // duplicate\n  // An earlier copy in the same Gmail poll is not in HubSpot yet, so the history search can't see it.\n  const firstInRun = $('Match Supplier').all().map((i) => i.json).find((b) => supplier && b.supplier && b.supplier.id === supplier.id && normText(ex.invoice_number) && normText(b.invoice_number) === normText(ex.invoice_number));\n  const dup = history.find((h) => normText(h.invoice_number) === normText(ex.invoice_number) && normText(ex.invoice_number) && h.dealstage !== S.rejected)\n    || (firstInRun && firstInRun.source_message_id !== meta.source_message_id);\n  if (dup) fail('duplicate', 'duplicate', 'Invoice ' + ex.invoice_number + ' from this supplier was already received.', 'Duplicate check');\n  else pass('Duplicate check', 'No earlier invoice with this number.');\n\n  // supplier\n  if (!supplier) fail('unknown_supplier', 'needs_review', 'The sender could not be matched to a known supplier.', 'Supplier');\n  else if (supplier.supplier_status !== 'approved') fail('supplier_blocked', 'needs_review', 'Supplier ' + supplier.name + ' has status ' + supplier.supplier_status + ', not approved.', 'Supplier status');\n  else pass('Supplier', supplier.name + ' is approved.');\n\n  if (supplier) {\n    // IBAN\n    if (ex.iban && supplier.supplier_iban && normIban(ex.iban) !== normIban(supplier.supplier_iban)) {\n      fail('iban_mismatch', 'needs_review', 'IBAN on the invoice differs from the one on file. Verify by phone before paying.', 'IBAN');\n    } else pass('IBAN', 'Matches the IBAN on file.');\n    const changed = toDate(supplier.iban_changed_on);\n    if (changed) {\n      const diff = (invDateObj - changed) / DAY;\n      if (diff >= 0 && diff <= 30) fail('iban_recently_changed', 'needs_review', 'Supplier IBAN was changed ' + Math.round(diff) + ' days before this invoice. Confirm the change by phone.', 'IBAN change');\n      else pass('IBAN change', 'No recent change.');\n    }\n    // certificate\n    const cert = toDate(supplier.tax_certificate_valid_until);\n    if (!cert || cert < today) {\n      fail('certificate_expired', 'waiting_on_supplier', 'Tax-compliance certificate is ' + (cert ? 'expired' : 'missing') + '.', 'Tax certificate');\n      missing.push('a current tax-compliance certificate');\n    } else pass('Tax certificate', 'Valid until ' + String(supplier.tax_certificate_valid_until).slice(0, 10) + '.');\n  }\n\n  // split purchase: only invoices on the same PO count, so unrelated purchases from one supplier don't trigger it\n  const samePo = normText(ex.po_number);\n  const win = samePo ? history.filter((h) => normText(h.po_number) === samePo && toDate(h.invoice_date) && Math.abs((toDate(h.invoice_date) - invDateObj) / DAY) <= 14 && h.dealstage !== S.rejected && normText(h.invoice_number) !== normText(ex.invoice_number)) : [];\n  const amounts = win.map((h) => Number(h.amount) || 0).concat([total]);\n  const sum = amounts.reduce((a, b) => a + b, 0);\n  if (win.length >= 1 && amounts.every((a) => a <= LIMIT) && sum > LIMIT) {\n    fail('split_purchase', 'needs_review', amounts.length + ' invoices on ' + ex.po_number + ' within 14 days each under EUR ' + LIMIT + ' but EUR ' + sum.toFixed(2) + ' together.', 'Split purchase');\n  } else pass('Split purchase', 'No pattern of invoices on this PO just under the approval limit.');\n\n  // confidence\n  const conf = [];\n  const c = ex.confidence || {};\n  const fieldMap = { supplier_name: ex.supplier_name, vat_id: ex.vat_id, iban: ex.iban, invoice_number: ex.invoice_number, invoice_date: ex.invoice_date, po_number: ex.po_number, total_amount: ex.total_amount };\n  Object.keys(fieldMap).forEach((k) => { if (fieldMap[k] && typeof c[k] === 'number') conf.push(c[k]); });\n  (ex.lines || []).forEach((l) => { if (typeof l.confidence === 'number') conf.push(l.confidence); });\n  var minConf = conf.length ? Math.min.apply(null, conf) : null;\n  if (minConf !== null && minConf < 0.8) fail('low_confidence', 'needs_review', 'Lowest field confidence is ' + minConf.toFixed(2) + ', below 0.80.', 'Extraction confidence');\n  else pass('Extraction confidence', minConf === null ? 'No confidence data.' : 'Lowest field confidence ' + minConf.toFixed(2) + '.');\n\n  // PO and lines\n  const findPoLine = (l) => {\n    const code = normText(l.item_code);\n    let m = code ? (poLines.find((p) => normText(p.hs_sku) === code) || null) : null;\n    if (!m) { const d = normText(l.description); if (d.length >= 4) m = poLines.find((p) => { const n = normText(p.name); return n && (n === d || n.indexOf(d) >= 0 || d.indexOf(n) >= 0); }) || null; }\n    return m;\n  };\n  let anyOff = false;\n  let anyPct = false;\n  // A line reports every problem it has: line_check is a multi-select (e.g. price_off;qty_off).\n  lines = (ex.lines || []).map((l) => {\n    const qty = Number(l.quantity) || 0;\n    const price = Number(l.unit_price) || 0;\n    const issues = [];\n    const notes = [];\n    let pct = 0;\n    let pl = null;\n    if (!po) { issues.push('not_on_po'); notes.push('No purchase order to match against.'); }\n    else {\n      pl = findPoLine(l);\n      if (!pl) { issues.push('not_on_po'); notes.push('Item ' + (l.item_code || l.description) + ' is not on PO ' + po.po_number + '.'); }\n      else {\n        const poPrice = Number(pl.price) || 0;\n        const received = Number(pl.received_quantity) || 0;\n        pct = poPrice ? (price - poPrice) / poPrice : 0;\n        const pctText = (pct > 0 ? '+' : '') + (pct * 100).toFixed(1) + '%';\n        if (Math.abs(pct) > 0.02) { issues.push('price_off'); notes.push('Invoiced ' + qty + ' at EUR ' + price.toFixed(2) + '; PO price EUR ' + poPrice.toFixed(2) + ' (' + pctText + ').'); }\n        if (qty > received) { issues.push('qty_off'); notes.push('Invoiced ' + qty + '; only ' + received + ' received per delivery notes (ordered ' + pl.quantity + ').'); }\n        if (!issues.length) notes.push(pct !== 0 ? 'Price within 2% of the PO (' + pctText + ').' : 'Matches the PO line and the delivery.');\n      }\n    }\n    if (issues.length) anyOff = true;\n    if (pct !== 0) anyPct = true;\n    return { name: l.description || l.item_code || 'Line', hs_sku: l.item_code || '', quantity: qty, price: price, po_line_ref: pl ? String(pl.id) : '', line_check: issues.length ? issues.join(';') : 'matched', line_check_note: notes.join(' '), field_confidence: Number(l.confidence) || 0 };\n  });\n\n  if (!ex.po_number || !po) {\n    matchResult = 'no_po';\n    fail(null, 'waiting_on_supplier', ex.po_number ? 'Purchase order ' + ex.po_number + ' was not found.' : 'The invoice has no purchase order number.', 'Purchase order');\n    missing.push('the purchase order number this invoice relates to');\n  } else {\n    pass('Purchase order', 'Found ' + po.po_number + ' (budget ' + (po.budget_code || 'n/a') + ').');\n    lines.forEach((l) => {\n      const iss = l.line_check.split(';');\n      if (l.line_check === 'matched') { pass('Line check', l.name + ': ' + l.line_check_note); return; }\n      const needsPerson = iss.indexOf('not_on_po') >= 0 || iss.indexOf('price_off') >= 0;\n      fail(null, needsPerson ? 'needs_review' : 'waiting_on_supplier', l.name + ': ' + l.line_check_note, 'Line check');\n      if (iss.indexOf('qty_off') >= 0) missing.push('a corrected quantity or delivery note for ' + l.name);\n    });\n    matchResult = anyOff ? 'mismatch' : (anyPct ? 'within_tolerance' : 'full_match');\n  }\n}\n\nconst approvalLevel = total <= LIMIT ? 'team_lead' : (total <= 25000 ? 'head_of_department' : 'cfo');\nconst stageKey = stage;\nlet draft = '';\nif (stage === 'waiting_on_supplier' && missing.length) {\n  draft = 'Dear ' + (supplier ? supplier.name : 'supplier') + ',\\n\\nThank you for invoice ' + (ex.invoice_number || '') + '. Before we can process it we still need:\\n- ' + missing.join('\\n- ') + '\\n\\nPlease reply to this email with the details.\\n\\nKind regards,\\nAccounts Payable (demo)';\n}\nconst esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst audit = '<p><b>Invoice worker audit</b> - result: ' + LABEL[stageKey] + '</p><ul>' + checks.map((k) => '<li>' + (k.ok ? '&#10003;' : '&#10007;') + ' ' + esc(k.name) + ': ' + esc(k.detail) + '</li>').join('') + '</ul>';\n\nconst props = {\n  dealname: (ex.invoice_number || docType) + ' · ' + (supplier ? supplier.name : (ex.supplier_name || 'Unknown supplier')),\n  pipeline: 'default',\n  dealstage: S[stageKey === 'ready_to_approve' ? 'ready_to_approve' : stageKey],\n  amount: total || '',\n  document_type: docType,\n  invoice_number: ex.invoice_number || '',\n  invoice_date: invDate,\n  due_date: toDate(ex.due_date) ? String(ex.due_date).slice(0, 10) : '',\n  po_number: ex.po_number || '',\n  iban_on_invoice: ex.iban || '',\n  vat_amount: Number(ex.vat_amount) || '',\n  match_result: matchResult,\n  approval_level: (docType === 'invoice' || docType === 'credit_note') ? approvalLevel : '',\n  anomaly_flags: flags.join(';'),\n  exception_reason: reasons.join(' '),\n  source_message_id: meta.source_message_id,\n  raw_order_text: String(meta.document_text || '').slice(0, 5000),\n  order_channel: meta.channel,\n  min_field_confidence: typeof minConf === 'number' ? minConf : '',\n  email_from: meta.channel === 'email' ? meta.submitted_by : '',\n  email_subject: meta.channel === 'email' ? String(meta.subject || '').slice(0, 250) : '',\n  email_received_by: meta.channel === 'email' ? meta.received_by : ''\n};\nObject.keys(props).forEach((k) => { if (props[k] === '' || props[k] === null || props[k] === undefined) delete props[k]; });\n\nreturn { json: {\n  stage: stageKey,\n  stage_label: LABEL[stageKey],\n  channel: meta.channel,\n  source_id: meta.gmail_id,\n  reply_to: meta.submitted_by,\n  subject: meta.subject,\n  route_reminder: routeReminder,\n  reminder_target_deal_id: target ? target.id : null,\n  supplier_id: supplier ? supplier.id : null,\n  supplier_name: supplier ? supplier.name : (ex.supplier_name || ''),\n  document_type: docType,\n  invoice_number: ex.invoice_number || '',\n  amount: total,\n  match_result: matchResult,\n  approval_level: props.approval_level || '',\n  anomaly_flags: flags,\n  exception_reason: reasons.join(' '),\n  deal_properties: props,\n  line_items: lines,\n  audit_html: audit,\n  supplier_email_draft: draft,\n  notify_to: meta.channel === 'email' ? meta.notify_to : '',\n  received_by: meta.received_by || '',\n  mark_read: !!meta.mark_read,\n  checks: checks,\n  missing: missing\n} };"
       },
       "id": "2179254d-2696-482e-a11f-5a989dbbbd6f",
       "name": "Apply Rules",
@@ -601,7 +616,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5600,
+        6720,
         0
       ]
     },
@@ -612,7 +627,7 @@
         "sendTo": "={{ $('Apply Rules').item.json.reply_to }}",
         "subject": "={{ 'Invoice ' + ($('Apply Rules').item.json.invoice_number || '') + ': information needed' }}",
         "emailType": "text",
-        "message": "={{ $('Apply Rules').item.json.supplier_email_draft }}",
+        "message": "={{ $('Apply Rules').item.json.supplier_email_draft + '\\n\\n--\\nSent by the AppBuilder.ai invoice worker.' }}",
         "options": {
           "senderName": "Accounts Payable (demo)",
           "appendAttribution": false
@@ -623,7 +638,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        5880,
+        7000,
         0
       ],
       "credentials": {
@@ -644,7 +659,7 @@
           "conditions": [
             {
               "id": "0f64fb84-2432-4a9f-96e1-91abf31257fb",
-              "leftValue": "={{ $('Apply Rules').item.json.channel === 'email' && !!$('Apply Rules').item.json.source_id }}",
+              "leftValue": "={{ $('Apply Rules').item.json.channel === 'email' && !!$('Apply Rules').item.json.source_id && $('Apply Rules').item.json.mark_read }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -662,7 +677,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        6160,
+        7280,
         0
       ]
     },
@@ -673,11 +688,11 @@
         "messageId": "={{ $('Apply Rules').item.json.source_id }}"
       },
       "id": "2b4c45eb-323d-4c70-9736-8a22bb20a94f",
-      "name": "Mark As Read",
+      "name": "Mark Demo Mailbox Read",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        6440,
+        7560,
         0
       ],
       "credentials": {
@@ -688,15 +703,15 @@
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const r = $('Apply Rules').item.json;\nlet dealId = null;\ntry { dealId = $('Create Invoice Deal').item.json.id || null; } catch (e) { dealId = null; }\nif (!dealId) dealId = r.reminder_target_deal_id || null;\nconst out = {\n  deal_id: dealId,\n  stage: r.stage,\n  stage_label: r.stage_label,\n  document_type: r.document_type,\n  supplier_name: r.supplier_name,\n  invoice_number: r.invoice_number,\n  amount: r.amount,\n  match_result: r.match_result,\n  approval_level: r.approval_level,\n  anomaly_flags: r.anomaly_flags,\n  exception_reason: r.exception_reason,\n  lines: (r.line_items || []).map((l) => ({ name: l.name, quantity: l.quantity, price: l.price, line_check: l.line_check, line_check_note: l.line_check_note }))\n};\nif (r.channel === 'app' && r.supplier_email_draft) out.supplier_email_draft = r.supplier_email_draft;\nreturn [{ json: out }];"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const r = $('Apply Rules').item.json;\nlet dealId = null;\ntry { dealId = $('Create Invoice Deal').item.json.id || null; } catch (e) { dealId = null; }\nif (!dealId) dealId = r.reminder_target_deal_id || null;\nconst out = {\n  deal_id: dealId,\n  stage: r.stage,\n  stage_label: r.stage_label,\n  document_type: r.document_type,\n  supplier_name: r.supplier_name,\n  invoice_number: r.invoice_number,\n  amount: r.amount,\n  match_result: r.match_result,\n  approval_level: r.approval_level,\n  anomaly_flags: r.anomaly_flags,\n  exception_reason: r.exception_reason,\n  lines: (r.line_items || []).map((l) => ({ name: l.name, quantity: l.quantity, price: l.price, line_check: l.line_check, line_check_note: l.line_check_note }))\n};\nif (r.channel === 'app' && r.supplier_email_draft) out.supplier_email_draft = r.supplier_email_draft;\nreturn { json: out };"
       },
       "id": "176815ae-6178-4ded-a02e-f68c37dac74f",
       "name": "Build Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6720,
+        7840,
         0
       ]
     },
@@ -711,9 +726,111 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        7000,
+        8120,
         0
       ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1869736a-47d0-4233-b691-f069ad5be581",
+              "leftValue": "={{ $('Apply Rules').item.json.channel === 'email' && !!$('Apply Rules').item.json.notify_to }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2fbffc47-4f91-483f-9fec-5e90651ec775",
+      "name": "Notify recipient?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// The email the invoice's recipient gets: the result, what to do next, every check, and a link.\n// Subject and footer carry the marker the Gmail Trigger and Prepare Email use to skip it.\nconst r = $('Apply Rules').item.json;\nconst dealId = String($('Create Invoice Deal').item.json.id || '');\nconst APP_URL = 'https://nexxt.appbuilder.ai';\nconst MARKER = 'Sent by the AppBuilder.ai invoice worker';\nconst APPROVER = { team_lead: 'a team lead', head_of_department: 'the head of department', cfo: 'the CFO' };\nconst MATCH = { full_match: 'Matches the PO and the delivery notes', within_tolerance: 'Prices within the 2% tolerance of the PO', mismatch: 'Does not match the PO or the delivery notes', no_po: 'No purchase order found' };\nconst esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst eur = (n) => 'EUR ' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });\nconst p = r.deal_properties || {};\nconst failed = (r.checks || []).filter((c) => !c.ok);\n// Same condition as the \"Send supplier email?\" node that runs after this one.\nconst supplierEmailed = r.stage === 'waiting_on_supplier' && !!r.reply_to && !!r.supplier_email_draft;\nconst approver = APPROVER[r.approval_level] || '';\nconst missing = r.missing || [];\n\nlet headline;\nlet todo;\nif (r.document_type === 'question' || r.document_type === 'other') {\n  headline = r.document_type === 'question' ? 'A supplier question needs an answer' : 'This email is not an invoice';\n  todo = failed.map((c) => c.detail).concat(['Open it in the app, answer or close it.']);\n} else if (r.stage === 'ready_to_approve') {\n  headline = 'Passed every check';\n  todo = ['Approve it for payment in the app' + (approver ? ' (needs ' + approver + ' approval)' : '') + '.'];\n} else if (r.stage === 'duplicate') {\n  headline = 'Looks like a duplicate';\n  todo = ['Do not pay it again: an invoice with this number from this supplier was already received.', 'Confirm and mark it as a duplicate in the app.'];\n} else if (r.stage === 'waiting_on_supplier') {\n  headline = 'On hold until the supplier sends what is missing';\n  todo = (missing.length ? ['Missing: ' + missing.join('; ') + '.'] : failed.map((c) => c.detail))\n    .concat([supplierEmailed ? 'We emailed the supplier at ' + r.reply_to + ' asking for it. Nothing to do until they reply.' : 'Ask the supplier for it, or send the invoice back from the app.']);\n} else {\n  headline = 'Needs a person to review it';\n  todo = failed.map((c) => c.detail).concat(['Then approve, send back or reject it in the app' + (approver ? ' (payment needs ' + approver + ' approval)' : '') + '.']);\n}\n\nconst label = r.invoice_number ? 'Invoice ' + r.invoice_number : (r.document_type === 'question' ? 'Supplier question' : 'Document');\nconst subject = 'AppBuilder invoice check: ' + r.stage_label + ' · ' + label + (r.supplier_name ? ' · ' + r.supplier_name : '');\nconst row = (k, v) => '<tr><td style=\"padding:4px 12px 4px 0;color:#666;vertical-align:top\">' + esc(k) + '</td><td style=\"padding:4px 0\">' + esc(v || '—') + '</td></tr>';\nconst lines = (r.line_items || []).map((l) => '<li>' + (l.line_check === 'matched' ? '&#10003; ' : '&#10007; ') + esc(l.name) + ' · ' + esc(l.quantity) + ' × ' + eur(l.price) + (l.line_check_note ? ' · ' + esc(l.line_check_note) : '') + '</li>').join('');\nconst link = dealId ? APP_URL + '/app/invoices/' + dealId : APP_URL + '/app/invoices';\nconst html = '<div style=\"font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#111;max-width:640px\">'\n  + '<p style=\"font-size:18px;margin:0 0 4px\"><b>' + esc(headline) + '</b></p>'\n  + '<p style=\"margin:0 0 16px;color:#444\">' + esc(label) + (r.supplier_name ? ' from ' + esc(r.supplier_name) : '') + (r.amount ? ' · ' + eur(r.amount) : '') + ' · result: <b>' + esc(r.stage_label) + '</b></p>'\n  + '<p style=\"margin:0\"><b>What to do</b></p><ul style=\"margin:4px 0 16px\">' + todo.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>'\n  + '<table style=\"border-collapse:collapse;margin-bottom:16px\">'\n  + row('Supplier', r.supplier_name) + row('Invoice number', r.invoice_number) + row('Amount', r.amount ? eur(r.amount) : '')\n  + row('Purchase order', p.po_number) + row('Three-way match', MATCH[r.match_result] || r.match_result)\n  + row('Approval', approver ? 'Needs ' + approver : '') + row('Received from', r.reply_to) + row('Sent to', r.received_by)\n  + '</table>'\n  + '<p style=\"margin:0\"><b>Checks against the approval rules</b></p><ul style=\"margin:4px 0 16px\">'\n  + (r.checks || []).map((c) => '<li>' + (c.ok ? '&#10003; ' : '&#10007; ') + esc(c.name) + ': ' + esc(c.detail) + '</li>').join('') + '</ul>'\n  + (lines ? '<p style=\"margin:0\"><b>Lines</b></p><ul style=\"margin:4px 0 16px\">' + lines + '</ul>' : '')\n  + '<p><a href=\"' + esc(link) + '\" style=\"display:inline-block;background:#facc15;color:#111;padding:10px 16px;text-decoration:none;font-weight:bold\">Open the invoice in AppBuilder.ai</a></p>'\n  + '<p style=\"color:#888;font-size:12px;margin-top:24px\">' + MARKER + ' for ' + esc(r.received_by || r.notify_to) + '. The checks are fixed rules; the AI only reads the document.</p>'\n  + '</div>';\nreturn { json: { notify_to: r.notify_to, subject: subject, html: html, deal_id: dealId } };"
+      },
+      "id": "060ed635-ce30-42ea-b077-a2fbedd366f0",
+      "name": "Build Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5880,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.notify_to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {
+          "senderName": "AppBuilder.ai invoice worker",
+          "appendAttribution": false
+        }
+      },
+      "id": "ca46c627-98e7-43c7-be28-98d030404ded",
+      "name": "Send Recipient Notification",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        6160,
+        -180
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "DaniS TMT Gmail"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://api.hubapi.com/crm/v3/objects/deals/' + $('Build Notification').item.json.deal_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ properties: { notified_to: $json.id ? $('Build Notification').item.json.notify_to : 'not sent (Gmail error)', notified_at: new Date().toISOString() } }) }}"
+      },
+      "id": "e61ccb00-2210-4e3a-ab8c-d6e8b7e1f8c6",
+      "name": "Record Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6440,
+        -180
+      ],
+      "credentials": {
+        "hubspotAppToken": {
+          "name": "AppBuilder HubSpot Service Key"
+        }
+      },
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
@@ -1013,7 +1130,7 @@
       "main": [
         [
           {
-            "node": "Send supplier email?",
+            "node": "Notify recipient?",
             "type": "main",
             "index": 0
           }
@@ -1053,7 +1170,7 @@
       "main": [
         [
           {
-            "node": "Mark As Read",
+            "node": "Mark Demo Mailbox Read",
             "type": "main",
             "index": 0
           }
@@ -1067,7 +1184,7 @@
         ]
       ]
     },
-    "Mark As Read": {
+    "Mark Demo Mailbox Read": {
       "main": [
         [
           {
@@ -1083,6 +1200,57 @@
         [
           {
             "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify recipient?": {
+      "main": [
+        [
+          {
+            "node": "Build Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send supplier email?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Notification": {
+      "main": [
+        [
+          {
+            "node": "Send Recipient Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Recipient Notification": {
+      "main": [
+        [
+          {
+            "node": "Record Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Notification": {
+      "main": [
+        [
+          {
+            "node": "Send supplier email?",
             "type": "main",
             "index": 0
           }
