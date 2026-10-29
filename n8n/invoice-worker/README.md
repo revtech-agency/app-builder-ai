@@ -37,7 +37,7 @@ Live versions of the email-intake workflows on 2026-10-29:
 
 | Workflow | Live version | Rollback |
 | --- | --- | --- |
-| Process supplier invoices (`Kxhmr00uS4MBXTSO`) | `f2cb7cbd-ad89-4d0f-8617-62327a4afd29` (node groups added; same logic as `0de20bcf-5af9-459f-914d-4e2c898a3a1c`) | before the node groups: `0de20bcf-5af9-459f-914d-4e2c898a3a1c`; before the duplicate fixes: `fa781b6c-1fb2-4760-9059-e8846db2221b`; before email intake: `030f7e0f-07b6-42ca-8620-61525f0ce617` |
+| Process supplier invoices (`Kxhmr00uS4MBXTSO`) | `8a6fc862-ad16-47e5-b8dc-62d679784e71` (e-Factura channel and the money line) | before the e-Factura channel: `f2cb7cbd-ad89-4d0f-8617-62327a4afd29` (node groups added; same logic as `0de20bcf-5af9-459f-914d-4e2c898a3a1c`); before the node groups: `0de20bcf-5af9-459f-914d-4e2c898a3a1c`; before the duplicate fixes: `fa781b6c-1fb2-4760-9059-e8846db2221b`; before email intake: `030f7e0f-07b6-42ca-8620-61525f0ce617` |
 | Send demo invoice email (`AaooGE5gsNiY6TDl`) | `13fa122f-d8ee-43b4-a381-a987f0a2a199` | before the aliases: `b677106d-3814-4a34-a867-ac6e5e4559e3` |
 
 ## Email intake
