@@ -291,12 +291,23 @@ function Index() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
-          <span className="flex items-center gap-2 font-semibold">
+          {/* The logo goes to the homepage (nexxt.appbuilder.ai); already there, it scrolls to the top. */}
+          <Link
+            to="/"
+            aria-label="AppBuilder.ai home"
+            className="flex items-center gap-2 font-semibold"
+            onClick={(e) => {
+              if (window.location.pathname === "/") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+          >
             <span className="flex size-7 items-center justify-center rounded-md bg-primary text-sm text-primary-foreground">
               A
             </span>
             AppBuilder.ai
-          </span>
+          </Link>
           <div className="flex items-center gap-4">
             <OpenAppLink className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline-flex" />
             <ApDemoButton closed={<BookDemo />}>Try the demo</ApDemoButton>
