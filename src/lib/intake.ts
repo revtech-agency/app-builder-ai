@@ -7,6 +7,7 @@ import { z } from "zod";
 import { requireInvoiceDesk } from "@/lib/admin";
 import { demoInvoice } from "@/lib/demo-invoices";
 import { bytesToBase64, invoicePdf } from "@/lib/invoice-pdf";
+import { rateLimit } from "@/lib/rate-limit";
 
 export type IntakeMailbox = {
   address: string;
@@ -51,7 +52,7 @@ export const DEMO_SEND_TO = "daniel@tigros.io";
 export const POLL_MINUTES = 1;
 
 export const sendDemoInvoice = createServerFn({ method: "POST" })
-  .middleware([requireInvoiceDesk])
+  .middleware([requireInvoiceDesk, rateLimit("sendDemoInvoice")])
   .inputValidator((input: { id: string }) =>
     z
       .object({ id: z.string().max(100) })

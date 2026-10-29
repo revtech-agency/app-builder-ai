@@ -14,6 +14,7 @@ import {
   splitList,
   stageIdFor,
 } from "@/lib/invoice-rules";
+import { rateLimit } from "@/lib/rate-limit";
 
 type Props = Record<string, string | null | undefined>;
 type HsObject = { id: string; properties: Props };
@@ -530,7 +531,7 @@ export const listPurchaseOrders = createServerFn({ method: "GET" })
 const MAX_PDF_BYTES = 5 * 1024 * 1024;
 
 export const submitDocument = createServerFn({ method: "POST" })
-  .middleware([requireInvoiceDesk])
+  .middleware([requireInvoiceDesk, rateLimit("submitDocument")])
   .inputValidator((input: { text?: string; pdfBase64?: string; filename?: string }) =>
     z
       .object({
@@ -627,7 +628,7 @@ export const decideInvoice = createServerFn({ method: "POST" })
   });
 
 export const askAssistant = createServerFn({ method: "POST" })
-  .middleware([requireInvoiceDesk])
+  .middleware([requireInvoiceDesk, rateLimit("askAssistant")])
   .inputValidator((input: { sessionId: string; message: string; dealId?: string }) =>
     z
       .object({
@@ -673,7 +674,7 @@ async function archive(type: string, ids: string[]) {
 // and suppliers are not touched. Archived records stay in HubSpot's recycle bin for 90 days.
 // Only the demo account and platform admins may run it (requireDemoReset).
 export const resetDemo = createServerFn({ method: "POST" })
-  .middleware([requireInvoiceDesk, requireDemoReset])
+  .middleware([requireInvoiceDesk, requireDemoReset, rateLimit("resetDemo")])
   .handler(async (): Promise<ResetResult> => {
     const hubspot = await hs();
     const deals = await searchDeals(false, [

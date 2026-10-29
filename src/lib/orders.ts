@@ -7,6 +7,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isAdmin } from "@/lib/admin";
 import { evaluateLine, orderStage, PIPELINE_ID, STAGE_IDS, STAGES } from "@/lib/order-rules";
 import type { OrderStage } from "@/lib/order-rules";
+import { rateLimit } from "@/lib/rate-limit";
 
 const DEMO_COMPANY_ID = "458454559952";
 
@@ -368,7 +369,7 @@ const CartLineSchema = z.object({
 });
 
 export const sendChat = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireSupabaseAuth, rateLimit("sendChat")])
   .inputValidator(
     (input: { companyId: string; sessionId: string; message: string; cart: ChatCartLine[] }) =>
       z
@@ -398,7 +399,7 @@ export const sendChat = createServerFn({ method: "POST" })
   });
 
 export const placeOrder = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireSupabaseAuth, rateLimit("placeOrder")])
   .inputValidator(
     (input: {
       companyId: string;
