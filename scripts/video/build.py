@@ -1,6 +1,6 @@
 """Builds the AppBuilder.ai pitch video from rendered slides, demo screenshots and macOS 'say' narration.
 
-Timeline follows the shot list (deck version 73): slides 1-4 (0:00-0:30), demo D1-D5 (0:30-2:00),
+Timeline follows the shot list (deck version 84): slides 1-4 (0:00-0:30), demo D1-D5 (0:30-2:00),
 slides 6-8 (2:00-2:58). Output: pitch.mp4 (full) and demo-cut.mp4 (0:30-2:00).
 """
 import json
@@ -41,14 +41,14 @@ FRAMES = [
     ("shots/D3a-hubspot-board.png", 5, "HubSpot (stands in for the bank's ERP) · invoice pipeline", None),
     ("shots/D3c-hubspot-audit-note.png", 7, "Audit note: every check written on the record", None),
     # D4 1:16-1:46
-    ("shots/D4a-app-queue.png", 5, "App · invoice queue: exceptions wait for a person", None),
-    ("shots/D4b-app-iban-invoice.png", 8, "Different IBAN → held in Needs review", None),
-    ("shots/D4c-app-qty-invoice.png", 6, "15 billed, 12 received → Waiting on supplier", None),
-    ("shots/D4e-gmail-supplier-request.png", 4, "The email to the supplier, drafted by the worker", None),
-    ("shots/D4d-app-qty-draft-email.png", 3.5, "A person decides: approve, send back, mark duplicate or reject", None),
-    ("shots/D4f-app-email-intake.png", 3.5, "Email intake: sender, result and who was notified", None),
+    ("shots/D4a-app-queue.png", 5, "App · invoice queue: exceptions wait for a person, with the money held", None),
+    ("shots/D4b-app-iban-invoice.png", 7, "Different IBAN → the whole amount held in Needs review", None),
+    ("shots/D4c-app-qty-invoice.png", 6, "15 billed, 12 received → Waiting on supplier, the extra held", None),
+    ("shots/D4e-gmail-supplier-request.png", 3.5, "The email to the supplier, drafted by the worker", None),
+    ("shots/D4d-app-qty-draft-email.png", 3, "A person decides: approve, send back, mark duplicate or reject", None),
+    ("shots/D4g-app-efactura.png", 5.5, "e-Factura intake (simulated SPV): the same 12 checks", None),
     # D5 1:46-2:00
-    ("shots/D5a-gmail-result-email.png", 14, "Result email to the reviewer", None),
+    ("shots/D5a-gmail-result-email.png", 14, "Result email to the reviewer, with the money protected", None),
     # Slides 6-8 2:00-2:58
     ("slides/S6.png", 19, None, None),
     ("slides/S7.png", 19, None, None),
@@ -69,15 +69,16 @@ CUES = [
     (61.1, "We cut the wait for the next mailbox check.", 172),
     (64.3, "HubSpot stands in for the bank's ERP.", 172),
     (68.0, "The invoice lands in Ready to approve, and every check is written on the record.", 172),
-    (76.3, "Exceptions wait for a person.", 172),
-    (81.3, "This invoice asks to be paid to a different IBAN, so it is held in Needs review.", 172),
-    (89.3, "This one bills fifteen docking stations when twelve were received,", 172),
-    (95.2, "so it goes back to the supplier with an email drafted.", 172),
-    (99.1, "Open one and you see every check, passed or failed, and why.", 172),
-    (106.8, "And the reviewer gets the result by email: the outcome, who approves it, and every check ticked or crossed.", 172),
+    (76.3, "Exceptions wait for a person, and the queue shows the money held.", 172),
+    (81.3, "This invoice asks to be paid to a different IBAN, so the whole amount is held in Needs review.", 172),
+    (88.3, "This one bills fifteen docking stations when twelve were received,", 172),
+    (94.2, "so the extra goes back to the supplier.", 172),
+    (97.8, "Open one: every check, and why.", 172),
+    (100.8, "Romanian e-Factura invoices get the same checks, here from a simulated SPV inbox.", 172),
+    (106.8, "And the reviewer gets the result by email: the money protected, who approves it, and every check ticked or crossed.", 172),
     (120.3, "Under the hood: n8n runs three flows, Claude Sonnet reads the documents, HubSpot holds the records and Lovable is the review screen. More agents would not help here. The decision has to be predictable and testable, so the rules are code.", 172),
-    (139.3, "You can check all of it. Twelve synthetic test cases came out right on four runs in a row. The repo has the workflows, the test runner and one script that rebuilds the demo on any HubSpot portal.", 172),
-    (158.3, "Clerks spend their time on the exceptions, and fraud signals are checked on every invoice, not only when someone has time. Its main limitation: it is tested on synthetic data only. Next step: a pilot with one bank accounts-payable team on real invoices.", 172),
+    (139.3, "You can check all of it. Twelve synthetic test cases came out right on four runs in a row. The repo has the workflows, the test runner and one script that rebuilds the demo, and it is built to run on the bank's own approved tools.", 172),
+    (158.3, "Every invoice is checked for duplicates, changed IBANs and overbilling before it is paid: up to 2 percent of supplier spend. Main limitation: synthetic data only. Next: a pilot with one bank accounts-payable team, measured in euros of risky payments held.", 172),
 ]
 
 DEMO_START, DEMO_END = 30, 120

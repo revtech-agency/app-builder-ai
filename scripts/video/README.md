@@ -1,6 +1,6 @@
 # Pitch video build
 
-Builds the three-minute VibeHack pitch video from deck slides, demo screenshots and generated narration, plus the 0:30–2:00 demo cut used on slide 5 at the finals. The timeline and voiceover follow the shot list (deck version 73).
+Builds the three-minute VibeHack pitch video from deck slides, demo screenshots and generated narration, plus the 0:30–2:00 demo cut used on slide 5 at the finals. The timeline and voiceover follow the shot list (deck version 84).
 
 | File                                           | What it does                                                                                                                                |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
