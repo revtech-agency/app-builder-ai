@@ -152,10 +152,13 @@ function SubmitPage() {
               <Button
                 key={s.label}
                 type="button"
-                variant={i === loaded ? "secondary" : "outline"}
+                variant="outline"
                 size="sm"
                 aria-pressed={i === loaded}
-                className="h-auto flex-col items-start gap-0.5 py-2 text-left"
+                // Same yellow accent as the highlighted step in the demo guide.
+                className={`h-auto flex-col items-start gap-0.5 py-2 text-left${
+                  i === loaded ? " border-primary bg-accent/40 ring-1 ring-primary" : ""
+                }`}
                 onClick={() => {
                   setText(s.text);
                   setFile(null);
