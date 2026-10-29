@@ -1,12 +1,12 @@
 # Supplier invoice worker (n8n workflows)
 
 Four importable n8n workflows for the banking demo: an AP worker that does a three-way match
-(PO, delivery, invoice) and sends each invoice to the right HubSpot stage. All three are tagged
+(PO, delivery, invoice) and sends each invoice to the right HubSpot stage. All four are tagged
 `appbuilder` and `invoice-worker` and are imported and active in n8n (see [Live in n8n](#live-in-n8n)).
 
 | File | Workflow | Entry |
 | --- | --- | --- |
-| `1-process-supplier-invoices.json` | Process supplier invoices | Gmail trigger (demo+invoices@appbuilder.ai and daniel@tigros.io, see [Email intake](#email-intake)) and `POST /webhook/invoice-intake` |
+| `1-process-supplier-invoices.json` | Process supplier invoices | Gmail trigger (daniel@tigros.io, its aliases daniel@appbuilder.ai and demo@appbuilder.ai, and demo+invoices@appbuilder.ai; see [Email intake](#email-intake)) and `POST /webhook/invoice-intake` |
 | `2-invoice-assistant-chat.json` | Invoice assistant chat | `POST /webhook/invoice-assistant` |
 | `3-look-up-purchase-order.json` | Look up purchase order | Called by workflow 2 as a tool |
 | `4-send-demo-invoice-email.json` | Send demo invoice email | `POST /webhook/invoice-demo-send` (app, Email intake page) |
@@ -32,6 +32,13 @@ IDs and status as of 2026-10-28 (Send demo invoice email added 2026-10-29).
 | Order | Approve order from offer link | `rujs7V5m4YWXzaqi` | Active | `/webhook/order-approval` (link in the offer email) |
 | Order | Send order offer | `LhA7BRoC6tkibSFI` | Inactive | Older PDF version, no longer called |
 | Sales | AI Sales Proposal - Webhook to HubSpot Quote | `ONXAlT74A1TlkOPv` | Inactive | Not used by the app |
+
+Live versions of the email-intake workflows on 2026-10-29:
+
+| Workflow | Live version | Rollback |
+| --- | --- | --- |
+| Process supplier invoices (`Kxhmr00uS4MBXTSO`) | `0de20bcf-5af9-459f-914d-4e2c898a3a1c` | before the duplicate fixes: `fa781b6c-1fb2-4760-9059-e8846db2221b`; before email intake: `030f7e0f-07b6-42ca-8620-61525f0ce617` |
+| Send demo invoice email (`AaooGE5gsNiY6TDl`) | `13fa122f-d8ee-43b4-a381-a987f0a2a199` | before the aliases: `b677106d-3814-4a34-a867-ac6e5e4559e3` |
 
 ## Email intake
 
@@ -60,7 +67,9 @@ the app's Email intake page); `src/test/email-intake.test.ts` fails if the two d
 
 For every email-channel invoice it creates, the workflow now also:
 
-1. stores `email_from`, `email_subject` and `email_received_by` on the deal;
+1. stores `email_from`, `email_subject` and `email_received_by` on the deal (with `notified_to` and
+   `notified_at` below, the five deal properties created on 2026-10-29 in portal 149650024 by
+   `setup-invoices.ts --properties-only`, group `appbuilder_invoice_worker`);
 2. emails the recipient (`Notify recipient?` → `Build Notification` → `Send Recipient Notification`):
    the result, what to do next (approve and by whom, which checks failed, what the supplier still
    has to send and whether they were already asked, or "do not pay twice"), every check with ✓/✗,
