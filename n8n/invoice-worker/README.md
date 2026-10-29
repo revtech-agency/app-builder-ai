@@ -117,11 +117,16 @@ Aliases (added 2026-10-29, live workflow 1 `2317091d-b406-44b1-aa2e-26dec8fae19b
 `532708179160`) and demo@appbuilder.ai (execution 370, deal `533278345423`) were picked up, with
 `email_received_by` set to the alias and the result email sent to daniel@tigros.io.
 
-Known limit: the email path handles one email per Gmail poll. When two emails arrive within the same
-minute, `Build Document Text` still has both but `Apply Rules` returns only the first, so the second
-never becomes a deal (seen in execution 368; the once-for-all-items Code nodes before it are the
-likely cause, not yet confirmed). Send demo invoices at
-least a minute apart.
+Several emails in one Gmail poll (fixed 2026-10-29, live workflow 1
+`fa781b6c-1fb2-4760-9059-e8846db2221b`, rollback `2317091d-b406-44b1-aa2e-26dec8fae19b`): two emails
+in the same poll used to give one deal (execution 368). `Match Supplier` ran once for all items,
+read `$('Read Document').item` (always the first item in that mode) and returned one item. It and the
+other Code nodes that read `$('Node').item` (`Collect PO`, `Apply Rules`, `Build Notification`,
+`Build Response`, `Existing Response`) now run once per item; `src/test/email-intake.test.ts` fails
+if a Code node that reads `$('Node').item` runs once for all items. Verified with two demo sends three
+seconds apart: one run (execution 373), two deals (`533287231677`, `532716985571`), each checked
+against its own PO and history. The app webhook path still passes (`run-tests.mjs --only
+08-supplier-not-approved`).
 
 ## Import
 

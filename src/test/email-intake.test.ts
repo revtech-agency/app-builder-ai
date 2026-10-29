@@ -8,7 +8,8 @@ import { invoicePdf } from "@/lib/invoice-pdf";
 
 type Item = { json: Record<string, unknown>; binary?: Record<string, unknown> };
 
-// Runs an n8n Code node's JavaScript with stubs for $input and $('Node').item.
+// Runs an n8n Code node's JavaScript with stubs for $input and $('Node').item. A node that runs
+// once per item returns one { json } object; n8n (and this helper) wrap it in a list.
 function runCode(
   workflow: { nodes: { name: string; parameters: Record<string, unknown> }[] },
   name: string,
@@ -20,7 +21,8 @@ function runCode(
   const $ = (ref: string) => ({ item: { json: refs[ref] ?? {} } });
   const $input = { all: () => input };
   const fn = new Function("$", "$input", "$json", node.parameters["jsCode"] as string);
-  return fn($, $input, input[0]?.json ?? {}) as Item[];
+  const out = fn($, $input, input[0]?.json ?? {}) as Item[] | Item;
+  return Array.isArray(out) ? out : [out];
 }
 
 const email = (to: string, extra: Record<string, unknown> = {}): Item => ({
@@ -114,6 +116,20 @@ describe("n8n email intake", () => {
     expect(q).toContain(`-"${marker}"`);
     expect(q).toContain("to:daniel@tigros.io");
     expect(q).toContain("to:demo+invoices@appbuilder.ai");
+  });
+
+  // In "run once for all items" mode $('Node').item is the first item only, so a node like that
+  // turned two emails from one Gmail poll into one deal.
+  it("handles every email of a Gmail poll, not just the first", () => {
+    const code = invoiceWorker.nodes.filter((n) => n.type === "n8n-nodes-base.code");
+    for (const n of code) {
+      const js = (n.parameters as Record<string, unknown>)["jsCode"] as string;
+      if (/\$\('[^']+'\)\.item\b/.test(js)) {
+        expect((n.parameters as Record<string, unknown>)["mode"], n.name).toBe(
+          "runOnceForEachItem",
+        );
+      }
+    }
   });
 
   it("only lets the demo sender mail a monitored mailbox", () => {
