@@ -1,0 +1,220 @@
+import { describe, expect, it } from "vitest";
+
+import invoiceWorker from "../../n8n/invoice-worker/1-process-supplier-invoices.json";
+import demoSend from "../../n8n/invoice-worker/4-send-demo-invoice-email.json";
+import { DEMO_INVOICES } from "@/lib/demo-invoices";
+import { DEMO_SEND_TO, INTAKE_MAILBOXES } from "@/lib/intake";
+import { invoicePdf } from "@/lib/invoice-pdf";
+
+type Item = { json: Record<string, unknown>; binary?: Record<string, unknown> };
+
+// Runs an n8n Code node's JavaScript with stubs for $input and $('Node').item.
+function runCode(
+  workflow: { nodes: { name: string; parameters: Record<string, unknown> }[] },
+  name: string,
+  input: Item[],
+  refs: Record<string, Record<string, unknown>> = {},
+): Item[] {
+  const node = workflow.nodes.find((n) => n.name === name);
+  if (!node) throw new Error(`No node ${name}`);
+  const $ = (ref: string) => ({ item: { json: refs[ref] ?? {} } });
+  const $input = { all: () => input };
+  const fn = new Function("$", "$input", "$json", node.parameters["jsCode"] as string);
+  return fn($, $input, input[0]?.json ?? {}) as Item[];
+}
+
+const email = (to: string, extra: Record<string, unknown> = {}): Item => ({
+  json: {
+    id: "abc123",
+    from: { value: [{ address: "billing@supplier.example.com" }] },
+    to: { value: [{ address: to }] },
+    subject: "Invoice OS-1",
+    text: "Please find attached our invoice.",
+    ...extra,
+  },
+});
+
+describe("demo invoices", () => {
+  it("covers the 12 invoice worker test cases", () => {
+    expect(DEMO_INVOICES).toHaveLength(12);
+    expect(new Set(DEMO_INVOICES.map((d) => d.id)).size).toBe(12);
+  });
+
+  it("sends invoices as a PDF and the supplier question as plain text", () => {
+    for (const d of DEMO_INVOICES) {
+      if (d.id === "12-supplier-question") {
+        expect(d.pdfText).toBeNull();
+      } else {
+        expect(d.pdfText).toMatch(/^INVOICE /);
+        expect(d.filename).toBe(`${d.id}.pdf`);
+      }
+    }
+  });
+
+  it("gives every demo email a subject the daniel@tigros.io Gmail filter picks up", () => {
+    for (const d of DEMO_INVOICES) expect(d.subject.toLowerCase()).toContain("invoice");
+  });
+
+  it("writes a well-formed PDF holding the invoice text", () => {
+    const pdf = new TextDecoder("latin1").decode(invoicePdf(DEMO_INVOICES[0]!.pdfText!));
+    expect(pdf.startsWith("%PDF-1.4")).toBe(true);
+    expect(pdf.trimEnd().endsWith("%%EOF")).toBe(true);
+    // Every xref offset points at the start of its object.
+    const xrefAt = Number(/startxref\n(\d+)/.exec(pdf)?.[1]);
+    const entries = pdf
+      .slice(xrefAt)
+      .split("\n")
+      .slice(3)
+      .filter((l) => / n $/.test(l));
+    entries.forEach((e, i) => expect(pdf.slice(Number(e.slice(0, 10)))).toMatch(`${i + 1} 0 obj`));
+    expect(pdf).toContain("(Supplier: Office Supplies Demo SRL)");
+  });
+
+  it("escapes PDF string delimiters and spreads long text over pages", () => {
+    const pdf = new TextDecoder("latin1").decode(
+      invoicePdf(["A (b) c\\d", ...Array.from({ length: 80 }, (_, i) => `line ${i}`)].join("\n")),
+    );
+    expect(pdf).toContain("(A \\(b\\) c\\\\d)");
+    expect(pdf).toContain("/Count 2");
+  });
+});
+
+describe("n8n email intake", () => {
+  it("knows the same mailboxes as the app, with the same recipient and read handling", () => {
+    for (const m of INTAKE_MAILBOXES) {
+      const [out] = runCode(invoiceWorker, "Prepare Email", [email(m.address)]);
+      expect(out?.json).toMatchObject({
+        received_by: m.address,
+        notify_to: m.notifies,
+        mark_read: m.marksRead,
+        channel: "email",
+        source_message_id: "gmail-abc123",
+        submitted_by: "billing@supplier.example.com",
+      });
+    }
+  });
+
+  it("matches the mailbox on Cc and ignores letter case", () => {
+    const [out] = runCode(invoiceWorker, "Prepare Email", [
+      email("someone@else.example.com", { cc: { value: [{ address: "Daniel@Tigros.io" }] } }),
+    ]);
+    expect(out?.json["received_by"]).toBe("daniel@tigros.io");
+  });
+
+  it("never reads back the emails it sends itself", () => {
+    const marker = "Sent by the AppBuilder.ai invoice worker";
+    const out = runCode(invoiceWorker, "Prepare Email", [
+      email("daniel@tigros.io", { text: `Result...\n${marker} for daniel@tigros.io.` }),
+      email("daniel@tigros.io", { text: "", html: `<p>${marker}</p>` }),
+      email("daniel@tigros.io"),
+    ]);
+    expect(out).toHaveLength(1);
+    const trigger = invoiceWorker.nodes.find((n) => n.name === "Gmail Trigger")!;
+    const q = (trigger.parameters as { filters: { q: string } }).filters.q;
+    expect(q).toContain(`-"${marker}"`);
+    expect(q).toContain("to:daniel@tigros.io");
+    expect(q).toContain("to:demo+invoices@appbuilder.ai");
+  });
+
+  it("only lets the demo sender mail a monitored mailbox", () => {
+    const code = (
+      demoSend.nodes.find((n) => n.name === "Prepare Demo Email")!.parameters as Record<
+        string,
+        unknown
+      >
+    )["jsCode"] as string;
+    expect(code).toContain(`'${DEMO_SEND_TO}'`);
+    for (const m of INTAKE_MAILBOXES) expect(code).toContain(`'${m.address}'`);
+  });
+});
+
+describe("result email to the recipient", () => {
+  const rules = (over: Record<string, unknown>) => ({
+    stage: "ready_to_approve",
+    stage_label: "Ready to approve",
+    document_type: "invoice",
+    invoice_number: "OS-2026-1301",
+    supplier_name: "Office Supplies Demo SRL",
+    amount: 2250.6,
+    match_result: "full_match",
+    approval_level: "team_lead",
+    reply_to: "billing@supplier.example.com",
+    received_by: "daniel@tigros.io",
+    notify_to: "daniel@tigros.io",
+    supplier_email_draft: "",
+    deal_properties: { po_number: "PO-2026-0444" },
+    line_items: [
+      {
+        name: "Pens",
+        quantity: 100,
+        price: 12.4,
+        line_check: "matched",
+        line_check_note: "Matches.",
+      },
+    ],
+    checks: [
+      { ok: true, name: "Supplier", detail: "Office Supplies Demo SRL is approved." },
+      { ok: true, name: "IBAN", detail: "Matches the IBAN on file." },
+    ],
+    missing: [],
+    ...over,
+  });
+  const build = (over: Record<string, unknown>) =>
+    runCode(invoiceWorker, "Build Notification", [], {
+      "Apply Rules": rules(over),
+      "Create Invoice Deal": { id: "4711" },
+    })[0]!.json as { notify_to: string; subject: string; html: string; deal_id: string };
+
+  it("tells the recipient a clean invoice can be approved, and by whom", () => {
+    const n = build({});
+    expect(n.notify_to).toBe("daniel@tigros.io");
+    expect(n.subject).toBe(
+      "AppBuilder invoice check: Ready to approve · Invoice OS-2026-1301 · Office Supplies Demo SRL",
+    );
+    expect(n.html).toContain("Passed every check");
+    expect(n.html).toContain("Approve it for payment in the app (needs a team lead approval)");
+    expect(n.html).toContain("/app/invoices/4711");
+    expect(n.html).toContain("Sent by the AppBuilder.ai invoice worker");
+  });
+
+  it("lists the failed checks when a person has to review it", () => {
+    const n = build({
+      stage: "needs_review",
+      stage_label: "Needs review",
+      checks: [
+        {
+          ok: false,
+          name: "IBAN",
+          detail:
+            "IBAN on the invoice differs from the one on file. Verify by phone before paying.",
+        },
+      ],
+    });
+    expect(n.html).toContain("Needs a person to review it");
+    expect(n.html).toContain("Verify by phone before paying.");
+    expect(n.html).toContain("&#10007; IBAN");
+  });
+
+  it("says what is missing and that the supplier was already asked", () => {
+    const n = build({
+      stage: "waiting_on_supplier",
+      stage_label: "Waiting on supplier",
+      supplier_email_draft: "Dear supplier...",
+      missing: ["a current tax-compliance certificate"],
+    });
+    expect(n.html).toContain("Missing: a current tax-compliance certificate.");
+    expect(n.html).toContain("We emailed the supplier at billing@supplier.example.com");
+  });
+
+  it("warns not to pay a duplicate twice", () => {
+    expect(build({ stage: "duplicate", stage_label: "Duplicate" }).html).toContain(
+      "Do not pay it again",
+    );
+  });
+
+  it("escapes what came from the email", () => {
+    const n = build({ supplier_name: "<script>x</script>" });
+    expect(n.html).not.toContain("<script>");
+    expect(n.html).toContain("&lt;script&gt;");
+  });
+});

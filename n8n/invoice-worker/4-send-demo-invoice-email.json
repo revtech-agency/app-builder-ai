@@ -1,0 +1,229 @@
+{
+  "name": "Send demo invoice email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoice-demo-send",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b8ef0f8e-88ef-4b9d-bb48-bcd0a6f7d3e8",
+      "name": "Demo Send Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "4a1b7792-6bdf-4527-b06e-ce6d241f7ac0",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "AppBuilder app key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Sends one demo invoice email from the app's Email intake page to a monitored mailbox, where the\n// \"Process supplier invoices\" workflow picks it up like any supplier email. Only the monitored\n// mailboxes are allowed, so this webhook can't be used to send mail anywhere else.\nconst ALLOWED = ['daniel@tigros.io', 'demo+invoices@appbuilder.ai'];\nconst b = $json.body || {};\nconst to = String(b.to || '').toLowerCase();\nif (ALLOWED.indexOf(to) < 0) throw new Error('Demo invoices can only go to a monitored mailbox.');\nif (!b.subject || !b.text) throw new Error('subject and text are required.');\nconst out = { json: {\n  to: to,\n  subject: String(b.subject).slice(0, 200),\n  text: String(b.text).slice(0, 5000),\n  sender_name: String(b.sender_name || 'Demo supplier').slice(0, 80) + ' (demo)',\n  demo_id: String(b.demo_id || ''),\n  has_pdf: !!b.pdf_base64\n} };\nif (b.pdf_base64) {\n  const buf = Buffer.from(String(b.pdf_base64), 'base64');\n  if (buf.length > 1024 * 1024) throw new Error('The demo PDF is too large.');\n  out.binary = { data: await this.helpers.prepareBinaryData(buf, String(b.filename || 'invoice.pdf'), 'application/pdf') };\n}\nreturn [out];"
+      },
+      "id": "032e62de-0efa-4c41-a32b-1fe4b0aeb9b3",
+      "name": "Prepare Demo Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4c2a9eb8-fcec-4e11-82e8-e8dd3db2cda3",
+              "leftValue": "={{ $json.has_pdf }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b3e38c56-cc70-427f-9ca7-9dd899dd0080",
+      "name": "Has PDF?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $('Prepare Demo Email').item.json.to }}",
+        "subject": "={{ $('Prepare Demo Email').item.json.subject }}",
+        "emailType": "text",
+        "message": "={{ $('Prepare Demo Email').item.json.text }}",
+        "options": {
+          "senderName": "={{ $('Prepare Demo Email').item.json.sender_name }}",
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "data"
+              }
+            ]
+          }
+        }
+      },
+      "id": "e4d68ab3-2342-40e6-adbd-c7bb45af0505",
+      "name": "Send With PDF",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        840,
+        -100
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "DaniS TMT Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $('Prepare Demo Email').item.json.to }}",
+        "subject": "={{ $('Prepare Demo Email').item.json.subject }}",
+        "emailType": "text",
+        "message": "={{ $('Prepare Demo Email').item.json.text }}",
+        "options": {
+          "senderName": "={{ $('Prepare Demo Email').item.json.sender_name }}",
+          "appendAttribution": false
+        }
+      },
+      "id": "85e97b09-a946-4521-9326-0461ff92a9fd",
+      "name": "Send Text Only",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        840,
+        100
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "DaniS TMT Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { sent: true, message_id: $json.id, to: $('Prepare Demo Email').item.json.to, demo_id: $('Prepare Demo Email').item.json.demo_id } }}",
+        "options": {}
+      },
+      "id": "9d727c39-f01c-42ba-9787-392b457f3c95",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Demo Send Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Demo Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Demo Email": {
+      "main": [
+        [
+          {
+            "node": "Has PDF?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has PDF?": {
+      "main": [
+        [
+          {
+            "node": "Send With PDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Text Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send With PDF": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Text Only": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "appbuilder"
+    },
+    {
+      "name": "invoice-worker"
+    }
+  ],
+  "pinData": {}
+}

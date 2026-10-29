@@ -10,6 +10,7 @@
  *
  *   bun scripts/hubspot/setup-invoices.ts             # writes to the portal
  *   bun scripts/hubspot/setup-invoices.ts --dry-run   # reads only, prints what it would do
+ *   bun scripts/hubspot/setup-invoices.ts --properties-only   # only adds missing properties
  *
  * Needs HUBSPOT_ACCESS_TOKEN (a private app token, the one the app uses) in .env.local, which git
  * ignores and bun loads on its own. HUBSPOT_API_KEY still works as the old name.
@@ -18,6 +19,7 @@ import data from "./data/invoices/invoices.json";
 
 const TOKEN = process.env.HUBSPOT_ACCESS_TOKEN ?? process.env.HUBSPOT_API_KEY;
 const DRY = process.argv.includes("--dry-run");
+const PROPERTIES_ONLY = process.argv.includes("--properties-only");
 const BASE = "https://api.hubapi.com";
 const GROUP = "appbuilder_invoice_worker";
 const VAT = 0.21;
@@ -111,6 +113,16 @@ const PROPERTIES: Record<string, Prop[]> = {
       description: "Warning signs the invoice worker found, such as a changed bank account or an invoice split to stay under an approval limit. Any flag sends the invoice to a person." },
     { name: "approved_by", label: "Approved by", type: "string", fieldType: "text",
       description: "Email of the person who approved the invoice for payment in the app." },
+    { name: "email_from", label: "Email from", type: "string", fieldType: "text",
+      description: "For an invoice that came in by email: the address it was sent from." },
+    { name: "email_subject", label: "Email subject", type: "string", fieldType: "text",
+      description: "For an invoice that came in by email: the subject of that email." },
+    { name: "email_received_by", label: "Received by mailbox", type: "string", fieldType: "text",
+      description: "For an invoice that came in by email: which monitored mailbox it was sent to." },
+    { name: "notified_to", label: "Notification sent to", type: "string", fieldType: "text",
+      description: "Who the invoice worker emailed with the result of the checks and what to do next." },
+    { name: "notified_at", label: "Notification sent at", type: "datetime", fieldType: "date",
+      description: "When the invoice worker sent that email." },
   ],
   line_items: [
     { name: "received_quantity", label: "Received quantity", type: "number", fieldType: "number",
@@ -425,6 +437,10 @@ const account = await hs("GET", "/account-info/v3/details");
 console.log(`Portal ${account.portalId} (${account.accountType}, data in ${account.dataHostingLocation})${DRY ? " · DRY RUN" : ""}`);
 console.log("1/6 properties");
 await ensureProperties();
+if (PROPERTIES_ONLY) {
+  console.log("Done (properties only).");
+  process.exit(0);
+}
 console.log("2/6 Procure-to-pay pipeline");
 const pipeline = await ensurePipeline();
 console.log("3/6 suppliers");
