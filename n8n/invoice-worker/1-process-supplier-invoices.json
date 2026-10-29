@@ -673,7 +673,7 @@
         "messageId": "={{ $('Apply Rules').item.json.source_id }}"
       },
       "id": "2b4c45eb-323d-4c70-9736-8a22bb20a94f",
-      "name": "Mark As Read",
+      "name": "Mark Demo Mailbox Read",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
@@ -1155,7 +1155,7 @@
       "main": [
         [
           {
-            "node": "Mark As Read",
+            "node": "Mark Demo Mailbox Read",
             "type": "main",
             "index": 0
           }
@@ -1169,7 +1169,7 @@
         ]
       ]
     },
-    "Mark As Read": {
+    "Mark Demo Mailbox Read": {
       "main": [
         [
           {
