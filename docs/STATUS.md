@@ -92,3 +92,4 @@ Lovable and holds only the public Supabase URL and publishable key.
 | 29 Oct | Email intake: watched mailboxes, result email to the reviewer, Email intake page, demo invoices |
 | 29 Oct | Landing page aligned with the finals deck; rate limits on the shared demo accounts; STATUS rewritten for outside readers |
 | 29 Oct | e-Factura intake (simulated SPV); money held before payment shown on the overview, queue, invoice page and result email; Source column in the queue |
+| 29 Oct | Hackathon over: the public one-click demo is closed by default (`DEMO_ENABLED`); the landing page offers "Book a demo" instead |

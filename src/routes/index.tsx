@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { ComponentProps } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -17,7 +18,7 @@ import aiWorkersImage from "@/assets/ai-workers-paper-processes.jpg";
 import heroImage from "@/assets/hero-robotic-document-workflow.jpg";
 import { BackToTop } from "@/components/back-to-top";
 import { ContactForm } from "@/components/contact-form";
-import { ApDemoButton } from "@/components/demo-button";
+import { ApDemoButton, useDemoOpen } from "@/components/demo-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -275,7 +276,17 @@ function OpenAppLink({ className = "" }: { className?: string }) {
   );
 }
 
+// Shown in place of "Try the demo" while the public demo is closed (DEMO_ENABLED off).
+function BookDemo({ className, ...props }: Omit<ComponentProps<typeof Button>, "asChild">) {
+  return (
+    <Button asChild className={className} {...props}>
+      <a href="#contact">Book a demo</a>
+    </Button>
+  );
+}
+
 function Index() {
+  const demoOpen = useDemoOpen();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
@@ -288,7 +299,7 @@ function Index() {
           </span>
           <div className="flex items-center gap-4">
             <OpenAppLink className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline-flex" />
-            <ApDemoButton>Try the demo</ApDemoButton>
+            <ApDemoButton closed={<BookDemo />}>Try the demo</ApDemoButton>
           </div>
         </div>
       </header>
@@ -315,14 +326,20 @@ function Index() {
                 approves none.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <ApDemoButton size="lg">Try the demo</ApDemoButton>
-                <Button asChild size="lg" variant="outline">
-                  <a href="#contact">Talk to us</a>
-                </Button>
+                <ApDemoButton size="lg" closed={<BookDemo size="lg" />}>
+                  Try the demo
+                </ApDemoButton>
+                {demoOpen && (
+                  <Button asChild size="lg" variant="outline">
+                    <a href="#contact">Talk to us</a>
+                  </Button>
+                )}
               </div>
               <p className="mt-4 text-sm text-muted-foreground">
-                Everything in the demo is synthetic: suppliers, purchase orders and invoices. Have
-                an account? <OpenAppLink className="text-foreground" />
+                {demoOpen
+                  ? "Everything in the demo is synthetic: suppliers, purchase orders and invoices."
+                  : "The public demo closed after the hackathon; we walk you through it on a call, on synthetic data."}{" "}
+                Have an account? <OpenAppLink className="text-foreground" />
               </p>
             </div>
           </div>
@@ -542,11 +559,16 @@ function Index() {
               See a risky payment held
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-primary-foreground/80">
-              Try the demo: the overview shows the euros held before payment, and every invoice says
-              why. Or tell us which flow eats your team's week.
+              {demoOpen
+                ? "Try the demo: the overview shows the euros held before payment, and every invoice says why. Or tell us which flow eats your team's week."
+                : "Book a demo: we show the euros held before payment, and why each invoice was stopped. Or tell us which flow eats your team's week."}
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              <ApDemoButton size="lg" variant="secondary">
+              <ApDemoButton
+                size="lg"
+                variant="secondary"
+                closed={<BookDemo size="lg" variant="secondary" />}
+              >
                 Try the demo
               </ApDemoButton>
               <OpenAppLink className="text-sm text-primary-foreground/80 hover:text-primary-foreground" />

@@ -72,9 +72,30 @@ export const requireDeskAdmin = createMiddleware({ type: "function" })
     return next();
   });
 
+// The public one-click demo ("Try the demo") is off unless DEMO_ENABLED is "true" in the
+// deploy settings. While it's off, nobody can sign in to the two shared demo accounts, and
+// sessions they already hold can't use the invoice desk or the order portal.
+export const demoEnabled = () => process.env["DEMO_ENABLED"] === "true";
+
+const casingsDemoEmail = () => process.env["DEMO_EMAIL"] || "demo@appbuilder.ai";
+
+export function isDemoAccount(email: string | undefined) {
+  const e = (email ?? "").trim().toLowerCase();
+  return e !== "" && (e === casingsDemoEmail().toLowerCase() || e === apDemoEmail().toLowerCase());
+}
+
+const DEMO_CLOSED = "The public demo is closed. Get in touch for a guided demo.";
+
+export const getDemoStatus = createServerFn({ method: "GET" }).handler(async () => ({
+  enabled: demoEnabled(),
+}));
+
 export const requireInvoiceDesk = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ next, context }) => {
+    if (!demoEnabled() && isDemoAccount((context.claims as { email?: string }).email)) {
+      throw new Error(DEMO_CLOSED);
+    }
     if (!(await canUseInvoiceDesk(context.userId))) {
       throw new Error("Only invoice desk reviewers can do this.");
     }
@@ -107,7 +128,8 @@ export const getMyRole = createServerFn({ method: "GET" })
 // One-click demo: a one-time sign-in token for the shared demo account, redeemed in the
 // browser with verifyOtp. No password is stored or sent anywhere.
 export const getDemoSignIn = createServerFn({ method: "POST" }).handler(async () => {
-  const email = process.env["DEMO_EMAIL"] || "demo@appbuilder.ai";
+  if (!demoEnabled()) throw new Error(DEMO_CLOSED);
+  const email = casingsDemoEmail();
   const db = await adminClient();
   const { data, error } = await db.auth.admin.generateLink({ type: "magiclink", email });
   if (error || !data.properties?.hashed_token) {
@@ -133,6 +155,7 @@ export const requireDemoReset = createMiddleware({ type: "function" })
   });
 
 export const getApDemoSignIn = createServerFn({ method: "POST" }).handler(async () => {
+  if (!demoEnabled()) throw new Error(DEMO_CLOSED);
   const db = await adminClient();
   const { data, error } = await db.auth.admin.generateLink({
     type: "magiclink",

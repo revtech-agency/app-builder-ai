@@ -4,7 +4,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { isAdmin } from "@/lib/admin";
+import { demoEnabled, isAdmin } from "@/lib/admin";
 import { evaluateLine, orderStage, PIPELINE_ID, STAGE_IDS, STAGES } from "@/lib/order-rules";
 import type { OrderStage } from "@/lib/order-rules";
 import { rateLimit } from "@/lib/rate-limit";
@@ -135,7 +135,9 @@ async function visibleCompanies(caller: Caller): Promise<Company[]> {
 
   const email = caller.email.trim().toLowerCase();
   const demoEmail = (process.env["DEMO_EMAIL"] || "demo@appbuilder.ai").toLowerCase();
-  if (email === demoEmail) return all.filter((c) => c.id === DEMO_COMPANY_ID);
+  if (email === demoEmail) {
+    return demoEnabled() ? all.filter((c) => c.id === DEMO_COMPANY_ID) : [];
+  }
 
   const domain = email.split("@")[1];
   if (!domain) return [];

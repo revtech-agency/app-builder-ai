@@ -151,6 +151,7 @@ The scripts in `scripts/hubspot/` require **Bun** (they use `Bun.sleep`, `import
 | `N8N_APP_KEY` | server | yes for submitting documents, the invoice chat, the order chat and the offer email | **missing from `.env.example`** |
 | `DEMO_EMAIL` | server | no (default `demo@appbuilder.ai`) | the casings demo account |
 | `DEMO_AP_EMAIL` | server | no (default `ap-demo@appbuilder.ai`) | the invoice desk demo account; must have the `ap_reviewer` role |
+| `DEMO_ENABLED` | server | no (default off) | `true` opens the public one-click demo ("Try the demo"). Anything else closes it: both demo sign-ins refuse, the demo accounts' existing sessions lose access to the invoice desk and the order portal, and the landing page shows "Book a demo" |
 | `INVOICE_APP_KEY` | `n8n/invoice-worker/run-tests.mjs` | for the test run | the same value as `N8N_APP_KEY` |
 | `N8N_BASE_URL` | `n8n/invoice-worker/run-tests.mjs` | no (default `https://revtech-agency.app.n8n.cloud`) | |
 | `HUBSPOT_API_KEY` | `scripts/hubspot/*.ts`, `n8n/invoice-worker/run-tests.mjs` | no | old name for the same token; read only if `HUBSPOT_ACCESS_TOKEN` is missing |
@@ -188,7 +189,7 @@ The invoice runner posts the 12 cases in `n8n/invoice-worker/test-cases.json` to
 
 ### The demo scenario (invoice desk)
 
-1. Open https://nexxt.appbuilder.ai and click **Try the demo** → signs in as `DEMO_AP_EMAIL` (an `ap_reviewer`, not an admin) and opens the invoice desk. A step-by-step guide follows these steps.
+1. Set `DEMO_ENABLED=true` in the deploy settings (the public demo has been closed since the hackathon ended), then open https://nexxt.appbuilder.ai and click **Try the demo** → signs in as `DEMO_AP_EMAIL` (an `ap_reviewer`, not an admin) and opens the invoice desk. A step-by-step guide follows these steps.
 2. **Submit a sample invoice** (`/app/invoices/new`, text or PDF) → the worker returns the stage, the flags and the reason.
 3. **Open the invoice** → three-way match per line, every check passed or failed, the supplier's IBAN and certificate, the audit note.
 4. **Ask the worker** → the read-only chat answers from HubSpot.
