@@ -6,7 +6,7 @@ export const DEMO_STEPS = [
   {
     key: "submitted",
     title: "Submit a sample invoice",
-    hint: "Pick one of the three sample emails and press Submit. The AI worker reads it, matches it to the purchase order and delivery note, and files it in a few seconds.",
+    hint: "A sample invoice is already loaded: press Submit, or pick one of the other two samples first. The AI worker reads it, matches it to the purchase order and delivery note, and files it in a few seconds.",
     to: "/app/invoices/new",
     cta: "Go to Submit document",
   },

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { FileText, Loader2, X } from "lucide-react";
+import { Check, FileText, Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { AnomalyChips, approvalText } from "@/components/invoice-bits";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatMoney } from "@/lib/format";
 import { splitList } from "@/lib/invoice-rules";
+import { useAuth } from "@/lib/auth";
 import { markDemoStep } from "@/lib/demo-guide";
 import { submitDocument } from "@/lib/invoices";
 
@@ -86,11 +87,21 @@ function toBase64(file: File) {
 const PHASES = ["Reading document…", "Matching against the purchase order…", "Checking rules…"];
 
 function SubmitPage() {
+  const { isDemo } = useAuth();
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
   const [phase, setPhase] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  // The sample now in the text box, if it hasn't been edited.
+  const loaded = SAMPLES.findIndex((s) => s.text === text);
+
+  // The demo account starts with a sample loaded, so visitors don't reach for their own invoice:
+  // it can't match the demo suppliers and purchase orders.
+  useEffect(() => {
+    if (isDemo) setText((t) => t || (SAMPLES[0]?.text ?? ""));
+  }, [isDemo]);
 
   const submit = useMutation({
     mutationFn: async () =>
@@ -121,10 +132,13 @@ function SubmitPage() {
           Paste a supplier email or attach a PDF invoice. The worker reads it, runs the three-way
           match and files it.
         </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Use a sample, or your own invoice: it's checked against the sample suppliers and purchase
-          orders, so an invoice from a supplier or PO that isn't in the demo lands in Needs review.
-        </p>
+        {!isDemo && (
+          <p className="mt-1 text-sm text-muted-foreground">
+            Use a sample, or your own invoice: it's checked against the sample suppliers and
+            purchase orders, so an invoice from a supplier or PO that isn't in the demo lands in
+            Needs review.
+          </p>
+        )}
       </div>
 
       <Card>
@@ -134,16 +148,24 @@ function SubmitPage() {
               Try a sample: each one fills in a supplier email that shows a different outcome. Then
               press Submit.
             </span>
-            {SAMPLES.map((s) => (
+            {SAMPLES.map((s, i) => (
               <Button
                 key={s.label}
                 type="button"
-                variant="outline"
+                variant={i === loaded ? "secondary" : "outline"}
                 size="sm"
+                aria-pressed={i === loaded}
                 className="h-auto flex-col items-start gap-0.5 py-2 text-left"
-                onClick={() => setText(s.text)}
+                onClick={() => {
+                  setText(s.text);
+                  setFile(null);
+                }}
               >
-                <span>{s.label}</span>
+                <span className="flex items-center gap-1">
+                  {i === loaded && <Check className="size-3.5" />}
+                  {s.label}
+                  {i === loaded && " — loaded"}
+                </span>
                 <span className="text-xs font-normal text-muted-foreground">{s.outcome}</span>
               </Button>
             ))}
@@ -161,7 +183,18 @@ function SubmitPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label>Or a PDF (max 5 MB)</Label>
+            {isDemo && !showUpload && !file ? (
+              <Button
+                type="button"
+                variant="link"
+                className="h-auto p-0 text-xs text-muted-foreground"
+                onClick={() => setShowUpload(true)}
+              >
+                Use your own PDF instead (it lands in Needs review: it can't match the demo POs)
+              </Button>
+            ) : (
+              <Label>Or a PDF (max 5 MB)</Label>
+            )}
             <input
               ref={inputRef}
               type="file"
@@ -176,9 +209,11 @@ function SubmitPage() {
                 }
                 setFileError(null);
                 setFile(f);
+                // A sample and a PDF would be read as one document.
+                if (f && loaded >= 0) setText("");
               }}
             />
-            {file ? (
+            {isDemo && !showUpload && !file ? null : file ? (
               <div className="flex items-center gap-2 rounded-md border p-2 text-sm">
                 <FileText className="size-4 text-muted-foreground" />
                 <span className="min-w-0 flex-1 truncate">{file.name}</span>
