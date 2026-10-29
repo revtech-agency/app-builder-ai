@@ -13,6 +13,7 @@ const MINUTE = 60_000;
 export const RATE_LIMITS = {
   submitDocument: { limit: 10, windowMs: 10 * MINUTE },
   sendDemoInvoice: { limit: 6, windowMs: 10 * MINUTE },
+  receiveEfactura: { limit: 10, windowMs: 10 * MINUTE },
   askAssistant: { limit: 30, windowMs: 10 * MINUTE },
   resetDemo: { limit: 1, windowMs: 2 * MINUTE },
   sendChat: { limit: 30, windowMs: 10 * MINUTE },

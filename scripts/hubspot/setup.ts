@@ -103,7 +103,7 @@ const PROPERTIES: Record<string, Prop[]> = {
   deals: [
     { name: "delivery_date", label: "Delivery date", type: "date", fieldType: "date",
       description: "The delivery date the client asked for. Every order needs one; the order worker asks the client if it is missing." },
-    { name: "order_channel", label: "Order channel", type: "enumeration", fieldType: "select", options: ["email", "whatsapp", "pdf", "app"],
+    { name: "order_channel", label: "Order channel", type: "enumeration", fieldType: "select", options: ["email", "whatsapp", "pdf", "app", "efactura"],
       description: "How the order arrived: email, WhatsApp, a PDF attachment, or placed in the AppBuilder.ai app (chat or inventory)." },
     { name: "source_message_id", label: "Source message ID", type: "string", fieldType: "text",
       description: "The ID of the message the order came from. Used to spot the same order sent twice." },

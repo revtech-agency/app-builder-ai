@@ -31,6 +31,8 @@ built on the same pattern.
 |---|---|---|
 | Invoice worker (n8n) | 🟢 Live. Reads invoices from email or from the app, applies the rules, writes the HubSpot deal, line items and an audit note listing every check, emails the result to the reviewer and asks the supplier for anything missing | `n8n/invoice-worker/`, workflow `Kxhmr00uS4MBXTSO` |
 | Email intake | 🟢 Live. Watches demo+invoices@appbuilder.ai and the demo sends to daniel@tigros.io (and its aliases daniel@appbuilder.ai, demo@appbuilder.ai) every minute; never reads back its own emails | `n8n/invoice-worker/README.md` (Email intake) |
+| e-Factura intake | 🟡 Simulated SPV: the app reads RO e-Factura XML (demo invoices or an uploaded file) and sends it through the same worker as source e-Factura. No live ANAF connection (needs OAuth with the company's qualified certificate) | `src/lib/efactura.ts`, `/app/efactura` |
+| Money protected | 🟢 Risky payments held before payment, by reason (duplicates, unverified payees, split purchases, no PO, overbilling per line), on the overview, the queue (At risk column), each invoice page and the result email; benchmark (APQC 0.8–2%) and cost (€1.50 per invoice, draft) card on the overview | `src/lib/money.ts` |
 | Reviewer chat ("Ask the worker") | 🟢 Live. Read-only agent with six tools: the invoice, its lines, its audit note, the supplier and the PO | workflows `HI8tvI2HG70NlgPo`, `rc72KPALhtJhwLZm` |
 | Invoice desk (app) | 🟢 Live. Queue, invoice page (three-way match, every check passed or failed, activity, chat), decisions (approve, send back, reject, duplicate), Submit document, Email intake page with demo invoices to send, suppliers, POs, team, approval rules, Reset demo, step-by-step demo guide | `src/routes/app/` |
 | Landing page | 🟢 Live. Leads with the invoice worker, matching the finals deck | `src/routes/index.tsx` |
@@ -89,3 +91,4 @@ Lovable and holds only the public Supabase URL and publishable key.
 | 29 Oct | Invoice worker live in n8n, 12 of 12 test cases correct (`evidence/`) |
 | 29 Oct | Email intake: watched mailboxes, result email to the reviewer, Email intake page, demo invoices |
 | 29 Oct | Landing page aligned with the finals deck; rate limits on the shared demo accounts; STATUS rewritten for outside readers |
+| 29 Oct | e-Factura intake (simulated SPV); money held before payment shown on the overview, queue, invoice page and result email; Source column in the queue |

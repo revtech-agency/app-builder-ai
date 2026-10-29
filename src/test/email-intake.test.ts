@@ -5,6 +5,7 @@ import demoSend from "../../n8n/invoice-worker/4-send-demo-invoice-email.json";
 import { DEMO_INVOICES } from "@/lib/demo-invoices";
 import { DEMO_SEND_TO, INTAKE_MAILBOXES } from "@/lib/intake";
 import { invoicePdf } from "@/lib/invoice-pdf";
+import { invoiceRisk } from "@/lib/money";
 
 type Item = { json: Record<string, unknown>; binary?: Record<string, unknown> };
 
@@ -272,5 +273,159 @@ describe("result email to the recipient", () => {
     const n = build({ supplier_name: "<script>x</script>" });
     expect(n.html).not.toContain("<script>");
     expect(n.html).toContain("&lt;script&gt;");
+  });
+});
+
+describe("money line in the result email", () => {
+  const poLines = [
+    { id: "901", price: "45.00", received_quantity: "12" },
+    { id: "902", price: "10.00", received_quantity: "40" },
+  ];
+  const line = (o: Record<string, unknown>) => ({
+    name: "Item",
+    quantity: 10,
+    price: 45,
+    line_check: "matched",
+    po_line_ref: "901",
+    ...o,
+  });
+  const CASES: { name: string; rules: Record<string, unknown> }[] = [
+    { name: "clean", rules: { line_items: [line({})], amount: 544.5 } },
+    {
+      name: "price above PO",
+      rules: {
+        stage: "needs_review",
+        line_items: [line({ price: 48.9, line_check: "price_off" })],
+        amount: 591.69,
+      },
+    },
+    {
+      name: "more than delivered",
+      rules: {
+        stage: "waiting_on_supplier",
+        line_items: [line({ quantity: 15, line_check: "qty_off" })],
+        amount: 816.75,
+      },
+    },
+    {
+      name: "price and quantity off, plus a line not on the PO",
+      rules: {
+        stage: "needs_review",
+        line_items: [
+          line({ quantity: 15, price: 50, line_check: "price_off;qty_off" }),
+          line({ po_line_ref: "", quantity: 2, price: 30, line_check: "not_on_po" }),
+        ],
+        amount: 980.1,
+      },
+    },
+    {
+      name: "duplicate",
+      rules: {
+        stage: "duplicate",
+        anomaly_flags: ["duplicate"],
+        line_items: [line({})],
+        amount: 544.5,
+      },
+    },
+    {
+      name: "IBAN changed",
+      rules: {
+        stage: "needs_review",
+        anomaly_flags: ["iban_recently_changed"],
+        line_items: [line({ price: 48.9, line_check: "price_off" })],
+        amount: 591.69,
+      },
+    },
+    {
+      name: "split purchase",
+      rules: {
+        stage: "needs_review",
+        anomaly_flags: ["split_purchase"],
+        line_items: [line({})],
+        amount: 2440.33,
+      },
+    },
+    {
+      name: "no PO",
+      rules: {
+        stage: "waiting_on_supplier",
+        match_result: "no_po",
+        line_items: [line({ po_line_ref: "", line_check: "not_on_po" })],
+        amount: 1089,
+      },
+    },
+    {
+      name: "supplier question",
+      rules: { document_type: "question", stage: "needs_review", line_items: [], amount: 0 },
+    },
+  ];
+
+  for (const c of CASES) {
+    it(`agrees with src/lib/money.ts: ${c.name}`, () => {
+      const r = {
+        stage: "ready_to_approve",
+        stage_label: "Result",
+        document_type: "invoice",
+        match_result: "mismatch",
+        anomaly_flags: [],
+        checks: [],
+        missing: [],
+        notify_to: "daniel@tigros.io",
+        ...c.rules,
+      } as unknown as Record<string, unknown> & { line_items: Record<string, unknown>[] };
+      const out = runCode(invoiceWorker, "Build Notification", [], {
+        "Apply Rules": r,
+        "Create Invoice Deal": { id: "1" },
+        "Collect PO": { po_lines: poLines },
+      })[0]!.json as { money_held: number; html: string };
+      const expected = invoiceRisk({
+        amount: r["amount"] as number,
+        stage: r["stage"] as string,
+        anomalyFlags: r["anomaly_flags"] as string[],
+        matchResult: r["match_result"] as string,
+        documentType: r["document_type"] as string,
+        lines: r.line_items.map((l) => {
+          const pl = poLines.find((p) => p.id === l["po_line_ref"]);
+          return {
+            quantity: l["quantity"] as number,
+            price: l["price"] as number,
+            lineCheck: String(l["line_check"]).split(";"),
+            poPrice: pl ? Number(pl.price) : null,
+            receivedQuantity: pl ? Number(pl.received_quantity) : null,
+          };
+        }),
+      });
+      expect(out.money_held).toBeCloseTo(expected.amount, 2);
+      if (expected.amount > 0) expect(out.html).toContain("Money protected");
+      else expect(out.html).not.toContain("Money protected");
+    });
+  }
+});
+
+describe("e-Factura through the app webhook", () => {
+  // "Prepare App Request" awaits n8n's binary helper, so it runs as an async function.
+  const prepare = async (body: Record<string, unknown>) => {
+    const node = invoiceWorker.nodes.find((n) => n.name === "Prepare App Request")!;
+    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor as new (
+      ...args: string[]
+    ) => (json: unknown) => Promise<Item>;
+    const fn = new AsyncFunction(
+      "$json",
+      (node.parameters as Record<string, unknown>)["jsCode"] as string,
+    );
+    return fn({ body });
+  };
+
+  it("keeps the e-Factura channel and source id the app sends", async () => {
+    const out = await prepare({ source_id: "efactura-1234567890", channel: "efactura", text: "X" });
+    expect(out.json).toMatchObject({
+      channel: "efactura",
+      source_message_id: "efactura-1234567890",
+    });
+  });
+
+  it("treats anything else from the app as a manual submission", async () => {
+    const out = await prepare({ source_id: "abc", channel: "email", text: "X" });
+    expect(out.json).toMatchObject({ channel: "app", source_message_id: "app-abc" });
   });
 });

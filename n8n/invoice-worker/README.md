@@ -156,6 +156,35 @@ Duplicates in one Gmail poll (fixed 2026-10-29, live workflow 1
 Verified: "Clean match" sent twice three seconds apart gave one run (execution 384), the first copy
 Ready to approve and the second Duplicate.
 
+## e-Factura channel and the money line
+
+Added on 2026-10-29 with the app's e-Factura intake page and its money figures:
+
+- **e-Factura (simulated SPV).** The app's e-Factura intake page reads an RO e-Factura XML (a demo
+  invoice from the simulated SPV inbox, or an uploaded XML), turns its fields into the worker's text
+  layout and posts it to `POST /webhook/invoice-intake` with `channel: "efactura"` and
+  `source_id: "efactura-<SPV id>"`. `Prepare App Request` keeps that channel (anything else from the
+  app stays `app`), so the deal gets `order_channel = efactura` and the same 12 checks run. There is
+  no live ANAF connection: that needs ANAF OAuth with the company's qualified certificate.
+- **Money line in the result email.** `Build Notification` works out the money held before payment
+  (duplicates, unverified payees, split purchases, no PO, overbilling per line from the PO lines in
+  `Collect PO`) with the same rules as `src/lib/money.ts`, adds "Money protected: EUR X · reason" to
+  the email and returns it as `money_held`. `src/test/email-intake.test.ts` runs the node against
+  `src/lib/money.ts` on nine cases.
+
+### Deploying the e-Factura channel
+
+1. Add the `efactura` option to the deal property `order_channel`, or HubSpot rejects e-Factura
+   deals: `bun scripts/hubspot/setup-invoices.ts --properties-only` (it now also adds missing
+   options; nothing else changes).
+2. In n8n, update "Process supplier invoices" (`Kxhmr00uS4MBXTSO`) from
+   `1-process-supplier-invoices.json`. Changed: `Prepare App Request` and `Build Notification`.
+   Nothing else.
+3. Test: on e-Factura intake, take "Clean match" from the SPV inbox; it should come back Ready to
+   approve and show as e-Factura in the queue's Source column. Then send "Price off" from Email
+   intake: the result email should open with "Money protected: EUR 67.76 · Overbilling found"
+   (50 boxes at EUR 13.52 against the PO's EUR 12.40: EUR 56.00 net, plus 21% VAT).
+
 ## Import
 
 1. Import workflow **3** first (n8n: Workflows, menu, Import from file). Copy its workflow ID from the URL.

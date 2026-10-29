@@ -17,6 +17,7 @@ import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppCompanyIdRouteImport } from './routes/app/$companyId'
 import { Route as AppAdminRouteImport } from './routes/app/admin'
 import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
+import { Route as AppEfacturaRouteImport } from './routes/app/efactura'
 import { Route as AppIntakeRouteImport } from './routes/app/intake'
 import { Route as AppOverviewRouteImport } from './routes/app/overview'
 import { Route as AppPlatformRouteImport } from './routes/app/platform'
@@ -73,6 +74,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEfacturaRoute = AppEfacturaRouteImport.update({
+  id: '/efactura',
+  path: '/efactura',
   getParentRoute: () => AppRoute,
 } as any)
 const AppIntakeRoute = AppIntakeRouteImport.update({
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin': typeof AppAdminRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/efactura': typeof AppEfacturaRoute
   '/app/intake': typeof AppIntakeRoute
   '/app/overview': typeof AppOverviewRoute
   '/app/platform': typeof AppPlatformRouteWithChildren
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin': typeof AppAdminRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/efactura': typeof AppEfacturaRoute
   '/app/intake': typeof AppIntakeRoute
   '/app/overview': typeof AppOverviewRoute
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/app/$companyId': typeof AppCompanyIdRouteWithChildren
   '/app/admin': typeof AppAdminRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/efactura': typeof AppEfacturaRoute
   '/app/intake': typeof AppIntakeRoute
   '/app/overview': typeof AppOverviewRoute
   '/app/platform': typeof AppPlatformRouteWithChildren
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/app/$companyId'
     | '/app/admin'
     | '/app/dashboard'
+    | '/app/efactura'
     | '/app/intake'
     | '/app/overview'
     | '/app/platform'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/app/$companyId'
     | '/app/admin'
     | '/app/dashboard'
+    | '/app/efactura'
     | '/app/intake'
     | '/app/overview'
     | '/app/purchase-orders'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/app/$companyId'
     | '/app/admin'
     | '/app/dashboard'
+    | '/app/efactura'
     | '/app/intake'
     | '/app/overview'
     | '/app/platform'
@@ -386,6 +398,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/app/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/efactura': {
+      id: '/app/efactura'
+      path: '/efactura'
+      fullPath: '/app/efactura'
+      preLoaderRoute: typeof AppEfacturaRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/intake': {
@@ -548,6 +567,7 @@ interface AppRouteChildren {
   AppCompanyIdRoute: typeof AppCompanyIdRouteWithChildren
   AppAdminRoute: typeof AppAdminRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppEfacturaRoute: typeof AppEfacturaRoute
   AppIntakeRoute: typeof AppIntakeRoute
   AppOverviewRoute: typeof AppOverviewRoute
   AppPlatformRoute: typeof AppPlatformRouteWithChildren
@@ -565,6 +585,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCompanyIdRoute: AppCompanyIdRouteWithChildren,
   AppAdminRoute: AppAdminRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppEfacturaRoute: AppEfacturaRoute,
   AppIntakeRoute: AppIntakeRoute,
   AppOverviewRoute: AppOverviewRoute,
   AppPlatformRoute: AppPlatformRouteWithChildren,

@@ -162,6 +162,36 @@ async function ensureProperties() {
   }
 }
 
+// Options the invoice worker writes on properties that setup.ts (the order worker) created:
+// order_channel gets "efactura" for invoices received through RO e-Factura (SPV).
+const EXTRA_OPTIONS: { object: string; name: string; values: string[] }[] = [
+  { object: "deals", name: "order_channel", values: ["efactura"] },
+];
+
+type PropOption = { label: string; value: string; displayOrder?: number };
+
+async function ensureOptions() {
+  for (const e of EXTRA_OPTIONS) {
+    const path = `/crm/v3/properties/${e.object}/${e.name}`;
+    const current: PropOption[] = (await hs("GET", path)).options ?? [];
+    const have = new Set(current.map((o) => o.value));
+    const missing = e.values.filter((v) => !have.has(v));
+    if (missing.length === 0) {
+      console.log(`  ${e.object}.${e.name} options ok`);
+      continue;
+    }
+    const added = missing.map((value, i) => ({
+      label: value === "efactura" ? "e-Factura" : value,
+      value,
+      displayOrder: current.length + i,
+    }));
+    await write(`options ${e.object}.${e.name} += ${missing.join(", ")}`, "PATCH", path, {
+      options: [...current, ...added],
+    });
+    console.log(`  added ${missing.join(", ")} to ${e.object}.${e.name}`);
+  }
+}
+
 // ---------- pipeline ----------
 
 // The portal allows one custom deal pipeline (Orders uses it), so purchase orders and invoices
@@ -437,6 +467,7 @@ const account = await hs("GET", "/account-info/v3/details");
 console.log(`Portal ${account.portalId} (${account.accountType}, data in ${account.dataHostingLocation})${DRY ? " · DRY RUN" : ""}`);
 console.log("1/6 properties");
 await ensureProperties();
+await ensureOptions();
 if (PROPERTIES_ONLY) {
   console.log("Done (properties only).");
   process.exit(0);

@@ -53,7 +53,8 @@ function toDemo(c: TestCase): DemoInvoice {
   };
   if (invoiceNumber) {
     const supplier = field(text, "Supplier");
-    const po = field(text, "Purchase order");
+    const poField = field(text, "Purchase order");
+    const po = poField && poField !== "(none)" ? poField : null;
     return {
       ...base,
       supplier,
