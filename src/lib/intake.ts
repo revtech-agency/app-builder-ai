@@ -18,7 +18,8 @@ export type IntakeMailbox = {
 export const INTAKE_MAILBOXES: IntakeMailbox[] = [
   {
     address: "daniel@tigros.io",
-    picksUp: "Emails with a PDF attached, or with “invoice” or “factura” in the subject",
+    picksUp:
+      "Only the demo sends (mail from daniel@tigros.io itself) with a PDF attached, or with “invoice” or “factura” in the subject",
     notifies: "daniel@tigros.io",
     marksRead: false,
   },
