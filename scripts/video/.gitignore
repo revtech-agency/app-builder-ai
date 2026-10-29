@@ -1,0 +1,8 @@
+# Inputs (screenshots show inbox and CRM UI) and everything the build writes.
+# No trailing slashes, so these also match symlinks to the folders.
+slides
+shots
+build
+out
+*.mp4
+.venv
