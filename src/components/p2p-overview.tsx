@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoney } from "@/lib/format";
 import { anomalyLabel, daysBetween } from "@/lib/invoice-rules";
 import { listInvoices, listPurchaseOrders, listSuppliers } from "@/lib/invoices";
+import type { InvoiceSummary } from "@/lib/invoices";
+import { APQC_RISK_RATE, PRICE_PER_INVOICE, RISK_CATEGORIES, riskTotals } from "@/lib/money";
 
 // Assumption for the "time saved" estimate: what a person spends checking one clean invoice.
 const MINUTES_PER_CLEAN_INVOICE = 6;
@@ -39,6 +41,104 @@ function Kpi({ label, value, hint }: { label: string; value: string; hint?: stri
         {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       </CardContent>
     </Card>
+  );
+}
+
+const pct = (n: number) => `${(n * 100).toLocaleString("en-GB", { maximumFractionDigits: 1 })}%`;
+
+// The money the worker kept from going out wrong (src/lib/money.ts), split by reason, and how it
+// compares with the benchmark and with what the worker costs.
+function MoneyProtected({ invoices }: { invoices: InvoiceSummary[] }) {
+  const totals = riskTotals(invoices.map((i) => i.risk));
+  const checked = invoices.filter((i) => !i.documentType || i.documentType === "invoice");
+  const spend = checked.reduce((s, i) => s + i.amount, 0);
+  const cost = checked.length * PRICE_PER_INVOICE;
+  const maxCat = Math.max(1, ...Object.values(totals.byCategory).map((c) => c.amount));
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-5">
+      <Card className="border-primary lg:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShieldCheck className="size-5" /> Risky payments held before payment
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div>
+            <p className="text-4xl font-semibold tracking-tight tabular-nums">
+              {formatMoney(totals.total)}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              on {totals.invoices} of {checked.length} invoices. Stopped before payment, not
+              recovered after: each invoice counts once, under its main reason.
+            </p>
+          </div>
+          <div className="space-y-3">
+            {RISK_CATEGORIES.map((c) => {
+              const t = totals.byCategory[c.key];
+              return (
+                <div key={c.key} className="space-y-1">
+                  <div className="flex items-baseline justify-between gap-3 text-sm">
+                    <span>
+                      <span className="font-medium">{c.label}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">{c.detail}</span>
+                    </span>
+                    <span className="shrink-0 font-mono text-xs font-semibold">
+                      {formatMoney(t.amount)} · {t.count}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted">
+                    <div
+                      className="h-2 rounded-full bg-primary"
+                      style={{ width: `${(t.amount / maxCat) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="lg:col-span-2">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Against the benchmark and the cost</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm">
+          <div>
+            <p className="text-muted-foreground">Supplier spend checked</p>
+            <p className="text-xl font-semibold tabular-nums">{formatMoney(spend)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">
+              Paid twice or wrong at the APQC rate ({pct(APQC_RISK_RATE.low)}–
+              {pct(APQC_RISK_RATE.high)})
+            </p>
+            <p className="text-xl font-semibold tabular-nums">
+              {formatMoney(spend * APQC_RISK_RATE.low)}–{formatMoney(spend * APQC_RISK_RATE.high)}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">
+              Worker cost: {checked.length} invoices × {formatMoney(PRICE_PER_INVOICE)}
+            </p>
+            <p className="text-xl font-semibold tabular-nums">{formatMoney(cost)}</p>
+          </div>
+          <div className="rounded-md bg-primary/10 p-3">
+            <p className="text-muted-foreground">Held per euro the worker costs</p>
+            <p className="text-2xl font-semibold tabular-nums">
+              {cost > 0 ? `€${Math.round(totals.total / cost).toLocaleString("en-GB")}` : "—"}
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Illustrative: the demo uses synthetic invoices built to hit the rules, so the held share
+            is far above a real AP team's. At bank scale the deck's example is 20,000 invoices a
+            year × €1.50 = €30k, against €0.8–2M at risk per €100M of supplier spend. €1.50 is a
+            draft price.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -96,7 +196,8 @@ export function P2pOverview() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          How the invoice worker is doing, and what's committed on purchase orders.
+          The money the invoice worker held before payment, how it is doing, and what's committed on
+          purchase orders.
         </p>
         <Button asChild variant="outline" size="sm">
           <Link to="/app/invoices">
@@ -114,6 +215,8 @@ export function P2pOverview() {
         </div>
       ) : (
         <>
+          <MoneyProtected invoices={inv} />
+
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <Kpi
               label="Cleared automatically"

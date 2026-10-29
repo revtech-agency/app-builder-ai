@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BadgeCheck,
+  Banknote,
   ClipboardList,
   FlaskConical,
   Mail,
@@ -20,27 +21,28 @@ import { ApDemoButton } from "@/components/demo-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Copy follows the NexxtAI finals deck (Raiffeisen, AI for Operational Efficiency): the
-// accounts-payable invoice worker leads, the SME market and the quote & order worker follow as
+// Copy follows the NexxtAI finals deck (Raiffeisen, AI for Operational Efficiency): risky
+// payments stopped before they leave, measured in euros held; the accounts-payable invoice
+// worker leads, the SME market and the quote & order worker follow as
 // the same engine. Keep claims to what the deck and the repo show; the learning loop and the EU
 // model route are not built or confirmed yet.
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AppBuilder.ai — an AI worker that checks supplier invoices before they are paid" },
+      { title: "AppBuilder.ai — risky supplier payments stop before they leave" },
       {
         name: "description",
         content:
-          "An AI worker for accounts payable: it checks every supplier invoice against its purchase order and delivery, runs 12 coded checks and sends it to one of four outcomes. A person approves every payment.",
+          "An AI worker for accounts payable: it checks every supplier invoice against its purchase order and delivery, holds duplicates, changed IBANs and overbilling before payment, and a person approves every payment.",
       },
       {
         property: "og:title",
-        content: "AppBuilder.ai — an AI worker that checks supplier invoices before they are paid",
+        content: "AppBuilder.ai — risky supplier payments stop before they leave",
       },
       {
         property: "og:description",
         content:
-          "Invoice, PO and delivery matched, 12 checks from a duplicate to a changed IBAN, and a person approves every payment.",
+          "0.8–2% of supplier payments go out duplicated or wrong. 12 checks hold them before payment, and a person approves every one.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -49,7 +51,17 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const TODAY = [
+  "Invoices arrive by email as PDFs, each in the supplier's own format.",
+  "A clerk matches every line against the PO and the delivery note.",
+  "Fraud signals like a changed IBAN or a split purchase are easy to miss.",
+];
+
 const PROCESS_STATS = [
+  {
+    value: "0.8–2%",
+    text: "of supplier payments go out duplicated or wrong (APQC benchmark): €0.8–2M for every €100M of supplier spend",
+  },
   {
     value: "12",
     text: "checks on every invoice: duplicates, IBAN changes, unapproved suppliers, split purchases, price and quantity",
@@ -62,7 +74,10 @@ const PROCESS_STATS = [
 ];
 
 const STEPS = [
-  { name: "Intake", text: "An email to the AP inbox, or a PDF or text in the app." },
+  {
+    name: "Intake",
+    text: "An email to the AP inbox, a PDF or text in the app, or an RO e-Factura XML (simulated in the demo).",
+  },
   { name: "Read", text: "Claude extracts every field with a confidence score." },
   { name: "Look up", text: "Supplier record, PO lines, quantities received, past invoices." },
   { name: "Decide", text: "12 coded rules; the worst result wins." },
@@ -74,62 +89,78 @@ const STEPS = [
 
 type Owner = "Worker" | "Staff" | "Supplier";
 
-const CHECKS: { situation: string; action: string; owner: Owner }[] = [
+const CHECKS: { situation: string; action: string; owner: Owner; protects: string }[] = [
   {
     situation: "Invoice number already received",
     action: "Marks it duplicate; never paid twice",
     owner: "Worker",
+    protects: "Paying the same invoice twice",
   },
-  { situation: "Sender isn't a known supplier", action: "Holds it for review", owner: "Staff" },
+  {
+    situation: "Sender isn't a known supplier",
+    action: "Holds it for review",
+    owner: "Staff",
+    protects: "Paying a fake supplier",
+  },
   {
     situation: "Supplier not approved yet",
     action: "Holds it and names the status",
     owner: "Staff",
+    protects: "Paying an unvetted supplier",
   },
   {
     situation: "IBAN differs from the one on file",
     action: "Holds it: verify by phone",
     owner: "Staff",
+    protects: "Money redirected to a fraudster's account",
   },
   {
     situation: "IBAN changed in the last 30 days",
     action: "Holds it: confirm the change",
     owner: "Staff",
+    protects: "Money redirected after a spoofed change request",
   },
   {
     situation: "Tax certificate expired or missing",
     action: "Drafts an email asking for it",
     owner: "Supplier",
+    protects: "Paying a non-compliant supplier",
   },
   {
     situation: "No PO number, or PO not found",
     action: "Drafts an email asking for it",
     owner: "Supplier",
+    protects: "Paying without an approved order",
   },
   {
     situation: "A line that isn't on the PO",
     action: "Holds it and names the line",
     owner: "Staff",
+    protects: "Paying for items never ordered",
   },
   {
     situation: "Price more than 2% off the PO",
     action: "Shows the difference per line",
     owner: "Staff",
+    protects: "Overbilling",
   },
   {
     situation: "15 billed, 12 received",
     action: "Asks for a corrected quantity",
     owner: "Supplier",
+    protects: "Paying for goods not received",
   },
   {
     situation: "Same PO, 14 days, each under €5,000",
     action: "Flags a possible split purchase",
     owner: "Staff",
+    protects: "Getting around an approval limit",
   },
   {
     situation: "A field read with confidence under 0.80",
     action: "Sends it to a person to check",
     owner: "Staff",
+    protects: "A misread amount or IBAN",
   },
 ];
 
@@ -161,6 +192,11 @@ const PRINCIPLES = [
     text: "The model never approves anything. Coded rules decide, and every check is written on the invoice record.",
   },
   {
+    icon: Banknote,
+    title: "Measured in euros held",
+    text: "The app shows the money held before payment and why: duplicates, unverified payees, split purchases, overbilling per line.",
+  },
+  {
     icon: Plug,
     title: "Fits existing systems",
     text: "Only the lookups and the writes touch HubSpot. Moving to the bank's ERP replaces those steps, not the rules.",
@@ -168,12 +204,12 @@ const PRINCIPLES = [
   {
     icon: Receipt,
     title: "Paid per document",
-    text: "€1.50 per invoice matched (draft price). Revenue grows with the invoices handled, not with seats.",
+    text: "€1.50 per invoice matched (draft price). For a bank: 20,000 invoices a year × €1.50 = €30k, against €0.8–2M at risk per €100M of spend (illustrative).",
   },
   {
     icon: Mail,
     title: "Results by email",
-    text: "The reviewer gets every result by email: the outcome, who approves, every check marked ✓ or ✗, and a link.",
+    text: "The reviewer gets every result by email: the money held and why, who approves, every check marked ✓ or ✗, and a link.",
   },
 ];
 
@@ -267,12 +303,13 @@ function Index() {
                 NexxtAI Hackathon 2026 · AI for Operational Efficiency
               </p>
               <h1 className="mt-6 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl md:text-6xl">
-                An AI worker that checks every supplier invoice before it is paid.
+                Risky supplier payments stop before they leave.
               </h1>
               <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-                Built for a bank's accounts-payable team. It matches each invoice to its purchase
-                order and its delivery, runs 12 checks, from a duplicate to a changed IBAN, and
-                sends it to one of four outcomes. A person approves every payment.
+                An AI worker for a bank's accounts-payable team. It checks every supplier invoice
+                against its purchase order and delivery, runs 12 checks, from a duplicate to a
+                changed IBAN, and holds the risky ones. A person approves every payment; the AI
+                approves none.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <ApDemoButton size="lg">Try the demo</ApDemoButton>
@@ -291,12 +328,13 @@ function Index() {
         <section className="border-y bg-muted/40">
           <div className="mx-auto w-full max-w-6xl px-4 py-16">
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              Every supplier invoice must match its PO and its delivery before it is paid
+              Every supplier invoice is checked by hand before it is paid
             </h2>
-            <p className="mt-3 max-w-2xl text-muted-foreground">
-              Today a clerk checks every line by hand, and fraud signals like a changed IBAN are
-              easy to miss.
-            </p>
+            <ul className="mt-4 max-w-2xl list-disc space-y-1 pl-5 text-muted-foreground">
+              {TODAY.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
             <p className="mt-6 flex flex-wrap items-center gap-2 font-mono text-sm">
               {["Purchase order", "=", "Delivery note", "=", "Invoice", "→", "Approve or flag"].map(
                 (t, i) =>
@@ -311,7 +349,7 @@ function Index() {
                   ),
               )}
             </p>
-            <dl className="mt-8 grid gap-6 sm:grid-cols-3">
+            <dl className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {PROCESS_STATS.map((s) => (
                 <div key={s.value}>
                   <dt className="text-5xl font-semibold tracking-tight md:text-6xl">{s.value}</dt>
@@ -375,6 +413,9 @@ function Index() {
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{c.action}</p>
+                  <p className="mt-2 text-xs">
+                    <span className="text-muted-foreground">Protects against:</span> {c.protects}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -404,7 +445,7 @@ function Index() {
             </a>
           </p>
 
-          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {PRINCIPLES.map((p) => (
               <div key={p.title}>
                 <p.icon className="size-6 text-foreground" />
@@ -426,7 +467,8 @@ function Index() {
             </ul>
             <p className="mt-3 text-sm">
               <span className="font-semibold">Next:</span> a pilot with one bank accounts-payable
-              team on real supplier invoices, measured as invoices handled with no human edits.
+              team on real supplier invoices, measured in euros of risky payments held. Then RO
+              e-Factura as a live intake channel: the demo simulates the ANAF SPV inbox today.
             </p>
           </div>
         </section>
@@ -490,11 +532,11 @@ function Index() {
         <section className="mx-auto w-full max-w-6xl px-4 py-16 pb-20">
           <div className="rounded-2xl bg-primary px-6 py-12 text-center text-primary-foreground md:px-12">
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              See the worker check an invoice
+              See a risky payment held
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-primary-foreground/80">
-              Try the demo with a sample invoice already loaded, or tell us which flow eats your
-              team's week.
+              Try the demo: the overview shows the euros held before payment, and every invoice says
+              why. Or tell us which flow eats your team's week.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
               <ApDemoButton size="lg" variant="secondary">

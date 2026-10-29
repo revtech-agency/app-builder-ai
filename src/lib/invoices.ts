@@ -14,6 +14,9 @@ import {
   splitList,
   stageIdFor,
 } from "@/lib/invoice-rules";
+import { invoiceRisk } from "@/lib/money";
+import type { Risk, RiskLine } from "@/lib/money";
+import { rateLimit } from "@/lib/rate-limit";
 
 type Props = Record<string, string | null | undefined>;
 type HsObject = { id: string; properties: Props };
@@ -38,6 +41,8 @@ export type InvoiceSummary = {
   channel: string | null;
   createdAt: string | null;
   supplierName: string | null;
+  // Euros the worker kept from going out wrong on this invoice (src/lib/money.ts).
+  risk: Risk;
 };
 
 export type InvoiceLine = {
@@ -288,7 +293,9 @@ async function supplierNames(dealIds: string[]) {
   return { byDeal, assoc };
 }
 
-function toSummary(d: HsObject, supplierName: string | null): InvoiceSummary {
+const NO_RISK: Risk = { category: null, amount: 0, overbilling: 0 };
+
+function toSummary(d: HsObject, supplierName: string | null, risk = NO_RISK): InvoiceSummary {
   const p = d.properties;
   const stageId = p["dealstage"] ?? "";
   const stage = INVOICE_STAGES[stageId];
@@ -311,7 +318,55 @@ function toSummary(d: HsObject, supplierName: string | null): InvoiceSummary {
     channel: p["order_channel"] || null,
     createdAt: p["createdate"] || null,
     supplierName,
+    risk,
   };
+}
+
+const riskOf = (s: InvoiceSummary, lines: RiskLine[]) =>
+  invoiceRisk({
+    amount: s.amount,
+    stage: s.stage,
+    anomalyFlags: s.anomalyFlags,
+    matchResult: s.matchResult,
+    documentType: s.documentType,
+    lines,
+  });
+
+// Summaries with supplier names and the money at risk, which needs each invoice's lines and the
+// PO lines they were matched to (po_line_ref).
+async function buildSummaries(deals: HsObject[]): Promise<InvoiceSummary[]> {
+  const ids = deals.map((d) => d.id);
+  const [{ byDeal }, lineAssoc] = await Promise.all([
+    supplierNames(ids),
+    readAssoc("deals", "line_items", ids),
+  ]);
+  const lines = await readObjects("line_items", [...lineAssoc.values()].flat(), [
+    "quantity",
+    "price",
+    "line_check",
+    "po_line_ref",
+  ]);
+  const poLineIds = [...lines.values()]
+    .map((l) => l.properties["po_line_ref"] ?? "")
+    .filter((id) => /^\d+$/.test(id));
+  const poLines = await readObjects("line_items", poLineIds, ["price", "received_quantity"]);
+  return deals.map((d) => {
+    const summary = toSummary(d, byDeal.get(d.id) ?? null);
+    const riskLines = (lineAssoc.get(d.id) ?? [])
+      .map((id) => lines.get(id))
+      .filter((o): o is HsObject => Boolean(o))
+      .map((o) => {
+        const po = poLines.get(o.properties["po_line_ref"] ?? "");
+        return {
+          quantity: num(o.properties["quantity"]) ?? 0,
+          price: num(o.properties["price"]) ?? 0,
+          lineCheck: splitList(o.properties["line_check"]),
+          poPrice: po ? num(po.properties["price"]) : null,
+          receivedQuantity: po ? num(po.properties["received_quantity"]) : null,
+        };
+      });
+    return { ...summary, risk: riskOf(summary, riskLines) };
+  });
 }
 
 function toEmailIntake(p: Props): EmailIntake {
@@ -398,27 +453,29 @@ const DealInput = z.object({ dealId: z.string().regex(/^\d+$/) });
 export const listInvoices = createServerFn({ method: "GET" })
   .middleware([requireInvoiceDesk])
   .handler(async (): Promise<InvoiceSummary[]> => {
-    const deals = await searchDeals(false, INVOICE_PROPS);
-    const { byDeal } = await supplierNames(deals.map((d) => d.id));
-    return deals.map((d) => toSummary(d, byDeal.get(d.id) ?? null));
+    return buildSummaries(await searchDeals(false, INVOICE_PROPS));
   });
+
+async function listChannel(channel: string): Promise<EmailIntakeRow[]> {
+  const deals = await searchDeals(
+    false,
+    [...INVOICE_PROPS, ...EMAIL_PROPS, "source_message_id"],
+    [{ propertyName: "order_channel", operator: "EQ", value: channel }],
+    100,
+  );
+  const summaries = await buildSummaries(deals);
+  return summaries.map((s, i) => ({ ...s, ...toEmailIntake(deals[i]!.properties) }));
+}
 
 // Invoices the worker read from a monitored mailbox, newest first, with who was notified.
 export const listEmailIntake = createServerFn({ method: "GET" })
   .middleware([requireInvoiceDesk])
-  .handler(async (): Promise<EmailIntakeRow[]> => {
-    const deals = await searchDeals(
-      false,
-      [...INVOICE_PROPS, ...EMAIL_PROPS],
-      [{ propertyName: "order_channel", operator: "EQ", value: "email" }],
-      100,
-    );
-    const { byDeal } = await supplierNames(deals.map((d) => d.id));
-    return deals.map((d) => ({
-      ...toSummary(d, byDeal.get(d.id) ?? null),
-      ...toEmailIntake(d.properties),
-    }));
-  });
+  .handler(async (): Promise<EmailIntakeRow[]> => listChannel("email"));
+
+// Invoices received through RO e-Factura (the simulated SPV inbox on the e-Factura intake page).
+export const listEfacturaIntake = createServerFn({ method: "GET" })
+  .middleware([requireInvoiceDesk])
+  .handler(async (): Promise<EmailIntakeRow[]> => listChannel("efactura"));
 
 export const getInvoice = createServerFn({ method: "GET" })
   .middleware([requireInvoiceDesk])
@@ -457,25 +514,41 @@ export const getInvoice = createServerFn({ method: "GET" })
     ]);
     const supplierObj = companyId ? companies.get(companyId) : undefined;
     const [po] = poDeals.length ? await buildPurchaseOrders(poDeals) : [];
+    const lines: InvoiceLine[] = [...lineObjs.values()].map((o) => ({
+      id: o.id,
+      name: o.properties["name"] ?? "",
+      sku: o.properties["hs_sku"] ?? "",
+      quantity: num(o.properties["quantity"]) ?? 0,
+      price: num(o.properties["price"]) ?? 0,
+      amount: num(o.properties["amount"]) ?? 0,
+      poLineRef: o.properties["po_line_ref"] || null,
+      lineCheck: splitList(o.properties["line_check"]),
+      lineCheckNote: o.properties["line_check_note"] || null,
+    }));
+    const summary = toSummary(deal, supplierObj?.properties["name"] ?? null);
+    const risk = riskOf(
+      summary,
+      lines.map((l) => {
+        const pl = po?.lines.find((x) => x.id === l.poLineRef);
+        return {
+          quantity: l.quantity,
+          price: l.price,
+          lineCheck: l.lineCheck,
+          poPrice: pl ? pl.price : null,
+          receivedQuantity: pl ? pl.receivedQuantity : null,
+        };
+      }),
+    );
 
     return {
-      ...toSummary(deal, supplierObj?.properties["name"] ?? null),
+      ...summary,
+      risk,
       ...toEmailIntake(p),
       ibanOnInvoice: p["iban_on_invoice"] || null,
       vatAmount: num(p["vat_amount"]),
       rawText: p["raw_order_text"] || null,
       approvedBy: p["approved_by"] || null,
-      lines: [...lineObjs.values()].map((o) => ({
-        id: o.id,
-        name: o.properties["name"] ?? "",
-        sku: o.properties["hs_sku"] ?? "",
-        quantity: num(o.properties["quantity"]) ?? 0,
-        price: num(o.properties["price"]) ?? 0,
-        amount: num(o.properties["amount"]) ?? 0,
-        poLineRef: o.properties["po_line_ref"] || null,
-        lineCheck: splitList(o.properties["line_check"]),
-        lineCheckNote: o.properties["line_check_note"] || null,
-      })),
+      lines,
       notes: [...noteObjs.values()]
         .map((o) => ({
           id: o.id,
@@ -530,7 +603,7 @@ export const listPurchaseOrders = createServerFn({ method: "GET" })
 const MAX_PDF_BYTES = 5 * 1024 * 1024;
 
 export const submitDocument = createServerFn({ method: "POST" })
-  .middleware([requireInvoiceDesk])
+  .middleware([requireInvoiceDesk, rateLimit("submitDocument")])
   .inputValidator((input: { text?: string; pdfBase64?: string; filename?: string }) =>
     z
       .object({
@@ -627,7 +700,7 @@ export const decideInvoice = createServerFn({ method: "POST" })
   });
 
 export const askAssistant = createServerFn({ method: "POST" })
-  .middleware([requireInvoiceDesk])
+  .middleware([requireInvoiceDesk, rateLimit("askAssistant")])
   .inputValidator((input: { sessionId: string; message: string; dealId?: string }) =>
     z
       .object({
@@ -673,7 +746,7 @@ async function archive(type: string, ids: string[]) {
 // and suppliers are not touched. Archived records stay in HubSpot's recycle bin for 90 days.
 // Only the demo account and platform admins may run it (requireDemoReset).
 export const resetDemo = createServerFn({ method: "POST" })
-  .middleware([requireInvoiceDesk, requireDemoReset])
+  .middleware([requireInvoiceDesk, requireDemoReset, rateLimit("resetDemo")])
   .handler(async (): Promise<ResetResult> => {
     const hubspot = await hs();
     const deals = await searchDeals(false, [

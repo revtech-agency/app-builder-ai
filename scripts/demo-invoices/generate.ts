@@ -1,6 +1,6 @@
 /**
- * Writes the demo invoices to demo-invoices/: one PDF per invoice test case and emails.md with
- * the subject and text to send with each. The app's Email intake page builds the same PDFs on
+ * Writes the demo invoices to demo-invoices/: one PDF per invoice test case, the same invoices as
+ * RO e-Factura XML in demo-invoices/efactura/, and README.md with the subject and text to send. The app's Email intake page builds the same PDFs on
  * the fly (src/lib/invoice-pdf.ts); these files are for sending from any mailbox by hand.
  *
  *   bun scripts/demo-invoices/generate.ts
@@ -8,11 +8,12 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 
 import { DEMO_INVOICES } from "../../src/lib/demo-invoices";
+import { buildUbl, parseInvoiceText } from "../../src/lib/efactura";
 import { invoicePdf } from "../../src/lib/invoice-pdf";
 import { DEMO_SEND_TO } from "../../src/lib/intake";
 
 const dir = new URL("../../demo-invoices/", import.meta.url);
-mkdirSync(dir, { recursive: true });
+mkdirSync(new URL("efactura/", dir), { recursive: true });
 
 const md = [
   "# Demo invoices",
@@ -25,9 +26,16 @@ const md = [
   "result is what the worker reached in the 12-of-12 test run. Regenerate with",
   "`bun scripts/demo-invoices/generate.ts`.",
   "",
+  "The invoices are also in `efactura/` as RO e-Factura XML (UBL 2.1, simplified CIUS-RO, not checked",
+  "with ANAF's validator). Upload one on **e-Factura intake** in the app, or take it from the",
+  "simulated SPV inbox there; the worker reads the fields from the XML, no PDF reading.",
+  "",
 ];
 for (const d of DEMO_INVOICES) {
-  if (d.pdfText && d.filename) writeFileSync(new URL(d.filename, dir), invoicePdf(d.pdfText));
+  if (d.pdfText && d.filename) {
+    writeFileSync(new URL(d.filename, dir), invoicePdf(d.pdfText));
+    writeFileSync(new URL(`efactura/${d.id}.xml`, dir), buildUbl(parseInvoiceText(d.pdfText)!));
+  }
   md.push(
     `## ${d.title}`,
     "",
@@ -35,6 +43,7 @@ for (const d of DEMO_INVOICES) {
     "",
     `- Expected result: **${d.expectedStageLabel}**${d.expectedFlags.length ? ` (flags: ${d.expectedFlags.join(", ")})` : ""}`,
     `- Attachment: ${d.filename ? `[${d.filename}](${d.filename})` : "none, plain email"}`,
+    ...(d.filename ? [`- e-Factura XML: [efactura/${d.id}.xml](efactura/${d.id}.xml)`] : []),
     `- Subject: \`${d.subject}\``,
     "",
     "```text",

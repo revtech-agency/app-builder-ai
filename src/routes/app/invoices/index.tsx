@@ -4,7 +4,13 @@ import { RotateCcw, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 
-import { AnomalyChips, approvalShort } from "@/components/invoice-bits";
+import {
+  AnomalyChips,
+  approvalShort,
+  RiskCell,
+  SourceLabel,
+  SOURCES,
+} from "@/components/invoice-bits";
 import { StatusBadge } from "@/components/status-badge";
 import {
   AlertDialog,
@@ -58,12 +64,23 @@ const isOverdue = (i: InvoiceSummary) =>
   i.stage !== "approved_for_payment" &&
   new Date(i.dueDate as string).getTime() < new Date(new Date().toDateString()).getTime();
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  hint,
+  accent = false,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  accent?: boolean;
+}) {
   return (
-    <Card>
+    <Card className={cn(accent && "border-primary bg-primary/10")}>
       <CardContent className="p-4">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="mt-1 text-xl font-semibold tabular-nums">{value}</p>
+        {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
       </CardContent>
     </Card>
   );
@@ -102,7 +119,10 @@ function QueuePage() {
     const waiting = all.filter((i) =>
       ["needs_review", "waiting_on_supplier", "ready_to_approve", "received"].includes(i.stage),
     );
+    const atRisk = all.filter((i) => i.risk.category);
     return {
+      held: atRisk.reduce((s, i) => s + i.risk.amount, 0),
+      heldCount: atRisk.length,
       today: all.filter((i) => i.createdAt && new Date(i.createdAt).toDateString() === today)
         .length,
       cleared: all.length ? Math.round((cleared / all.length) * 100) : 0,
@@ -122,7 +142,12 @@ function QueuePage() {
     (i) =>
       (tab === "all" || i.stage === tab) &&
       (!term ||
-        [i.supplierName, i.invoiceNumber, i.poNumber].some((v) => v?.toLowerCase().includes(term))),
+        [
+          i.supplierName,
+          i.invoiceNumber,
+          i.poNumber,
+          i.channel ? (SOURCES[i.channel]?.label ?? i.channel) : null,
+        ].some((v) => v?.toLowerCase().includes(term))),
   );
 
   return (
@@ -165,14 +190,20 @@ function QueuePage() {
       </div>
 
       {invoices.isLoading ? (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {[0, 1, 2, 3].map((i) => (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+          {[0, 1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="h-20" />
           ))}
         </div>
       ) : (
         invoices.data && (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+            <Stat
+              label="Risky payments held"
+              value={formatMoney(stats.held)}
+              hint={`${stats.heldCount} invoice${stats.heldCount === 1 ? "" : "s"}, before payment`}
+              accent
+            />
             <Stat label="Documents today" value={String(stats.today)} />
             <Stat label="Auto-cleared" value={`${stats.cleared}%`} />
             <Stat label="Exceptions open" value={String(stats.exceptions)} />
@@ -201,7 +232,7 @@ function QueuePage() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search supplier, invoice or PO no."
+            placeholder="Search supplier, invoice, PO no. or source"
             className="pl-9"
             aria-label="Search invoices"
           />
@@ -235,10 +266,11 @@ function QueuePage() {
                 <TableHead>Invoice date</TableHead>
                 <TableHead>Due</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead>At risk</TableHead>
                 <TableHead>Match</TableHead>
                 <TableHead>Approval</TableHead>
                 <TableHead>Flags</TableHead>
-                <TableHead>Channel</TableHead>
+                <TableHead>Source</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -271,6 +303,9 @@ function QueuePage() {
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(i.amount)}</TableCell>
                   <TableCell>
+                    <RiskCell risk={i.risk} />
+                  </TableCell>
+                  <TableCell>
                     {i.matchResult ? <StatusBadge status={i.matchResult} /> : "—"}
                   </TableCell>
                   <TableCell className="whitespace-nowrap capitalize">
@@ -279,7 +314,9 @@ function QueuePage() {
                   <TableCell className="min-w-48">
                     <AnomalyChips flags={i.anomalyFlags} />
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{i.channel ?? "—"}</TableCell>
+                  <TableCell>
+                    <SourceLabel channel={i.channel} />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

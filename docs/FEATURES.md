@@ -30,6 +30,8 @@ Judging criteria (short code): **ORIG** 15% · **DOM** 15% · **AGENT** 25% · *
 | F-14 | "Talk to us" form connected to HubSpot | BIZ | Daniel | 🟢 on `main` (`contact-form.tsx`, Forms API, hardcoded IDs) |
 | F-15 | Admin dashboard: MRR, revenue/month, billable orders from HubSpot | BIZ | Daniel | 🟢 `/app/dashboard`, `billing.ts` tested (wasn't in the draft) |
 | F-16 | "Order assistant" chat + cart + inventory with pack rules | FUNC, DOM | Daniel | 🟢 `/app/$companyId/*` (wasn't in the draft); the chat depends on n8n |
+| F-17 | Money protected: euros of risky payments held before payment, by reason, with the benchmark and the cost | BIZ, FUNC | Daniel | 🟢 `src/lib/money.ts` (tested), overview, queue At risk column, invoice page banner, result email line (n8n, same rules, parity test) |
+| F-18 | RO e-Factura intake (ANAF SPV) | DOM, FUNC | Daniel | 🟡 simulated SPV inbox + XML upload on `/app/efactura`; the XML fields become the worker's text (no PDF reading) and go through the same worker and rules. Live SPV connection not built |
 
 ## P2 — after the hackathon
 

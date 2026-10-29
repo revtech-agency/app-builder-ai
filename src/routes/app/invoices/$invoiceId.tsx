@@ -1,10 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Check, ChevronDown, Loader2, MessageCircle, Send, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  Loader2,
+  MessageCircle,
+  Send,
+  ShieldCheck,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { AnomalyChips, approvalText } from "@/components/invoice-bits";
+import { AnomalyChips, approvalText, SourceLabel } from "@/components/invoice-bits";
 import { StatusBadge } from "@/components/status-badge";
 import {
   AlertDialog,
@@ -44,7 +53,21 @@ import { markDemoStep } from "@/lib/demo-guide";
 import { daysBetween, invoiceChecks, normIban, suggestedComment } from "@/lib/invoice-rules";
 import { askAssistant, decideInvoice, getInvoice } from "@/lib/invoices";
 import type { InvoiceDetail, InvoiceLine, PoLine } from "@/lib/invoices";
+import { riskLabel } from "@/lib/money";
+import type { RiskCategory } from "@/lib/money";
 import { cn } from "@/lib/utils";
+
+// What the banner on the invoice says the worker kept from being paid, per main reason.
+const RISK_TEXT: Record<RiskCategory, string> = {
+  duplicate: "This invoice was already received. Paying it would have paid the supplier twice.",
+  payee:
+    "Payment is held until the payee is verified: the IBAN differs or just changed, or the supplier isn't approved.",
+  split_purchase:
+    "Invoices on this PO add up past the approval limit while each stays under it. Held for a second look.",
+  no_po: "No approved purchase order backs this invoice. Held until the supplier names one.",
+  overbilling:
+    "Billed above the PO price, for more than was delivered, or for items not on the PO.",
+};
 
 export const Route = createFileRoute("/app/invoices/$invoiceId")({
   head: () => ({ meta: [{ title: "Invoice — AppBuilder.ai" }] }),
@@ -421,6 +444,9 @@ function InvoicePage() {
               {d.approvedBy && (
                 <p className="text-xs text-muted-foreground">Approved by {d.approvedBy}</p>
               )}
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                Source: <SourceLabel channel={d.channel} />
+              </p>
               {d.emailFrom && (
                 <p className="text-xs text-muted-foreground">
                   Emailed by {d.emailFrom}
@@ -446,6 +472,29 @@ function InvoicePage() {
               </Button>
             </div>
           </div>
+
+          {d.risk.category && (
+            <Card className="border-primary bg-primary/10">
+              <CardContent className="flex flex-wrap items-start gap-4 p-4">
+                <ShieldCheck className="mt-1 size-6 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-muted-foreground">
+                    Money protected · {riskLabel(d.risk.category)}
+                  </p>
+                  <p className="text-2xl font-semibold tabular-nums">
+                    {formatMoney(d.risk.amount)}
+                  </p>
+                  <p className="mt-1 text-sm">{RISK_TEXT[d.risk.category]}</p>
+                  {d.risk.category !== "overbilling" && d.risk.overbilling > 0 && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {formatMoney(d.risk.overbilling)} of it is billed above the PO or the
+                      delivery.
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>
