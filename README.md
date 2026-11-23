@@ -1,4 +1,14 @@
-# AppBuilder.ai
+# BigOps.ai (formerly AppBuilder.ai)
+
+**BigOps.ai is an AI worker for the back office of distributors and manufacturers.** It enters orders,
+checks supplier invoices and chases payments, reading whatever the other side sends (email, PDF,
+e-invoice), and it is priced per unit of work done. You hire it like a clerk: a job description, a
+probation month, then a capped guarantee on its errors. More at [bigops.ai](https://bigops.ai).
+
+This repository is the working prototype: a supplier invoice worker (three-way match, approval rules,
+audit trail, human review) and an earlier order portal. All data in it is synthetic.
+
+## Where the prototype comes from
 
 AI workers for back-office work, built for the NEXXT AI hackathon (Raiffeisen challenge). Live at
 [nexxt.appbuilder.ai](https://nexxt.appbuilder.ai). HubSpot (portal 149650024, synthetic demo data) stands in
